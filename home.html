@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Full Page Blur Background</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      font-family: 'Arial', sans-serif;
+    }
+
+    /* Background image */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('background.jpg') no-repeat center center/cover;
+      z-index: -2;
+    }
+
+    /* Full-page blur layer */
+    .background-blur {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      backdrop-filter: blur(12px);
+      background: rgba(0, 0, 0, 0.3);
+      z-index: -1;
+    }
+
+    .content {
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      color: #fff;
+      padding: 20px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 40px;
+      border-radius: 30px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 0 30px rgba(0,0,0,0.4);
+      max-width: 800px;
+    }
+
+    .card h1 {
+      font-size: 50px;
+      margin-bottom: 20px;
+    }
+
+    .card p {
+      font-size: 18px;
+      margin-bottom: 30px;
+    }
+
+    .card button {
+      background: #FF7F50;
+      border: none;
+      padding: 12px 30px;
+      color: #fff;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.3s;
+    }
+
+    .card button:hover {
+      background: #e66a3b;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Full-page blur effect -->
+  <div class="background-blur"></div>
+
+  <div class="content">
+    <div class="card">
+      <h1>Chicken Salad Bowl</h1>
+      <p>With Black Beans and Veggies — a perfect healthy lifestyle choice.<br> Prep: 35 min | Cook: 35 min | Serves: 2</p>
+      <button onclick="alert('Learn More clicked!')">Learn More</button>
+    </div>
+  </div>
+
+</body>
+</html>
