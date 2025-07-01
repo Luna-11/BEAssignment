@@ -103,8 +103,6 @@ for($j=5; $j >0; $j--)
 }
 
 
-
-
   echo "<br>";
     echo "<br>";
       echo "<br>";
