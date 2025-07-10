@@ -1,0 +1,198 @@
+/* Basic Reset with CSS Variables */
+:root {
+  --primary-color: #C89091;
+  --text-color: #7b4e48;
+  --background-color: #fcfaf2;
+  --light_pink:#e9d0cb;
+  --medium_pink:#ddb2b1;
+  --light_yellow:#f9f1e5;
+  --white: #fff;
+  --black: #222;
+  --light-gray: #bbb;
+  --medium-gray: #555;
+  --shadow-color: rgba(0,0,0,0.1);
+  --border-color: #ccc;
+  --button-color: #333;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box; 
+}
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  line-height: 1.6;
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+/* Navigation Bar Styles */
+/* Navigation Bar Styles */
+.navbar {
+  background-color: var(--primary-color);
+  padding: 1rem 0;
+  box-shadow: 0 2px 5px var(--shadow-color);
+}
+
+.nav-container {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+}
+
+/* Logo on the left */
+.navbar .logo {
+  color: var(--white);
+  font-size: 1.5rem;
+  text-decoration: none;
+  font-weight: bold;
+  margin-right: 2rem;
+}
+
+/* Centered navigation links */
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 2rem;
+  flex: 1;
+  justify-content: center;
+}
+
+.nav-links li a {
+  color: var(--white);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.nav-links li a:hover {
+  text-decoration: underline;
+}
+
+/* Icons on the right */
+.nav-icons {
+  display: flex;
+  gap: 1.2rem;
+}
+
+.nav-icons i {
+  color: var(--white);
+  font-size: 1.2rem;
+  margin-left: 1rem;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+}
+
+.nav-icons .icon:hover 
+{
+  opacity: 0.7;
+}
+
+
+/* Hero Section */
+.hero {
+  background: url('images/hero.png') no-repeat center center/cover;
+  color: var(--text-color);
+  padding: 120px 20px;
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+
+.hero p {
+  font-size: 18px;
+}
+
+/* Menu Section */
+.menu {
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.menu h2 {
+  margin-bottom: 40px;
+  font-size: 28px;
+}
+
+.menu-items {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.item {
+  background: var(--white);
+  padding: 10px;
+  border-radius: 8px;
+  width: 200px;
+  box-shadow: 0 0 5px var(--shadow-color);
+}
+
+.item img {
+  width: 100%;
+  border-radius: 6px;
+}
+
+.item p {
+  margin: 10px 0;
+  font-weight: bold;
+}
+
+.item span {
+  color: var(--medium-gray);
+}
+
+/* Promo Section */
+.promo {
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.promo img {
+  width: 90%;
+  border-radius: 10px;
+}
+
+/* Store Locator */
+.store-locator {
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.store-locator h2 {
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+
+.store-locator input {
+  padding: 10px;
+  width: 220px;
+  margin-right: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+}
+
+.store-locator button {
+  padding: 10px 20px;
+  background: var(--button-color);
+  color: var(--white);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Footer */
+footer {
+  background: var(--black);
+  color: var(--light-gray);
+  padding: 20px;
+  text-align: center;
+}

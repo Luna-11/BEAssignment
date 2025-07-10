@@ -22,13 +22,39 @@ for($row=1; $row <=12; $row++)
 {
     echo"Multiplication for ", $row;
     echo "<br>";
+    if($row ==6)
+    {
+        break;
+    }
     for($col=1; $col<=12; $col++)
     {
         echo $row * $col, "&nbsp;";
     }
+
     echo"<br>";
     echo"<br>";
 
 }
 
+echo "<br>";
+echo "<br>";
+echo "<br>";
+
+for($row=1; $row <=12; $row++)
+{
+    echo"Multiplication for ", $row;
+    echo "<br>";
+    if($row ==6)
+    {
+        continue;
+    }
+    for($col=1; $col<=12; $col++)
+    {
+        echo $row * $col, "&nbsp;";
+    }
+
+    echo"<br>";
+    echo"<br>";
+
+}
 ?>

@@ -2,103 +2,81 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Full Page Blur Background</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    html, body {
-      height: 100%;
-      width: 100%;
-      overflow: hidden;
-      font-family: 'Arial', sans-serif;
-    }
-
-    /* Background image */
-    body::before {
-      content: "";
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: url('background.jpg') no-repeat center center/cover;
-      z-index: -2;
-    }
-
-    /* Full-page blur layer */
-    .background-blur {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      backdrop-filter: blur(12px);
-      background: rgba(0, 0, 0, 0.3);
-      z-index: -1;
-    }
-
-    .content {
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      color: #fff;
-      padding: 20px;
-    }
-
-    .card {
-      background: rgba(255, 255, 255, 0.08);
-      padding: 40px;
-      border-radius: 30px;
-      backdrop-filter: blur(20px);
-      box-shadow: 0 0 30px rgba(0,0,0,0.4);
-      max-width: 800px;
-    }
-
-    .card h1 {
-      font-size: 50px;
-      margin-bottom: 20px;
-    }
-
-    .card p {
-      font-size: 18px;
-      margin-bottom: 30px;
-    }
-
-    .card button {
-      background: #FF7F50;
-      border: none;
-      padding: 12px 30px;
-      color: #fff;
-      border-radius: 30px;
-      cursor: pointer;
-      font-size: 16px;
-      transition: background 0.3s;
-    }
-
-    .card button:hover {
-      background: #e66a3b;
-    }
-
-  </style>
+  <title>FoodFustion Sharing</title>
+  <link rel="stylesheet" href="homeStyle.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
 
-  <!-- Full-page blur effect -->
-  <div class="background-blur"></div>
 
-  <div class="content">
-    <div class="card">
-      <h1>Chicken Salad Bowl</h1>
-      <p>With Black Beans and Veggies — a perfect healthy lifestyle choice.<br> Prep: 35 min | Cook: 35 min | Serves: 2</p>
-      <button onclick="alert('Learn More clicked!')">Learn More</button>
+    <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="#" class="logo">FoodFusion</a>
+
+      <!-- Centered Navigation Links -->
+      <ul class="nav-links">
+        <li><a href="#">Recipes</a></li>
+        <li><a href="#">Community</a></li>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Contact us</a></li>
+        <li><a href="#">Resources</a></li>
+      </ul>
+
+      <!-- Right Side Icons -->
+      <div class="nav-icons">
+       <a href="#"><i class="fa-solid fa-right-to-bracket"></i></a>
+        <a href="#"><i class="fa-solid fa-plus"></i></a>
+      </div>
     </div>
-  </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="hero">
+    <div class="hero-text">
+      <h1>Share the food & Share the love</h1>
+      <p>특별한 기분으로 맛있게 즐기는 팜미엔의 중화요리</p>
+    </div>
+  </header>
+
+  <!-- Menu Section -->
+  <section class="menu">
+    <h2>팜미엔의 대표메뉴를 소개합니다</h2>
+    <div class="menu-items">
+      <div class="item">
+        <img src="images/dish1.png" alt="Dish 1">
+        <p>팜미엔 볶음밥</p>
+        <span>5,500원</span>
+      </div>
+      <div class="item">
+        <img src="images/dish2.png" alt="Dish 2">
+        <p>팜미엔 짬뽕</p>
+        <span>5,500원</span>
+      </div>
+      <div class="item">
+        <img src="images/dish3.png" alt="Dish 3">
+        <p>팜미엔 볶음밥</p>
+        <span>5,500원</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Promotion Section -->
+  <section class="promo">
+    <img src="images/promo.png" alt="Promo Image">
+  </section>
+
+  <!-- Store Locator -->
+  <section class="store-locator">
+    <h2>팜미엔 매장찾기</h2>
+    <input type="text" placeholder="지역을 입력하세요">
+    <button>검색</button>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2025 PALMIAN. All rights reserved.</p>
+  </footer>
 
 </body>
 </html>
