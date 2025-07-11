@@ -92,23 +92,139 @@ body {
   opacity: 0.7;
 }
 
+/* Dropdown Styles */
+.nav-links .dropdown {
+  position: relative;
+}
+
+.nav-links .dropdown-menu {
+  display: none;
+  position: absolute;
+  background-color: #ffffff;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  top: 100%;
+  left: 0;
+  z-index: 999;
+}
+
+.nav-links .dropdown-menu li a {
+  display: block;
+  padding: 0.75rem 1.5rem;
+  color: #333;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.nav-links .dropdown-menu li a:hover {
+  background-color: #f0f0f0;
+}
+
+/* Show dropdown on hover */
+.nav-links .dropdown:hover .dropdown-menu {
+  display: block;
+}
+
 
 /* Hero Section */
 .hero {
-  background: url('images/hero.png') no-repeat center center/cover;
-  color: var(--text-color);
-  padding: 120px 20px;
+  background-image: url('./BEpics/bg1.jpg'); /* Replace with your actual image path */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--light_pink);
+  text-align: center;
+  padding: 0 1rem;
+}
+
+.hero-text h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.hero-text p {
+  font-size: 1.5rem;
+  max-width: 600px;
+}
+
+.categories {
+  text-align: center;
+  padding: 2rem 1rem;
+  background-color: #fff8f0;
+}
+
+.categories h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Absolutely enforce horizontal row */
+.category-row {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  gap: 1rem;
+  overflow-x: auto;
+  padding: 0 1rem;
+  justify-content: center;
+  white-space: nowrap;
+  scrollbar-width: none;
+}
+
+.category-row::-webkit-scrollbar {
+  display: none;
+}
+
+.category-item {
+  flex: 0 0 auto;
   text-align: center;
 }
 
-.hero h1 {
-  font-size: 36px;
-  margin-bottom: 10px;
+/* .category-item img {
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid var(--medium_pink);
+  display: block;
+  margin: 0 auto;
+  transition: transform 0.3s ease;
+} */
+.circle-frame {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid var(--medium_pink);
+  overflow: hidden;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.hero p {
-  font-size: 18px;
+.circle-frame img {
+  width: 60px;
+  height: 60px;
+  transition: transform 0.3s ease;
 }
+
+
+.category-item img:hover {
+  transform: scale(1.05);
+}
+
+.category-item p {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
 
 /* Menu Section */
 .menu {
