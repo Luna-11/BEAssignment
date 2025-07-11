@@ -146,11 +146,16 @@ body {
 .hero-text h1 {
   font-size: 3rem;
   margin-bottom: 1rem;
+  align-items: center;
+  text-align: center;
 }
 
 .hero-text p {
+
   font-size: 1.5rem;
   max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
 }
 
 .categories {
