@@ -186,16 +186,6 @@ body {
   text-align: center;
 }
 
-/* .category-item img {
-  width: 90px;
-  height: 90px;
-  object-fit: cover;
-  border-radius: 50%;
-  border: 2px solid var(--medium_pink);
-  display: block;
-  margin: 0 auto;
-  transition: transform 0.3s ease;
-} */
 .circle-frame {
   width: 80px;
   height: 80px;
@@ -273,7 +263,8 @@ body {
 }
 
 .promo img {
-  width: 90%;
+  width: 700px;
+  height: 200px;
   border-radius: 10px;
 }
 
@@ -312,3 +303,35 @@ footer {
   padding: 20px;
   text-align: center;
 }
+
+
+/* for the drink page */
+    /* Image Grid */
+    .dimage-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      padding: 30px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .dimage-card {
+      background-color: #fff;
+      padding: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      overflow: hidden;
+      text-align: center;
+    }
+    .dimage-card img {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+    }
+    .dimage-card p {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #666;
+    }
+
+/* for the drink page */
