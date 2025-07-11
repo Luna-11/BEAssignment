@@ -298,8 +298,8 @@ body {
 
 /* Footer */
 footer {
-  background: var(--black);
-  color: var(--light-gray);
+  background: var(--primary-color);
+  color: var(--white);
   padding: 20px;
   text-align: center;
 }
