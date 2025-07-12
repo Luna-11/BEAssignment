@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoodFusion - Growth for Flavor</title>
+    <link rel="stylesheet" href="homeStyle.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+
+    
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">FoodFusion</a>
+            
+            <!-- Centered Navigation Links -->
+            <ul class="nav-links">
+                <li><a href="#">Recipes</a></li>
+                <li><a href="#">Community</a></li>
+                <li><a href="#">About Us</a></li>
+                <li><a href="#">Contact us</a></li>
+                <li class="dropdown">
+                    <a href="#">Resources <i class="fa-solid fa-caret-down"></i></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">Educational Resources</a></li>
+                        <li><a href="#">Culinary Resources</a></li>
+                    </ul>
+                </li>
+            </ul>
+            
+            <!-- Right Side Icons -->
+            <div class="nav-icons">
+                <a href="#"><i class="fa-solid fa-right-to-bracket"></i></a>
+                <a href="#"><i class="fa-solid fa-plus"></i></a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Growth for Flavor Section -->
+        <section class="section">
+            <div class="section-header">
+                <h1>GROWTH for flavour</h1>
+            </div>
+            
+            <div class="features">
+                <div class="feature-item">
+                    <i class="fas fa-apple-alt"></i>
+                    <h3>Fruits</h3>
+                    <p>Naturally grown with optimal sweetness and nutritional value</p>
+                </div>
+                
+                <div class="feature-item">
+                    <i class="fas fa-carrot"></i>
+                    <h3>Vegetables</h3>
+                    <p>Fresh, organic produce harvested at peak ripeness</p>
+                </div>
+                
+                <div class="feature-item">
+                    <i class="fas fa-mushroom"></i>
+                    <h3>Mushrooms</h3>
+                    <p>Exotic varieties grown in controlled natural environments</p>
+                </div>
+            </div>
+        </section>
+        
+        <div class="divider"></div>
+        
+        <!-- Why Brix Products Section -->
+        <section class="section">
+            <div class="why-section">
+                <div class="why-header">
+                    <h2>Why Brix products?</h2>
+                </div>
+                
+                <div class="why-content">
+                    <p>Dedication to work have had a decisive influence on significant results accomplished in agriculture by the producers from Serbia.</p>
+                    <p>Inspired by tradition and experience, with enthusiasm and views, LPT EU imports frozen fish and other products to share the enjoyment of exceptional taste and exquisite quality with others.</p>
+                </div>
+            </div>
+            
+            <div class="why-header" style="margin-top: 50px;">
+                <h2>OUR PRODUCTS</h2>
+            </div>
+            
+            <div class="products-grid">
+                <div class="product-card">
+                    <div class="product-content">
+                        <h3>Highly fertile soil</h3>
+                        <p>Continental with hot summer months 35 °C+</p>
+                    </div>
+                </div>
+                
+                <div class="product-card">
+                    <div class="product-content">
+                        <h3>Perfect climatic conditions</h3>
+                        <p>Continental with hot summer months 35 °C+</p>
+                    </div>
+                </div>
+                
+                <div class="product-card">
+                    <div class="product-content">
+                        <h3>Ideal insolation</h3>
+                        <p>Average 110 sunny days annually / average yearly sum of global solar irradiation per square meter – 1.50 kWh/m²</p>
+                    </div>
+                </div>
+                
+                <div class="product-card">
+                    <div class="product-content">
+                        <h3>High natural sugar</h3>
+                        <p>High natural sugar content and minerals content in fruit / T4-22 Brix/</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <div class="divider"></div>
+        
+        <!-- Catalog Section -->
+        <section class="section">
+            <div class="catalog-section">
+                <h2>Katalóg produktov</h2>
+                <a href="#" class="btn">DOWNLOAD</a>
+            </div>
+        </section>
+        
+        <div class="divider"></div>
+        
+        <!-- About Us Section -->
+        <section class="section">
+            <div class="about-section">
+                <div class="about-content">
+                    <h2>About us</h2>
+                    <p>We are a modest-sized private limited company, founded in 2006 and based in Slovakia. Initially, our business was established on the import of multimedia equipment from China, Taiwan, Australia, Singapore and Hong Kong and its distribution within the EU under the brand 'Rwork'.</p>
+                    <a href="#" class="btn">MORE ABOUT US</a>
+                </div>
+                
+                <div class="about-image">
+                    FoodFusion Journey Since 2006
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 PALMIAN. All rights reserved.</p>
+    </footer>
+    
+    <script>
+        // Simple JavaScript for dropdown functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropdowns = document.querySelectorAll('.dropdown');
+            
+            dropdowns.forEach(dropdown => {
+                dropdown.addEventListener('mouseenter', function() {
+                    this.querySelector('.dropdown-menu').style.opacity = '1';
+                    this.querySelector('.dropdown-menu').style.visibility = 'visible';
+                    this.querySelector('.dropdown-menu').style.transform = 'translateY(0)';
+                });
+                
+                dropdown.addEventListener('mouseleave', function() {
+                    this.querySelector('.dropdown-menu').style.opacity = '0';
+                    this.querySelector('.dropdown-menu').style.visibility = 'hidden';
+                    this.querySelector('.dropdown-menu').style.transform = 'translateY(10px)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
