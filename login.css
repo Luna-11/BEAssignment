@@ -1,0 +1,322 @@
+/* ===== GLOBAL STYLES ===== */
+:root {
+  --primary-color: #C89091;
+  --text-color: #7b4e48;
+  --lightest-color: #fcfaf2;
+  --light_pink: #e9d0cb;
+  --medium_pink: #ddb2b1;
+  --light_yellow: #f9f1e5;
+  --white: #fff;
+  --black: #222;
+  --light-gray: #bbb;
+  --medium-gray: #555;
+  --shadow-color: rgba(0,0,0,0.1);
+  --border-color: #ccc;
+  --button-color: #333;
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--light_yellow);
+}
+
+/* ===== LOGO AT THE TOP ===== */
+.logo {
+  position: fixed;
+  top: 20px;
+  left: 250px;
+  z-index: 9999;
+  color: var(--light_pink);
+  align-items: center;
+  text-align: center;
+}
+
+.logo-text {
+  font-size: 32px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.logo-subtitle {
+  font-size: 14px;
+  color: var(--lightest-color);
+  margin-top: 5px;
+  align-items: center;
+  text-align: center;
+}
+
+/* ===== PAGE CONTAINER ===== */
+.container {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+}
+
+/* ===== LEFT SIDE ===== */
+.left-side {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.food-background {
+  position: relative;
+  height: 100%;
+}
+
+.food-grid {
+  position: relative;
+  padding: 20px;
+  padding-top: 80px;
+  z-index: 1000;
+}
+
+.food-row {
+  display: flex;
+  gap: 10px;
+}
+
+.food-grid {
+  position: absolute;
+  top: 20%;
+  transform: translateY(-50%);
+  width: 100%;
+  z-index: 1000;
+}
+
+/* Base style for all items */
+.food-item {
+  position: absolute;
+  overflow: hidden;
+}
+
+.food-item img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 16px;
+}
+
+/* Top image — to the left of overlay */
+.food-item.top-item {
+  top: 0;
+  left: 70px;
+  width: 380px;
+  z-index: 3;
+}
+
+/* Middle image — to the right of overlay */
+.food-item.middle-item {
+  top: 250px;
+  left: 260px;
+  width: 250px;
+  z-index: 2;
+}
+
+/* Bottom image — left of overlay */
+.food-item.bottom-item {
+  top: 400px;
+  left: 150px;
+  width: 200px;
+  z-index: 1;
+}
+
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 200px;
+  width: 300px;
+  height: 100%;
+  background: rgba(0, 0, 0);
+  z-index: 999;
+  overflow: hidden;
+}
+
+.overlay-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.7;
+  mix-blend-mode: lighten;
+}
+
+
+/* Decorative SVG */
+.leaf-patternsLeft {
+  position: absolute;
+  left:-150px;
+  top:50px;
+  width: 850px;
+  height: auto;
+}
+
+/* ===== RIGHT SIDE ===== */
+.right-side {
+  flex: 1;
+  position: relative;
+  padding: 60px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.leaf-patterns 
+{
+  position: absolute;
+  width: 800px;
+  height: auto;
+  opacity: 0.4;
+}
+
+/* Form Container */
+.form-container {
+  max-width: 400px;
+  margin: 0 auto;
+  z-index: 1;
+}
+
+.form-header h1 {
+  font-size: 28px;
+  margin-bottom: 30px;
+  color: var(--black);
+  text-align: center;
+}
+
+/* Input Groups */
+.input-group {
+  margin-bottom: 20px;
+}
+
+.input-container {
+  position: relative;
+}
+
+.input-container input {
+  width: 100%;
+  padding: 12px 40px 12px 40px;
+  border: 1px solid var(--light_pink);
+  border-radius: 30px;
+  font-size: 16px;
+}
+
+.input-icon {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 20px;
+  height: 20px;
+  stroke: var(--primary-color);
+}
+
+.eye-icon {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 22px;
+  height: 22px;
+  stroke: var(--text-color);
+}
+
+.toggle-password {
+  background: none;
+  border: none;
+  position: absolute;
+  right: 8px;
+  cursor: pointer;
+}
+
+/* Forgot Password */
+.forgot-password {
+  text-align: right;
+  margin-bottom: 20px;
+}
+
+.forgot-password a {
+  color: var(--text-color);
+  text-decoration: none;
+  font-size: 14px;
+}
+
+/* Buttons */
+.login-btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--medium_pink);
+  color: var(--white);
+  font-size: 16px;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+}
+
+.divider {
+  text-align: center;
+  margin: 20px 0;
+  color: var(--text-color);
+  position: relative;
+}
+
+.divider span {
+  background: #fff;
+  padding: 0 20px;
+  position: relative;
+  z-index: 1;
+  border-radius: 20px;
+}
+
+.divider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 1px;
+  width: 100%;
+  background: #ddd;
+  z-index: 0;
+}
+
+/* Sign Up */
+.signup-link {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+.signup-link a {
+  color: var(--text-color);
+  text-decoration: none;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+
+  .left-side {
+    display: none;
+  }
+
+  .right-side {
+    padding: 40px 20px;
+  }
+
+  .logo {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+  }
+}
