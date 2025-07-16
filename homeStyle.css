@@ -428,6 +428,58 @@ footer {
   color: var(--medium-gray);
 }
 
+/* ===== MUZZA STYLE HEADER ===== */
+.muzza-header {
+  background-color: var(--lightest-color);
+  text-align: center;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.logo-area img {
+  width: 70%;
+  height: 350px;
+  align-items: start;
+}
+
+.brand-name {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-color);
+  letter-spacing: 2px;
+  margin: 10px 0 5px;
+}
+
+.tagline {
+  font-size: 0.9rem;
+  color: var(--medium-gray);
+  font-style: italic;
+  margin-bottom: 20px;
+}
+
+.insta-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 15px;
+}
+
+.insta-tabs .tab {
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  color: var(--medium-gray);
+  text-decoration: none;
+  padding-bottom: 4px;
+  transition: all 0.3s ease;
+}
+
+.insta-tabs .tab:hover,
+.insta-tabs .tab.active {
+  color: var(--text-color);
+  border-bottom: 2px solid var(--primary-color);
+}
+
+
 /* ===== ABOUT PAGE STYLES ===== */
 .about-container {
   max-width: 1200px;

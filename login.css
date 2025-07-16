@@ -301,6 +301,70 @@ body {
 }
 
 /* ===== RESPONSIVE ===== */
+/* ===== TABLET SCREENS ===== */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .container {
+    flex-direction: column;
+  }
+
+  .left-side {
+    height: 400px;
+    width: 100%;
+    flex: none;
+  }
+
+  .food-grid {
+    top: 35%;
+    transform: translateY(-50%);
+  }
+
+  .food-item.top-item {
+    width: 260px;
+    top: 20px;
+    left: 40px;
+  }
+
+  .food-item.middle-item {
+    width: 180px;
+    top: 150px;
+    left: 200px;
+  }
+
+  .food-item.bottom-item {
+    width: 150px;
+    top: 260px;
+    left: 100px;
+  }
+
+  .overlay {
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .logo {
+    top: 10px;
+    left: 20px;
+    font-size: 28px;
+  }
+
+  .right-side {
+    padding: 40px 30px;
+  }
+
+  .leaf-patternsLeft {
+    width: 600px;
+    left: -100px;
+    top: 20px;
+  }
+
+  .leaf-patterns {
+    width: 600px;
+  }
+}
+
+
+/* ===== MOBILE SCREENS ===== */
 @media (max-width: 768px) {
   .container {
     flex-direction: column;
@@ -316,7 +380,35 @@ body {
 
   .logo {
     position: absolute;
-    top: 20px;
-    left: 20px;
+    top: 10px;
+    left: 10px;
+    text-align: left;
+  }
+
+  .form-header h1 {
+    font-size: 24px;
+  }
+
+  .input-container input {
+    font-size: 14px;
+    padding: 10px 36px 10px 36px;
+  }
+
+  .login-btn {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .divider span {
+    font-size: 12px;
+  }
+
+  .signup-link {
+    font-size: 12px;
+  }
+
+  .leaf-patterns {
+    display: none;
   }
 }
+
