@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Recipe - FoodFusion</title>
+    <link rel="stylesheet" href="homeStyle.css">
+    <link rel="stylesheet" href="additionalStyles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <!-- Rich Text Editor -->
+    <link rel="stylesheet" href="https://cdn.quilljs.com/1.3.6/quill.snow.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">FoodFusion</a>
+            <ul class="nav-links">
+                <li><a href="recipes.html">Recipes</a></li>
+                <li><a href="community.html">Community</a></li>
+                <li><a href="about-us.html">About Us</a></li>
+                <li><a href="contact.html">Contact us</a></li>
+                <li class="dropdown">
+                    <a href="#">Resources <i class="fa-solid fa-caret-down"></i></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="eduRes.html">Educational Resources</a></li>
+                        <li><a href="culRes.html">Culinary Resources</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <div class="nav-icons">
+                <a href="login.css" onclick="openLoginModal()"><i class="fa-solid fa-right-to-bracket"></i></a>
+                <a href="upload.html" onclick="openJoinModal()"><i class="fa-solid fa-plus"></i></a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Upload Recipe Header -->
+    <section class="upload-header">
+        <div class="upload-hero">
+            <h1>Share Your Recipe</h1>
+            <p>Share your culinary creations with the FoodFusion community</p>
+        </div>
+    </section>
+
+    <!-- Recipe Upload Form -->
+    <section class="upload-form-section">
+        <div class="upload-container">
+            <div class="form-progress">
+                <div class="progress-step active" data-step="1">
+                    <div class="step-number">1</div>
+                    <span>Basic Info</span>
+                </div>
+                <div class="progress-step" data-step="2">
+                    <div class="step-number">2</div>
+                    <span>Images</span>
+                </div>
+                <div class="progress-step" data-step="3">
+                    <div class="step-number">3</div>
+                    <span>Categories</span>
+                </div>
+                <div class="progress-step" data-step="4">
+                    <div class="step-number">4</div>
+                    <span>Ingredients</span>
+                </div>
+                <div class="progress-step" data-step="5">
+                    <div class="step-number">5</div>
+                    <span>Instructions</span>
+                </div>
+            </div>
+
+            <form id="uploadRecipeForm" class="upload-form">
+                <!-- Step 1: Basic Information -->
+                <div class="form-step active" data-step="1">
+                    <h2><i class="fas fa-info-circle"></i> Basic Information</h2>
+                    
+                    <div class="form-group">
+                        <label for="recipeTitle">Recipe Title *</label>
+                        <input type="text" id="recipeTitle" name="recipeTitle" required 
+                               placeholder="Enter your recipe title">
+                        <div class="field-help">Give your recipe a catchy and descriptive title</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="recipeDescription">Short Description *</label>
+                        <textarea id="recipeDescription" name="recipeDescription" rows="3" required 
+                                  placeholder="Brief description of your recipe..."></textarea>
+                        <div class="field-help">Describe what makes your recipe special (max 200 characters)</div>
+                        <div class="char-counter">
+                            <span id="descriptionCounter">0</span>/200
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="cookTime">Cook Time (minutes) *</label>
+                            <input type="number" id="cookTime" name="cookTime" min="1" required 
+                                   placeholder="30">
+                        </div>
+
+                    </div>
+
+                    <div class="form-group">
+                        <label for="difficulty">Difficulty Level *</label>
+                        <select id="difficulty" name="difficulty" required>
+                            <option value="">Select difficulty</option>
+                            <option value="easy">Easy</option>
+                            <option value="medium">Medium</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Step 2: Image Upload -->
+                <div class="form-step" data-step="2">
+                    <h2><i class="fas fa-images"></i> Recipe Images</h2>
+                    <p class="step-description">Upload up to 3 high-quality images of your recipe</p>
+                    
+                    <div class="image-upload-container">
+                        <div class="image-upload-grid">
+                            <div class="image-upload-slot" data-slot="1">
+                                <input type="file" id="image1" name="image1" accept="image/*" onchange="handleImageUpload(1)">
+                                <div class="upload-placeholder">
+                                    <i class="fas fa-camera"></i>
+                                    <span>Main Image</span>
+                                    <small>Click to upload</small>
+                                </div>
+                                <div class="image-preview" style="display: none;">
+                                    <img src="/placeholder.svg" alt="Preview">
+                                    <button type="button" class="remove-image" onclick="removeImage(1)">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="image-upload-slot" data-slot="2">
+                                <input type="file" id="image2" name="image2" accept="image/*" onchange="handleImageUpload(2)">
+                                <div class="upload-placeholder">
+                                    <i class="fas fa-camera"></i>
+                                    <span>Additional Image</span>
+                                    <small>Click to upload</small>
+                                </div>
+                                <div class="image-preview" style="display: none;">
+                                    <img src="/placeholder.svg" alt="Preview">
+                                    <button type="button" class="remove-image" onclick="removeImage(2)">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="image-upload-slot" data-slot="3">
+                                <input type="file" id="image3" name="image3" accept="image/*" onchange="handleImageUpload(3)">
+                                <div class="upload-placeholder">
+                                    <i class="fas fa-camera"></i>
+                                    <span>Additional Image</span>
+                                    <small>Click to upload</small>
+                                </div>
+                                <div class="image-preview" style="display: none;">
+                                    <img src="/placeholder.svg" alt="Preview">
+                                    <button type="button" class="remove-image" onclick="removeImage(3)">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="upload-guidelines">
+                            <h4>Image Guidelines:</h4>
+                            <ul>
+                                <li>Maximum file size: 5MB per image</li>
+                                <li>Supported formats: JPG, PNG, WebP</li>
+                                <li>Recommended resolution: 1200x800 pixels</li>
+                                <li>First image will be used as the main recipe photo</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Categories -->
+                <div class="form-step" data-step="3">
+                    <h2><i class="fas fa-tags"></i> Categories & Tags</h2>
+                    
+                    <div class="form-group">
+                        <label for="country">Country/Cuisine *</label>
+                        <select id="country" name="country" required onchange="updateFoodTypes()">
+                            <option value="">Select country/cuisine</option>
+                            <option value="italian">Italian</option>
+                            <option value="chinese">Chinese</option>
+                            <option value="japanese">Japanese</option>
+                            <option value="korean">Korean</option>
+                            <option value="thai">Thai</option>
+                            <option value="indian">Indian</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="foodType">Food Type *</label>
+                        <select id="foodType" name="foodType" required multiple>
+                            <option value="">Select food type(s)</option>
+                            <!-- Options will be populated based on country selection -->
+                        </select>
+                        <div class="field-help">Hold Ctrl/Cmd to select multiple types</div>
+                    </div>
+
+                    <div class="selected-categories">
+                        <h4>Selected Categories:</h4>
+                        <div id="selectedCategoriesDisplay">
+                            <span class="no-selection">No categories selected yet</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Step 4: Ingredients -->
+                <div class="form-step" data-step="4">
+                    <h2><i class="fas fa-list"></i> Ingredients</h2>
+                    <p class="step-description">List all ingredients with quantities and measurements</p>
+                    
+                    <div class="ingredients-container">
+                        <div class="ingredients-list" id="ingredientsList">
+                            <div class="ingredient-item" data-index="1">
+                                <div class="ingredient-input-group">
+                                    <input type="text" class="ingredient-amount" placeholder="1 cup" name="ingredientAmount[]">
+                                    <input type="text" class="ingredient-name" placeholder="all-purpose flour" name="ingredientName[]" required>
+                                    <button type="button" class="remove-ingredient" onclick="removeIngredient(1)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="button" class="add-ingredient-btn" onclick="addIngredient()">
+                            <i class="fas fa-plus"></i> Add Ingredient
+                        </button>
+                    </div>
+
+                    <div class="ingredients-tips">
+                        <h4>Tips for listing ingredients:</h4>
+                        <ul>
+                            <li>Be specific with measurements (1 cup, 2 tablespoons, etc.)</li>
+                            <li>List ingredients in the order they'll be used</li>
+                            <li>Include preparation notes (diced, chopped, etc.)</li>
+                            <li>Separate wet and dry ingredients if helpful</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Step 5: Instructions -->
+                <div class="form-step" data-step="5">
+                    <h2><i class="fas fa-clipboard-list"></i> Cooking Instructions</h2>
+                    <p class="step-description">Provide detailed step-by-step cooking instructions</p>
+                    
+                    <div class="form-group">
+                        <label for="instructions">Instructions *</label>
+                        <div id="instructionsEditor" style="height: 400px;"></div>
+                        <input type="hidden" id="instructions" name="instructions" required>
+                        <div class="field-help">Use the rich text editor to format your instructions with bold, italics, lists, and more</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cookingTips">Cooking Tips & Notes</label>
+                        <textarea id="cookingTips" name="cookingTips" rows="4" 
+                                  placeholder="Share any helpful tips, substitutions, or notes about your recipe..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Form Navigation -->
+                <div class="form-navigation">
+                    <button type="button" id="prevBtn" class="nav-btn prev-btn" onclick="changeStep(-1)">
+                        <i class="fas fa-arrow-left"></i> Previous
+                    </button>
+                    <button type="button" id="nextBtn" class="nav-btn next-btn" onclick="changeStep(1)">
+                        Next <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <button type="submit" id="submitBtn" class="nav-btn submit-btn" style="display: none;">
+                        <i class="fas fa-upload"></i> Share Recipe
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- Preview Modal -->
+    <div id="previewModal" class="modal preview-modal">
+        <div class="modal-content preview-modal-content">
+            <span class="close" onclick="closePreviewModal()">&times;</span>
+            <h2>Recipe Preview</h2>
+            <div id="recipePreview">
+                <!-- Preview content will be generated here -->
+            </div>
+            <div class="preview-actions">
+                <button type="button" class="btn secondary" onclick="closePreviewModal()">Edit Recipe</button>
+                <button type="button" class="btn primary" onclick="submitRecipe()">Confirm & Share</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>FoodFusion</h3>
+                <p>Connecting the world through the joy of cooking</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="recipes.html">Recipes</a></li>
+                    <li><a href="community.html">Community</a></li>
+                    <li><a href="about-us.html">About Us</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Legal</h4>
+                <ul>
+                    <li><a href="#" onclick="showPrivacyPolicy()">Privacy Policy</a></li>
+                    <li><a href="#" onclick="showCookiePolicy()">Cookie Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 FoodFusion. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script src="script.js"></script>
+    <script src="upload.js"></script>
+</body>
+</html>
