@@ -301,114 +301,113 @@ body {
 }
 
 /* ===== RESPONSIVE ===== */
-/* ===== TABLET SCREENS ===== */
-@media (max-width: 1024px) and (min-width: 769px) {
-  .container {
-    flex-direction: column;
-  }
-
-  .left-side {
-    height: 400px;
-    width: 100%;
-    flex: none;
-  }
-
-  .food-grid {
-    top: 35%;
-    transform: translateY(-50%);
-  }
-
-  .food-item.top-item {
-    width: 260px;
-    top: 20px;
-    left: 40px;
-  }
-
-  .food-item.middle-item {
-    width: 180px;
-    top: 150px;
-    left: 200px;
-  }
-
-  .food-item.bottom-item {
-    width: 150px;
-    top: 260px;
-    left: 100px;
-  }
-
-  .overlay {
-    left: 0;
-    width: 100%;
-    height: 100%;
-  }
-
-  .logo {
-    top: 10px;
-    left: 20px;
-    font-size: 28px;
-  }
-
-  .right-side {
-    padding: 40px 30px;
-  }
-
-  .leaf-patternsLeft {
-    width: 600px;
-    left: -100px;
-    top: 20px;
-  }
-
-  .leaf-patterns {
-    width: 600px;
-  }
-}
-
-
-/* ===== MOBILE SCREENS ===== */
+/* ===== MOBILE RESPONSIVE STYLES ===== */
 @media (max-width: 768px) {
   .container {
     flex-direction: column;
+    height: 100vh; /* Full viewport height */
+    position: relative; /* Needed for absolute positioning */
   }
 
+  /* Food images background (now behind form) */
   .left-side {
-    display: none;
-  }
-
-  .right-side {
-    padding: 40px 20px;
-  }
-
-  .logo {
     position: absolute;
-    top: 10px;
-    left: 10px;
-    text-align: left;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    padding: 0;
   }
 
-  .form-header h1 {
-    font-size: 24px;
+  /* Adjust food grid to fill background */
+  .food-grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
   }
 
-  .input-container input {
-    font-size: 14px;
-    padding: 10px 36px 10px 36px;
+  .food-item {
+    position: relative !important;
+    width: 80% !important;
+    max-width: 300px;
+    margin: 0 auto;
   }
 
-  .login-btn {
-    font-size: 14px;
-    padding: 10px;
+  /* Semi-transparent overlay for better readability */
+  .overlay {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.3);
+    z-index: 2;
   }
 
-  .divider span {
-    font-size: 12px;
+  /* Login form (on top of images) */
+  .right-side {
+    position: relative;
+    z-index: 3;
+    background: transparent;
+    padding: 40px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
   }
 
-  .signup-link {
-    font-size: 12px;
+  .form-container {
+    background: var(--light_yellow);
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    width: 100%;
+    max-width: 400px;
   }
 
+  /* Hide decorative elements on mobile */
+  .leaf-patternsLeft,
   .leaf-patterns {
     display: none;
   }
+
+  /* Logo adjustments */
+  .logo {
+    position: absolute;
+    top: 20px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    z-index: 4;
+    color: white;
+  }
+  
+  .logo-subtitle {
+    color: rgba(255,255,255,0.8);
+  }
 }
 
+/* Adjustments for small screens */
+@media (max-width: 480px) {
+  .food-item {
+    width: 90% !important;
+  }
+  
+  .form-container {
+    padding: 25px 20px;
+  }
+  
+  .right-side {
+    padding: 20px;
+  }
+}
