@@ -123,6 +123,122 @@ body {
 .nav-links .dropdown:hover .dropdown-menu {
   display: block;
 }
+/* Updated Navigation Bar Styles */
+.nav-links {
+  display: flex;
+  gap: 1.5rem; /* Adjust spacing between items */
+}
+
+.nav-links li a {
+  color: var(--white);
+  text-decoration: none;
+  display: block;
+  padding: 0.5rem 0;
+}
+
+.nav-icon-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  padding: 0 0.5rem;
+}
+
+.nav-icon-text i:first-child {
+  font-size: 1.2rem;
+  margin-bottom: 0.25rem;
+}
+
+.nav-icon-text span {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* Dropdown specific styles */
+.dropdown .nav-icon-text {
+  padding-right: 1.25rem; /* Space for dropdown indicator */
+}
+
+.dropdown-indicator {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  font-size: 0.7rem;
+}
+
+/* Dropdown menu styles (unchanged from your original) */
+.nav-links .dropdown-menu {
+  display: none;
+  position: absolute;
+  background-color: var(--light_yellow);
+  box-shadow: 0 4px 8px var(--shadow-color);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  top: 100%;
+  left: 0;
+  z-index: 999;
+  min-width: 180px;
+}
+
+.nav-links .dropdown-menu li a {
+  display: block;
+  padding: 0.75rem 1.5rem;
+  color: var(--black);
+  text-decoration: none;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.nav-links .dropdown:hover .dropdown-menu {
+  display: block;
+}
+
+/* Hover effects */
+.nav-links li a:hover {
+  opacity: 0.9;
+}
+
+.nav-links li a:hover .nav-icon-text i:first-child {
+  transform: translateY(-2px);
+  transition: transform 0.2s ease;
+}
+
+/* Updated Right Side Icons */
+.nav-icons {
+  display: flex;
+  gap: 1.5rem; /* Match the gap from main nav */
+  align-items: center;
+}
+
+.nav-icons a {
+  color: var(--white);
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+
+.nav-icons i {
+  font-size: 1.2rem; /* Match icon size from main nav */
+  margin-bottom: 0.25rem;
+}
+
+.nav-icons span {
+  font-size: 0.8rem; /* Match text size from main nav */
+  font-weight: 500;
+}
+
+/* Hover effects to match main nav */
+.nav-icons a:hover {
+  opacity: 0.9;
+}
+
+.nav-icons a:hover i {
+  transform: translateY(-2px);
+  transition: transform 0.2s ease;
+}
 
 /* ===== HERO SECTION ===== */
 .hero {
