@@ -34,13 +34,13 @@ body {
 /* ===== NAVIGATION BAR ===== */
 .navbar {
   background-color: var(--primary-color);
-  padding: 1rem 0;
+  padding: 0.6rem 0;
   box-shadow: 0 2px 5px var(--shadow-color);
 }
 
 .nav-container {
   width: 90%;
-  max-width: 1200px;
+  max-width: 1800px;
   margin: 0 auto;
   display: flex;
   align-items: center;
@@ -62,21 +62,14 @@ body {
   justify-content: center;
 }
 
-.nav-links li a {
-  color: var(--white);
-  text-decoration: none;
-  font-weight: 500;
-  font-size: 1rem;
-}
-
-.nav-links li a:hover {
+/* .nav-links li a:hover {
   text-decoration: underline;
-}
-
+} */
+/* 
 .nav-icons {
   display: flex;
   gap: 1.2rem;
-}
+} */
 
 .nav-icons i {
   color: var(--white);
@@ -100,6 +93,7 @@ body {
   position: absolute;
   background-color: var(--light_yellow);
   box-shadow: 0 4px 8px var(--shadow-color);
+  border-radius: 30px;
   list-style: none;
   padding: 0;
   margin: 0;
@@ -124,10 +118,6 @@ body {
   display: block;
 }
 /* Updated Navigation Bar Styles */
-.nav-links {
-  display: flex;
-  gap: 1.5rem; /* Adjust spacing between items */
-}
 
 .nav-links li a {
   color: var(--white);
@@ -156,14 +146,15 @@ body {
 
 /* Dropdown specific styles */
 .dropdown .nav-icon-text {
-  padding-right: 1.25rem; /* Space for dropdown indicator */
+  padding-right: 1.3rem;
+
 }
 
 .dropdown-indicator {
   position: absolute;
   right: 0;
-  bottom: 0;
-  font-size: 0.7rem;
+  bottom: 6px;
+  font-size: 0.9rem;
 }
 
 /* Dropdown menu styles (unchanged from your original) */
@@ -221,12 +212,12 @@ body {
 }
 
 .nav-icons i {
-  font-size: 1.2rem; /* Match icon size from main nav */
+  font-size: 1.2rem; 
   margin-bottom: 0.25rem;
 }
 
 .nav-icons span {
-  font-size: 0.8rem; /* Match text size from main nav */
+  font-size: 0.8rem; 
   font-weight: 500;
 }
 

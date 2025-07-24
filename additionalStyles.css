@@ -1,3 +1,18 @@
+:root {
+  --primary-color: #C89091;
+  --text-color: #7b4e48;
+  --lightest-color: #fcfaf2;
+  --light_pink: #e9d0cb;
+  --medium_pink: #ddb2b1;
+  --light_yellow: #f9f1e5;
+  --white: #fff;
+  --black: #222;
+  --light-gray: #bbb;
+  --medium-gray: #555;
+  --shadow-color: rgba(0,0,0,0.1);
+  --border-color: #ccc;
+  --button-color: #333;
+}
 /* Modal Styles */
 .modal {
   display: none;
@@ -586,9 +601,10 @@
 
 /* Contact Page Styles */
 .contact-header {
-  background: linear-gradient(135deg, var(--primary-color), var(--medium_pink));
+  background-image: url("./BEpics/banner3.jpg");
   color: var(--white);
   text-align: center;
+  background-position: right 100%;
   padding: 80px 20px;
 }
 
