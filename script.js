@@ -1,7 +1,4 @@
-document.getElementById('login-form')?.addEventListener('submit', function (e) {
-  e.preventDefault();
-  alert('Login successful!');
-});
+
 
 // Global variables
 let currentUser = null
@@ -98,55 +95,6 @@ window.onclick = (event) => {
   })
 }
 
-// Form Submissions
-document.addEventListener("DOMContentLoaded", () => {
-  // Join form submission
-  const joinForm = document.getElementById("joinForm")
-  if (joinForm) {
-    joinForm.addEventListener("submit", (e) => {
-      e.preventDefault()
-      handleJoinSubmission()
-    })
-  }
-
-  // Login form submission
-  const loginForm = document.getElementById("loginForm")
-  if (loginForm) {
-    loginForm.addEventListener("submit", (e) => {
-      e.preventDefault()
-      handleLoginSubmission()
-    })
-  }
-
-  // Contact form submission
-  const contactForm = document.getElementById("contactForm")
-  if (contactForm) {
-    contactForm.addEventListener("submit", (e) => {
-      e.preventDefault()
-      handleContactSubmission()
-    })
-  }
-})
-
-function handleJoinSubmission() {
-  const formData = new FormData(document.getElementById("joinForm"))
-  const userData = {
-    firstName: formData.get("firstName"),
-    lastName: formData.get("lastName"),
-    email: formData.get("email"),
-    password: formData.get("password"),
-  }
-
-  // Simulate user registration
-  console.log("User registration:", userData)
-  alert("Welcome to FoodFusion! Your account has been created successfully.")
-  closeJoinModal()
-
-  // Store user data (in real app, this would be sent to server)
-  currentUser = userData
-  updateUIForLoggedInUser()
-}
-
 function handleLoginSubmission() {
   const formData = new FormData(document.getElementById("loginForm"))
   const loginData = {
@@ -186,11 +134,6 @@ function updateUIForLoggedInUser() {
     loginIcon.innerHTML = '<i class="fa-solid fa-user"></i>'
     loginIcon.setAttribute("onclick", "showUserMenu()")
   }
-}
-
-function showUserMenu() {
-  // Show user dropdown menu
-  alert(`Welcome, ${currentUser.firstName}!`)
 }
 
 // FAQ Functions
