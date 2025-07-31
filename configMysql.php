@@ -19,7 +19,7 @@ if($conn == false)
 }
 else
 {
-   echo "Connection Successfully <br> ";
+//    echo "Connection Successfully <br> ";
 }
 ?>
 
