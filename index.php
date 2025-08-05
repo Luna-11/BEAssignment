@@ -1,3 +1,10 @@
+<?php
+session_start();
+if (!isset($_SESSION['userID'])) {
+    header("Location: logIn.php");
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -65,9 +72,9 @@
 
     <!-- Right Side Icons -->
     <div class="nav-icons">
-      <a href="logIn.html" class="nav-icon-text">
+      <a href="logIn.php" class="nav-icon-text">
         <i class="fa-solid fa-right-to-bracket"></i>
-        <span>Sign Up</span>
+        <span>Log Out</span>
       </a>
       <a href="upload.html" class="nav-icon-text">
         <i class="fa-solid fa-plus"></i>
