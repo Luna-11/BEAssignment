@@ -15,31 +15,70 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (empty($email) || empty($password)) {
         $error = "Please fill in all fields";
     } else {
-        // Prepare SQL statement to prevent SQL injection
-        $sql = "SELECT userID, name, password FROM user WHERE mail = ?";
+        // Prepare SQL statement to get user data including failed attempts
+        $sql = "SELECT userID, name, password, failed_attempts, last_attempt_time FROM user WHERE mail = ?";
         $stmt = mysqli_prepare($conn, $sql);
         
         if ($stmt) {
             mysqli_stmt_bind_param($stmt, "s", $email);
             mysqli_stmt_execute($stmt);
-            $result = mysqli_stmt_get_result($stmt);
+            mysqli_stmt_store_result($stmt);
             
-            if ($row = mysqli_fetch_assoc($result)) {
-                // Verify password
-                if (password_verify($password, $row['password'])) {
-                    // Password is correct, start a new session
-                    $_SESSION['userID'] = $row['userID'];
-                    $_SESSION['name'] = $row['name'];
-                    $_SESSION['loggedin'] = true;
-                    
-                    // Redirect to home page
-                    header('Location: index.php');
-                    exit;
-                } else {
-                    $error = "Invalid email or password";
-                }
-            } else {
+            if (mysqli_stmt_num_rows($stmt) === 0) {
                 $error = "Invalid email or password";
+            } else {
+                mysqli_stmt_bind_result($stmt, $userID, $name, $hashed_password, $failed_attempts, $last_attempt_time);
+                mysqli_stmt_fetch($stmt);
+
+                $now = time();
+                $lock_duration = 180; // 3 minutes lockout
+
+                // Check if account is locked
+                if ($failed_attempts >= 3 && $last_attempt_time !== null) {
+                    $last_time = strtotime($last_attempt_time);
+                    $elapsed = $now - $last_time;
+
+                    if ($elapsed < $lock_duration) {
+                        $wait = $lock_duration - $elapsed;
+                        $error = "Account locked. Try again in $wait seconds.";
+                    } else {
+                        // Unlock account after lock duration has passed
+                        $sql = "UPDATE user SET failed_attempts = 0 WHERE userID = $userID";
+                        mysqli_query($conn, $sql);
+                        $failed_attempts = 0;
+                    }
+                }
+
+                // Only attempt login if account isn't locked
+                if ($failed_attempts < 3) {
+                    if (password_verify($password, $hashed_password)) {
+                        // Password is correct, start a new session
+                        $_SESSION['userID'] = $userID;
+                        $_SESSION['name'] = $name;
+                        $_SESSION['loggedin'] = true;
+                        
+                        // Reset failed attempts
+                        $sql = "UPDATE user SET failed_attempts = 0, last_attempt_time = NULL WHERE userID = $userID";
+                        mysqli_query($conn, $sql);
+                        
+                        // Redirect to home page
+                        header('Location: index.php');
+                        exit;
+                    } else {
+                        // Increment failed attempts
+                        $failed_attempts++;
+                        $now_str = date("Y-m-d H:i:s");
+                        $sql = "UPDATE user SET failed_attempts = $failed_attempts, last_attempt_time = '$now_str' WHERE userID = $userID";
+                        mysqli_query($conn, $sql);
+
+                        if ($failed_attempts >= 3) {
+                            $error = "Account locked. Try again in 3 minutes.";
+                        } else {
+                            $remaining = 3 - $failed_attempts;
+                            $error = "Invalid email or password. $remaining attempt(s) left.";
+                        }
+                    }
+                }
             }
             
             mysqli_stmt_close($stmt);
@@ -101,6 +140,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <img src="BEpics/basil.png" alt="Leaf Pattern" class="leaf-patterns">
 
             <!-- Login Form -->
+             
             <div class="form-container">
                 <div class="form-header">
                     <h1>Log In Here!</h1>
@@ -159,7 +199,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <!-- Sign Up Link -->
                     <div class="signup-link">
                         <span>Don't have an account? </span>
-                        <a href="register.html">register here</a>
+                        <a href="register.php">register here</a>
                     </div>
                 </form>
             </div>
