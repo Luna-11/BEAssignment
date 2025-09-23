@@ -12,35 +12,52 @@
 require_once("configMysql.php");
 
 // Initialize variables
-$name = $mail = $password = "";
+$first_name = $last_name = $mail = $password = "";
 $error = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Sanitize inputs
-    $name = htmlspecialchars(trim($_POST["name"]));
+    $first_name = htmlspecialchars(trim($_POST["first_name"]));
+    $last_name = htmlspecialchars(trim($_POST["last_name"]));
     $mail = htmlspecialchars(trim($_POST["mail"]));
     $password = trim($_POST["password"]);
     $confirm_password = trim($_POST["confirm-password"]);
-    
+
+    // Validate email
+    if (!filter_var($mail, FILTER_VALIDATE_EMAIL)) {
+        $error = "Invalid email format!";
+    }
     // Validate password match
-    if ($password !== $confirm_password) {
+    elseif ($password !== $confirm_password) {
         $error = "Passwords do not match!";
     } else {
         // Hash the password
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-        
-        // Use prepared statement to insert data
-        $stmt = $conn->prepare("INSERT INTO users (username, mail, password) VALUES (?, ?, ?)");
-        $stmt->bind_param("sss", $name, $mail, $hashed_password);
 
-        if ($stmt->execute()) {
-            header('Location: logIn.html');
-            exit;
+        // Check if user already exists
+        $checkStmt = $conn->prepare("SELECT id FROM users WHERE mail = ?");
+        $checkStmt->bind_param("s", $mail);
+        $checkStmt->execute();
+        $checkStmt->store_result();
+
+        if ($checkStmt->num_rows > 0) {
+            $error = "User already exists with this email.";
         } else {
-            $error = "Error saving data: " . $stmt->error;
+            // Insert new user
+            $stmt = $conn->prepare("INSERT INTO users (first_name, last_name, mail, password, failed_attempts, last_attempt_time) VALUES (?, ?, ?, ?, 0, NULL)");
+            $stmt->bind_param("ssss", $first_name, $last_name, $mail, $hashed_password);
+
+            if ($stmt->execute()) {
+                header('Location: logIn.php');
+                exit;
+            } else {
+                $error = "Error saving data: " . $stmt->error;
+            }
+
+            $stmt->close();
         }
 
-        $stmt->close();
+        $checkStmt->close();
     }
 }
 ?>
@@ -85,15 +102,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
             <?php endif; ?>
 
-            <form class="login-form" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
-                <!-- Name -->
+            <form id="register-form" class="login-form" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+                <!-- First Name -->
                 <div class="input-group">
                     <div class="input-container">
                         <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                             <circle cx="12" cy="7" r="4"></circle>
                         </svg>
-                        <input type="text" placeholder="Name" id="name" name="name" value="<?php echo $name; ?>" required>
+                        <input type="text" placeholder="First Name" id="first_name" name="first_name" value="<?php echo $first_name; ?>" required>
+                    </div>
+                </div>
+
+                <!-- Last Name -->
+                <div class="input-group">
+                    <div class="input-container">
+                        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        <input type="text" placeholder="Last Name" id="last_name" name="last_name" value="<?php echo $last_name; ?>" required>
                     </div>
                 </div>
 
@@ -155,7 +183,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <!-- Login Link -->
                 <div class="signup-link">
                     <span>Already have an account? </span>
-                    <a href="logIn.html">Log In here</a>
+                    <a href="logIn.php">Log In here</a>
                 </div>
             </form>
         </div>
@@ -171,6 +199,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             passwordField.type = "password";
         }
     }
+
+    document.getElementById("register-form").addEventListener("submit", function (e) {
+        const firstName = document.getElementById("first_name").value;
+        const lastName = document.getElementById("last_name").value;
+        const password = document.getElementById("password").value;
+        const confirmPassword = document.getElementById("confirm-password").value;
+
+        // Name validation
+        if (firstName.trim() === "" || lastName.trim() === "") {
+            e.preventDefault();
+            alert("Please enter both first name and last name.");
+            return;
+        }
+
+        // Password regex: at least one uppercase, one digit, min 8 characters
+        const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+        if (!passwordRegex.test(password)) {
+            e.preventDefault();
+            alert("Password must be at least 8 characters long, contain at least one uppercase letter, and one digit.");
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            e.preventDefault();
+            alert("Passwords do not match!");
+            return;
+        }
+    });
 </script>
 </body>
 </html>

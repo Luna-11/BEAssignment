@@ -3,33 +3,35 @@ session_start();
 require_once("configMysql.php");
 
 // Initialize variables
-$email = $password = "";
+$mail = $password = "";
 $error = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Sanitize inputs
-    $email = htmlspecialchars(trim($_POST["email"]));
+    $mail = htmlspecialchars(trim($_POST["mail"]));
     $password = trim($_POST["password"]);
     
     // Validate inputs
-    if (empty($email) || empty($password)) {
+    if (empty($mail) || empty($password)) {
         $error = "Please fill in all fields";
     } else {
         // Prepare SQL statement to get user data including failed attempts
-        $sql = "SELECT userID, name, password, failed_attempts, last_attempt_time FROM user WHERE mail = ?";
+        $sql = "SELECT id, first_name, last_name, password, failed_attempts, last_attempt_time FROM users WHERE mail = ?";
         $stmt = mysqli_prepare($conn, $sql);
         
         if ($stmt) {
-            mysqli_stmt_bind_param($stmt, "s", $email);
+            mysqli_stmt_bind_param($stmt, "s", $mail);
             mysqli_stmt_execute($stmt);
             mysqli_stmt_store_result($stmt);
             
             if (mysqli_stmt_num_rows($stmt) === 0) {
-                $error = "Invalid email or password";
+                // User with this email doesn't exist
+                $error = "No account found with this email address";
             } else {
-                mysqli_stmt_bind_result($stmt, $userID, $name, $hashed_password, $failed_attempts, $last_attempt_time);
+                mysqli_stmt_bind_result($stmt, $userID, $first_name, $last_name, $hashed_password, $failed_attempts, $last_attempt_time);
                 mysqli_stmt_fetch($stmt);
 
+                $full_name = $first_name . ' ' . $last_name;
                 $now = time();
                 $lock_duration = 180; // 3 minutes lockout
 
@@ -40,11 +42,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                     if ($elapsed < $lock_duration) {
                         $wait = $lock_duration - $elapsed;
-                        $error = "Account locked. Try again in $wait seconds.";
+                        $minutes = ceil($wait / 60);
+                        $error = "Account locked due to too many failed attempts. Please try again in $minutes minute(s).";
                     } else {
                         // Unlock account after lock duration has passed
-                        $sql = "UPDATE user SET failed_attempts = 0 WHERE userID = $userID";
-                        mysqli_query($conn, $sql);
+                        $update_sql = "UPDATE users SET failed_attempts = 0 WHERE id = ?";
+                        $update_stmt = mysqli_prepare($conn, $update_sql);
+                        mysqli_stmt_bind_param($update_stmt, "i", $userID);
+                        mysqli_stmt_execute($update_stmt);
+                        mysqli_stmt_close($update_stmt);
                         $failed_attempts = 0;
                     }
                 }
@@ -54,12 +60,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     if (password_verify($password, $hashed_password)) {
                         // Password is correct, start a new session
                         $_SESSION['userID'] = $userID;
-                        $_SESSION['name'] = $name;
+                        $_SESSION['username'] = $full_name;
+                        $_SESSION['mail'] = $mail;
                         $_SESSION['loggedin'] = true;
                         
                         // Reset failed attempts
-                        $sql = "UPDATE user SET failed_attempts = 0, last_attempt_time = NULL WHERE userID = $userID";
-                        mysqli_query($conn, $sql);
+                        $update_sql = "UPDATE users SET failed_attempts = 0, last_attempt_time = NULL WHERE id = ?";
+                        $update_stmt = mysqli_prepare($conn, $update_sql);
+                        mysqli_stmt_bind_param($update_stmt, "i", $userID);
+                        mysqli_stmt_execute($update_stmt);
+                        mysqli_stmt_close($update_stmt);
                         
                         // Redirect to home page
                         header('Location: index.php');
@@ -68,14 +78,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         // Increment failed attempts
                         $failed_attempts++;
                         $now_str = date("Y-m-d H:i:s");
-                        $sql = "UPDATE user SET failed_attempts = $failed_attempts, last_attempt_time = '$now_str' WHERE userID = $userID";
-                        mysqli_query($conn, $sql);
+                        
+                        $update_sql = "UPDATE users SET failed_attempts = ?, last_attempt_time = ? WHERE id = ?";
+                        $update_stmt = mysqli_prepare($conn, $update_sql);
+                        mysqli_stmt_bind_param($update_stmt, "isi", $failed_attempts, $now_str, $userID);
+                        mysqli_stmt_execute($update_stmt);
+                        mysqli_stmt_close($update_stmt);
 
                         if ($failed_attempts >= 3) {
-                            $error = "Account locked. Try again in 3 minutes.";
+                            $error = "Too many failed attempts. Your account has been locked for 3 minutes.";
                         } else {
                             $remaining = 3 - $failed_attempts;
-                            $error = "Invalid email or password. $remaining attempt(s) left.";
+                            $error = "Incorrect password. You have $remaining attempt(s) remaining.";
                         }
                     }
                 }
@@ -84,6 +98,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             mysqli_stmt_close($stmt);
         } else {
             $error = "Database error. Please try again later.";
+            error_log("MySQL prepare error: " . mysqli_error($conn));
         }
     }
 }
@@ -102,7 +117,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="container">
         <!-- Left Side - Food Photography -->
         <div class="left-side">
-
             <!-- Logo -->
             <div class="logo">
                 <div class="logo-text">FoodFusion</div>
@@ -126,12 +140,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <img src="BEpics/p4.png" alt="Colorful bowl">
                     </div>
                     </div>
-
             </div>
 
             <!-- Decorative Leaf Patterns -->
             <img src="BEpics/test.png" alt="Leaf Pattern" class="leaf-patternsLeft">
-
         </div>
 
         <!-- Right Side - Login Form -->
@@ -140,7 +152,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <img src="BEpics/basil.png" alt="Leaf Pattern" class="leaf-patterns">
 
             <!-- Login Form -->
-             
             <div class="form-container">
                 <div class="form-header">
                     <h1>Log In Here!</h1>
@@ -153,7 +164,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <?php endif; ?>
 
                 <form class="login-form" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
-
                     <!-- Email Input -->
                     <div class="input-group">
                         <div class="input-container">
@@ -161,7 +171,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
                                 <polyline points="22,6 12,13 2,6"/>
                             </svg>
-                            <input type="email" placeholder="E-mail" id="email" name="email" value="<?php echo $email; ?>" required>
+                            <input type="email" placeholder="E-mail" id="mail" name="mail" value="<?php echo htmlspecialchars($mail); ?>" required>
                         </div>
                     </div>
 
