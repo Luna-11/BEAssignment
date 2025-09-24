@@ -22,7 +22,6 @@
             --button-color: #333;
         }
 
-
         body {
             font-family: 'Segoe UI', sans-serif;
             line-height: 1.6;
@@ -45,7 +44,7 @@
         }
 
         .nav-container {
-            width: 100%; /* Changed from 90% to remove padding */
+            width: 100%;
             max-width: 1800px;
             margin: 0 auto;
             display: flex;
@@ -73,7 +72,6 @@
             justify-content: center;
         }
 
-        /* Updated Navigation Bar Styles */
         .nav-links li a {
             color: var(--white);
             text-decoration: none;
@@ -115,7 +113,6 @@
             font-size: 0.9rem;
         }
 
-        /* Dropdown menu styles */
         .nav-links .dropdown-menu {
             display: none;
             position: absolute;
@@ -149,7 +146,6 @@
             display: block;
         }
 
-        /* Hover effects */
         .nav-links li a:hover {
             opacity: 0.9;
         }
@@ -175,13 +171,13 @@
             padding: 0.5rem 0;
         }
 
-        /* Upload dropdown in nav-icons */
         .nav-icons .dropdown {
             position: relative;
         }
 
         .nav-icons .dropdown .nav-icon-text {
             padding-right: 1.3rem;
+            align-items: center;
         }
 
         .nav-icons .dropdown-menu {
@@ -217,14 +213,30 @@
             display: block;
         }
 
-        /* Hover effects to match main nav */
         .nav-icons a:hover {
             opacity: 0.9;
         }
 
-        .nav-icons a:hover i {
+        .nav-icons a:hover .icon-circle i {
             transform: translateY(-2px);
             transition: transform 0.2s ease;
+        }
+
+        /* Icon Circle for consistent icon sizing */
+        .icon-circle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            margin-bottom: 0.25rem;
+        }
+
+        .icon-circle i {
+            color: var(--white);
+            font-size: 1.2rem;
         }
 
         /* Hamburger Menu - Positioned to the right */
@@ -251,7 +263,6 @@
             transform-origin: center;
         }
 
-        /* Close icon when menu is active */
         .hamburger.active span:nth-child(1) {
             transform: rotate(45deg) translate(5px, 5px);
         }
@@ -264,7 +275,6 @@
             transform: rotate(-45deg) translate(7px, -6px);
         }
 
-        /* Overlay for mobile when menu is open */
         .overlay {
             display: none;
             position: fixed;
@@ -280,12 +290,15 @@
             display: block;
         }
 
-        /* Mobile-only items - Hidden by default */
         .mobile-only {
             display: none;
         }
 
-        /* Responsive Styles for Navbar */
+        .profile-dropdown .dropdown-menu {
+            right: 0;
+            left: auto;
+        }
+
         @media (max-width: 1024px) {
             .nav-links {
                 gap: 1rem;
@@ -302,27 +315,27 @@
             }
             
             .nav-icons {
-                display: none; /* Hide the right side icons on mobile */
+                display: none;
             }
             
             .nav-links {
                 position: fixed;
                 top: 0;
-                right: -100%; /* Changed from left to right */
+                right: -100%;
                 width: 70%;
                 height: 100vh;
                 background-color: var(--primary-color);
                 flex-direction: column;
                 justify-content: flex-start;
                 padding-top: 80px;
-                transition: right 0.3s ease; /* Changed from left to right */
+                transition: right 0.3s ease;
                 z-index: 1000;
-                box-shadow: -2px 0 10px rgba(0,0,0,0.1); /* Shadow on left side */
+                box-shadow: -2px 0 10px rgba(0,0,0,0.1);
                 gap: 0;
             }
             
             .nav-links.active {
-                right: 0; /* Changed from left to right */
+                right: 0;
             }
             
             .nav-links li {
@@ -365,7 +378,6 @@
                 transform: rotate(180deg);
             }
             
-            /* FIXED DROPDOWN POSITIONING FOR MOBILE */
             .nav-links .dropdown-menu {
                 display: none;
                 position: static;
@@ -390,7 +402,6 @@
                 background-color: rgba(0, 0, 0, 0.1);
             }
             
-            /* Mobile upload dropdown */
             .mobile-upload-dropdown .dropdown-menu {
                 display: none;
                 position: static;
@@ -412,7 +423,27 @@
                 border-bottom: none;
             }
             
-            /* Show mobile-only items on mobile */
+            .mobile-profile-dropdown .dropdown-menu {
+                display: none;
+                position: static;
+                width: 100%;
+                box-shadow: none;
+                background-color: rgba(0, 0, 0, 0.1);
+                border-radius: 0;
+                margin-top: 0;
+                padding: 0;
+            }
+            
+            .mobile-profile-dropdown .dropdown-menu.active {
+                display: block;
+            }
+            
+            .mobile-profile-dropdown .dropdown-menu li a {
+                padding-left: 75px;
+                color: var(--white);
+                border-bottom: none;
+            }
+            
             .mobile-only {
                 display: block;
             }
@@ -420,7 +451,7 @@
 
         @media (max-width: 600px) {
             .nav-container {
-                padding: 0 0.5rem; /* Reduced padding on mobile */
+                padding: 0 0.5rem;
             }
             
             .logo {
@@ -442,7 +473,6 @@
             width: 90%;
         }
         
-        /* Debug styling to show the issue was fixed */
         .debug-info {
             background: #f0f0f0;
             padding: 10px;
@@ -458,127 +488,144 @@
     </style>
 </head>
 <body>
-        <nav class="navbar">
-            <div class="nav-container">
-                <a href="index.php" class="logo">FoodFusion</a>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.php" class="logo">FoodFusion</a>
 
-                <!-- Centered Navigation Links - Hidden on mobile -->
-                <ul class="nav-links" id="navLinks">
-                    <li>
-                        <a href="re.php">
-                            <div class="nav-icon-text">
-                                <i class="fa-solid fa-utensils"></i>
-                                <span>Recipes</span>
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="community.php">
-                            <div class="nav-icon-text">
-                                <i class="fa-solid fa-people-group"></i>
-                                <span>Community</span>
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="event.php">
-                            <div class="nav-icon-text">
-                                <i class="fa-solid fa-calendar-days"></i>
-                                <span>Events</span>
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="aboutUs.php">
-                            <div class="nav-icon-text">
-                                <i class="fa-solid fa-circle-info"></i>
-                                <span>About Us</span>
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="contactUs.html">
-                            <div class="nav-icon-text">
-                                <i class="fa-solid fa-envelope"></i>
-                                <span>Contact us</span>
-                            </div>
-                        </a>
-                    </li>
-                    <li class="dropdown" id="resourcesDropdown">
-                        <a href="#">
-                            <div class="nav-icon-text">
-                                <i class="fa-solid fa-book"></i>
-                                <span>Resources</span>
-                                <i class="fa-solid fa-caret-down dropdown-indicator"></i>
-                            </div>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a href="eduRes.html">Educational Resources</a></li>
-                            <li><a href="culRes.html">Culinary Resources</a></li>
-                        </ul>
-                    </li>
-                    
-                    <!-- Mobile-only items (Log Out and Upload) -->
-                    <li class="mobile-only">
-                        <a href="logIn.php">
-                            <div class="nav-icon-text">
-                                <i class="fa-solid fa-right-to-bracket"></i>
-                                <span>Log Out</span>
-                            </div>
-                        </a>
-                    </li>
-                    <li class="mobile-only mobile-upload-dropdown" id="mobileUploadDropdown">
-                        <a href="#">
-                            <div class="nav-icon-text">
-                                <i class="fa-solid fa-plus"></i>
-                                <span>Upload</span>
-                                <i class="fa-solid fa-caret-down dropdown-indicator"></i>
-                            </div>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a href="recipe_upload.html">Recipe Upload</a></li>
-                            <li><a href="event_upload.html">Event Upload</a></li>
-                            <li><a href="community_upload.html">Community Post Upload</a></li>
-                            <li><a href="resource_upload.html">Resource Upload</a></li>
-                        </ul>
-                    </li>
-                </ul>
-
-                <!-- Right Side Icons - Visible on desktop only -->
-                <div class="nav-icons">
-                    <a href="logIn.php" class="nav-icon-text">
-                        <i class="fa-solid fa-right-to-bracket"></i>
-                        <span>Log Out</span>
+            <ul class="nav-links" id="navLinks">
+                <li>
+                    <a href="re.php">
+                        <div class="nav-icon-text">
+                            <i class="fa-solid fa-utensils"></i>
+                            <span>Recipes</span>
+                        </div>
                     </a>
-                    <div class="dropdown" id="desktopUploadDropdown">
-                        <a href="#">
-                            <div class="nav-icon-text">
+                </li>
+                <li>
+                    <a href="community.php">
+                        <div class="nav-icon-text">
+                            <i class="fa-solid fa-people-group"></i>
+                            <span>Community</span>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a href="event.php">
+                        <div class="nav-icon-text">
+                            <i class="fa-solid fa-calendar-days"></i>
+                            <span>Events</span>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a href="aboutUs.php">
+                        <div class="nav-icon-text">
+                            <i class="fa-solid fa-circle-info"></i>
+                            <span>About Us</span>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a href="contactUs.html">
+                        <div class="nav-icon-text">
+                            <i class="fa-solid fa-envelope"></i>
+                            <span>Contact us</span>
+                        </div>
+                    </a>
+                </li>
+                <li class="dropdown" id="resourcesDropdown">
+                    <a href="#">
+                        <div class="nav-icon-text">
+                            <i class="fa-solid fa-book"></i>
+                            <span>Resources</span>
+                            <i class="fa-solid fa-caret-down dropdown-indicator"></i>
+                        </div>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="eduRes.html">Educational Resources</a></li>
+                        <li><a href="culRes.html">Culinary Resources</a></li>
+                    </ul>
+                </li>
+                <li class="mobile-only mobile-upload-dropdown" id="mobileUploadDropdown">
+                    <a href="#">
+                        <div class="nav-icon-text">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Upload</span>
+                            <i class="fa-solid fa-caret-down dropdown-indicator"></i>
+                        </div>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="recipe_upload.html">Recipe Upload</a></li>
+                        <li><a href="event_upload.html">Event Upload</a></li>
+                        <li><a href="community_upload.html">Community Post Upload</a></li>
+                        <li><a href="resource_upload.html">Resource Upload</a></li>
+                    </ul>
+                </li>
+                <li class="mobile-only mobile-profile-dropdown" id="mobileProfileDropdown">
+                    <a href="#">
+                        <div class="nav-icon-text">
+                            <i class="fa-solid fa-user"></i>
+                            <span>Profile</span>
+                            <i class="fa-solid fa-caret-down dropdown-indicator"></i>
+                        </div>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="profile.php">My Profile</a></li>
+                        <li><a href="my_recipes.php">My Recipes</a></li>
+                        <li><a href="saved_recipes.php">Saved Recipes</a></li>
+                        <li><a href="settings.php">Settings</a></li>
+                        <li><a href="logIn.php">Log Out</a></li>
+                    </ul>
+                </li>
+            </ul>
+
+            <div class="nav-icons">
+                <div class="dropdown" id="desktopUploadDropdown">
+                    <a href="#">
+                        <div class="nav-icon-text">
+                            <div class="icon-circle">
                                 <i class="fa-solid fa-plus"></i>
-                                <span>Upload</span>
-                                <i class="fa-solid fa-caret-down dropdown-indicator"></i>
                             </div>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a href="recipe_upload.html">Recipe Upload</a></li>
-                            <li><a href="addEvent.php">Event Upload</a></li>
-                            <li><a href="community_upload.html">Community Post Upload</a></li>
-                            <li><a href="resource_upload.html">Resource Upload</a></li>
-                        </ul>
-                    </div>
+                            <span>Upload</span>
+                            <i class="fa-solid fa-caret-down dropdown-indicator"></i>
+                        </div>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="recipe_upload.html">Recipe Upload</a></li>
+                        <li><a href="addEvent.php">Event Upload</a></li>
+                        <li><a href="community_upload.html">Community Post Upload</a></li>
+                        <li><a href="resource_upload.html">Resource Upload</a></li>
+                    </ul>
                 </div>
-                
-                <!-- Hamburger Menu - Positioned to the right -->
-                <button class="hamburger" id="hamburger">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
+                <div class="dropdown profile-dropdown" id="desktopProfileDropdown">
+                    <a href="#">
+                        <div class="nav-icon-text">
+                            <div class="icon-circle">
+                                <i class="fa-solid fa-user"></i>
+                            </div>
+                            <span>Profile</span>
+                            <i class="fa-solid fa-caret-down dropdown-indicator"></i>
+                        </div>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="profile.php">My Profile</a></li>
+                        <li><a href="my_recipes.php">My Recipes</a></li>
+                        <li><a href="saved_recipes.php">Saved Recipes</a></li>
+                        <li><a href="settings.php">Settings</a></li>
+                        <li><a href="logIn.php">Log Out</a></li>
+                    </ul>
+                </div>
             </div>
-        </nav>
+            
+            <button class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
 
-        <!-- Overlay for mobile menu -->
-        <div class="overlay" id="overlay"></div>
-
+    <div class="overlay" id="overlay"></div>
 
     <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -586,10 +633,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const navLinks = document.getElementById('navLinks');
     const overlay = document.getElementById('overlay');
     
-    // Get ALL dropdowns including the mobile upload dropdown
-    const dropdowns = document.querySelectorAll('.dropdown, .mobile-upload-dropdown');
+    const dropdowns = document.querySelectorAll('.dropdown, .mobile-upload-dropdown, .mobile-profile-dropdown');
 
-    // Toggle mobile menu
     hamburger.addEventListener('click', function() {
         hamburger.classList.toggle('active');
         navLinks.classList.toggle('active');
@@ -597,24 +642,20 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
     });
 
-    // Close menu when clicking overlay
     overlay.addEventListener('click', function() {
         closeMobileMenu();
     });
 
-    // Handle ALL dropdowns on mobile (both Resources and Upload)
     dropdowns.forEach(dd => {
         dd.addEventListener('click', function(e) {
             if (window.innerWidth <= 900) {
                 e.preventDefault();
                 e.stopPropagation();
                 
-                // Toggle this dropdown
                 this.classList.toggle('active');
                 const menu = this.querySelector('.dropdown-menu');
                 if (menu) menu.classList.toggle('active');
                 
-                // Close other dropdowns
                 dropdowns.forEach(otherDd => {
                     if (otherDd !== this) {
                         otherDd.classList.remove('active');
@@ -626,7 +667,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Close dropdowns when clicking outside (desktop only)
     document.addEventListener('click', function(e) {
         if (window.innerWidth > 900) {
             dropdowns.forEach(dd => {
@@ -638,8 +678,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Close menu when clicking on regular nav links (non-dropdown)
-    const regularNavLinks = document.querySelectorAll('.nav-links > li:not(.dropdown):not(.mobile-upload-dropdown) > a');
+    const regularNavLinks = document.querySelectorAll('.nav-links > li:not(.dropdown):not(.mobile-upload-dropdown):not(.mobile-profile-dropdown) > a');
     regularNavLinks.forEach(item => {
         item.addEventListener('click', function() {
             if (window.innerWidth <= 900) {
@@ -648,7 +687,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Close menu when clicking on dropdown menu items
     const dropdownMenuItems = document.querySelectorAll('.dropdown-menu a');
     dropdownMenuItems.forEach(item => {
         item.addEventListener('click', function() {
@@ -658,7 +696,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Desktop hover effect
     dropdowns.forEach(dd => {
         if (window.innerWidth > 900) {
             dd.addEventListener('mouseenter', function() {
@@ -672,14 +709,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Function to close mobile menu
     function closeMobileMenu() {
         hamburger.classList.remove('active');
         navLinks.classList.remove('active');
         overlay.classList.remove('active');
         document.body.style.overflow = '';
         
-        // Close all dropdowns
         dropdowns.forEach(dd => {
             dd.classList.remove('active');
             const menu = dd.querySelector('.dropdown-menu');
@@ -687,7 +722,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
-
     </script>
 </body>
 </html>
