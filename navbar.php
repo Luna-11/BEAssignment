@@ -542,8 +542,8 @@
                         </div>
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a href="eduRes.html">Educational Resources</a></li>
-                        <li><a href="culRes.html">Culinary Resources</a></li>
+                        <li><a href="eduRes.php">Educational Resources</a></li>
+                        <li><a href="culRes.php">Culinary Resources</a></li>
                     </ul>
                 </li>
                 <li class="mobile-only mobile-upload-dropdown" id="mobileUploadDropdown">
