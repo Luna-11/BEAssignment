@@ -83,13 +83,11 @@
                     <p class="text-lg text-gray-600 mb-6">
                         Whether you're looking for dinner inspiration, want to improve your skills, or simply enjoy connecting with other food lovers, FoodFusion is your culinary home.
                     </p>
-                    <a href="#" class="inline-block bg-food-primary text-white px-6 py-3 rounded-full font-semibold shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:bg-food-medium-pink">
-                        LEARN MORE ABOUT US
-                    </a>
                 </div>
                 
-                <div class="flex-1 bg-food-light-pink h-80 rounded-lg shadow-lg flex items-center justify-center text-center p-4 text-food-text font-semibold text-xl">
-                    FoodFusion Community Since 2015
+                <div class="flex-1 h-80 rounded-lg shadow-lg overflow-hidden">
+                    <img src="./BEpics/bannerWatermelon.jpg" alt="FoodFusion Community Cooking Together" 
+                        class="w-full h-full object-cover">
                 </div>
             </div>
         </section>

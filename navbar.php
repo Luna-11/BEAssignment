@@ -526,7 +526,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="contactUs.html">
+                    <a href="contactUs.php">
                         <div class="nav-icon-text">
                             <i class="fa-solid fa-envelope"></i>
                             <span>Contact us</span>
@@ -562,7 +562,7 @@
                     </ul>
                 </li>
                 <li class="mobile-only mobile-profile-dropdown" id="mobileProfileDropdown">
-                    <a href="#">
+                    <a href="profile.php">
                         <div class="nav-icon-text">
                             <i class="fa-solid fa-user"></i>
                             <span>Profile</span>

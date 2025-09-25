@@ -1,19 +1,15 @@
 <?php
-define('DB_SERVER','Localhost');
-define('DB_USER', 'root');
-define('DB_PASSWORD', '');
+// configMysql.php
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "BEAssignment";
 
-define('DB_NAME', 'BEAssignment');
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
 
-$conn=mysqli_connect(DB_SERVER,DB_USER,DB_PASSWORD,DB_NAME);
-
-if($conn == false)
-{
-    die('ERROR: Could not connect!'.mysqli_connect_error());
-}
-else
-{
-//    echo "Connection Successfully <br> ";
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 ?>
-

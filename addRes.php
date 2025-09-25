@@ -1,5 +1,168 @@
 <?php
+session_start();
+include('./configMysql.php');
+
+// Initialize variables
+$resourceName = $description = $resourceTypeID = "";
+$errors = [];
+$success = "";
+
+// Process form submission
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Check database connection
+    if ($conn == false) {
+        $errors[] = "Database connection failed: " . mysqli_connect_error();
+    } else {
+        // Check if resources table exists
+        $tableCheck = mysqli_query($conn, "SHOW TABLES LIKE 'Resource'");
+        if (mysqli_num_rows($tableCheck) == 0) {
+            $errors[] = "The 'Resource' table does not exist in the database. Please create it first.";
+        }
+    }
+
+    // File upload configuration
+    $uploadDir = "uploads/resources/";
+    $imageUploadPath = $uploadDir . "images/";
+    $pdfUploadPath = $uploadDir . "pdfs/";
+    $videoUploadPath = $uploadDir . "videos/";
+
+    // Create directories if they don't exist
+    if (!file_exists($imageUploadPath)) mkdir($imageUploadPath, 0777, true);
+    if (!file_exists($pdfUploadPath)) mkdir($pdfUploadPath, 0777, true);
+    if (!file_exists($videoUploadPath)) mkdir($videoUploadPath, 0777, true);
+
+    // Validate input
+    if (empty($_POST["resourceTitle"])) {
+        $errors[] = "Resource title is required";
+    } else {
+        $resourceName = trim($_POST["resourceTitle"]);
+        if (strlen($resourceName) > 100) $errors[] = "Resource title must be less than 100 characters";
+    }
+
+    if (empty($_POST["description"])) {
+        $errors[] = "Description is required";
+    } else {
+        $description = trim($_POST["description"]);
+        if (strlen($description) > 200) $errors[] = "Description must be less than 200 characters";
+    }
+
+    if (empty($_POST["resourceType"])) {
+        $errors[] = "Resource type is required";
+    } else {
+        $resourceTypeID = $_POST["resourceType"];
+        if (!in_array($resourceTypeID, ['1', '2'])) $errors[] = "Invalid resource type";
+    }
+
+    if (empty($_FILES["resourcesImage"]["name"])) {
+        $errors[] = "Resource image is required";
+    }
+
+    // If no errors, proceed
+    if (empty($errors)) {
+        mysqli_begin_transaction($conn);
+
+        try {
+            $userID = isset($_SESSION['userID']) ? $_SESSION['userID'] : null;
+
+            // --- Handle image upload ---
+            $imageFileName = null;
+            if (!empty($_FILES["resourcesImage"]["name"])) {
+                $imageFile = $_FILES["resourcesImage"];
+                $ext = strtolower(pathinfo($imageFile["name"], PATHINFO_EXTENSION));
+                $imageFileName = uniqid() . "_" . time() . "." . $ext;
+                $dest = $imageUploadPath . $imageFileName;
+                if (!move_uploaded_file($imageFile["tmp_name"], $dest)) {
+                    $errors[] = "Failed to upload image file.";
+                }
+            }
+
+            // --- Handle video upload (optional) ---
+            $videoFileName = null;
+            if (!empty($_FILES["Video"]["name"])) {
+                $videoFile = $_FILES["Video"];
+                $ext = strtolower(pathinfo($videoFile["name"], PATHINFO_EXTENSION));
+                $videoFileName = uniqid() . "_" . time() . "." . $ext;
+                $dest = $videoUploadPath . $videoFileName;
+                if (!move_uploaded_file($videoFile["tmp_name"], $dest)) {
+                    $errors[] = "Failed to upload video file.";
+                }
+            }
+
+            // Insert into Resource table
+            $sql = "INSERT INTO Resource (userID, resourceName, description, resourcesImage, Video, resourceTypeID) 
+                    VALUES (?, ?, ?, ?, ?, ?)";
+            $stmt = mysqli_prepare($conn, $sql);
+            if ($stmt) {
+                mysqli_stmt_bind_param($stmt, "issssi", $userID, $resourceName, $description, $imageFileName, $videoFileName, $resourceTypeID);
+                if (mysqli_stmt_execute($stmt)) {
+                    $resourceID = mysqli_insert_id($conn);
+                    mysqli_stmt_close($stmt);
+
+                    // --- Handle PDF upload (into files table) ---
+                    if (!empty($_FILES["PDFfile"]["name"])) {
+                        $pdfFile = $_FILES["PDFfile"];
+                        $pdfResult = uploadAndSaveFile($conn, $resourceID, $pdfFile, $pdfUploadPath, 'pdf');
+                        if (!$pdfResult) {
+                            $errors[] = "Failed to upload PDF file.";
+                        }
+                    }
+
+                    if (empty($errors)) {
+                        mysqli_commit($conn);
+                        $success = "Resource added successfully!";
+                        $resourceName = $description = $resourceTypeID = "";
+                    } else {
+                        mysqli_rollback($conn);
+                    }
+
+                } else {
+                    $errors[] = "Error saving resource: " . mysqli_error($conn);
+                    mysqli_rollback($conn);
+                }
+            } else {
+                $errors[] = "Database error: " . mysqli_error($conn);
+                mysqli_rollback($conn);
+            }
+
+        } catch (Exception $e) {
+            mysqli_rollback($conn);
+            $errors[] = "Transaction failed: " . $e->getMessage();
+        }
+    }
+}
+
+// File upload helper for PDFs
+function uploadAndSaveFile($conn, $resourceID, $file, $uploadPath, $fileType) {
+    $fileName = basename($file["name"]);
+    $tmp = $file["tmp_name"];
+    $size = $file["size"];
+    $error = $file["error"];
+
+    if ($error !== UPLOAD_ERR_OK) return false;
+    if ($fileType !== 'pdf') return false;
+
+    $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+    if ($ext !== 'pdf') return false;
+    if ($size > 10485760) return false; // 10MB max
+
+    $uniqueName = uniqid() . '_' . time() . '.pdf';
+    $dest = $uploadPath . $uniqueName;
+
+    if (move_uploaded_file($tmp, $dest)) {
+        $sql = "INSERT INTO files (resourcesID, filename, filetype, filesize, filepath) 
+                VALUES (?, ?, ?, ?, ?)";
+        $stmt = mysqli_prepare($conn, $sql);
+        if ($stmt) {
+            mysqli_stmt_bind_param($stmt, "issis", $resourceID, $uniqueName, $fileType, $size, $dest);
+            $result = mysqli_stmt_execute($stmt);
+            mysqli_stmt_close($stmt);
+            return $result;
+        }
+    }
+    return false;
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -46,6 +209,30 @@
       z-index: -1;
       pointer-events: none;
     }
+    .error-message {
+      background-color: #fee;
+      border: 1px solid #fcc;
+      color: #c00;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+    }
+    .success-message {
+      background-color: #efe;
+      border: 1px solid #cfc;
+      color: #0c0;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+    }
+    .info-message {
+      background-color: #eef;
+      border: 1px solid #ccf;
+      color: #00c;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+    }
   </style>
 </head>
 <body class="bg-light-yellow text-text-color font-segoe min-h-screen relative">
@@ -59,15 +246,27 @@
     </header>
 
     <div class="max-w-2xl mx-auto w-[90%] bg-lightest rounded-2xl shadow-2xl p-6 sm:p-8">
-      <form action="resourcesAction.php" method="post" enctype="multipart/form-data">
+      <!-- Display error messages -->
+      <?php if (!empty($errors)): ?>
+        <?php foreach ($errors as $error): ?>
+          <div class="error-message mb-4"><?php echo htmlspecialchars($error); ?></div>
+        <?php endforeach; ?>
+      <?php endif; ?>
+      
+      <!-- Display success message -->
+      <?php if (!empty($success)): ?>
+        <div class="success-message mb-4"><?php echo htmlspecialchars($success); ?></div>
+      <?php endif; ?>
+      
+      <form action="" method="post" enctype="multipart/form-data">
         <div class="mb-6">
           <label for="resourceTitle" class="block font-semibold text-text-color mb-2">Title</label>
-          <input type="text" class="w-full p-3 border border-border-color rounded-lg bg-white text-text-color focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50" id="resourceTitle" name="resourceTitle" placeholder="e.g. Mastering Knife Skills" required>
+          <input type="text" class="w-full p-3 border border-border-color rounded-lg bg-white text-text-color focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50" id="resourceTitle" name="resourceTitle" placeholder="e.g. Mastering Knife Skills" value="<?php echo htmlspecialchars($resourceName); ?>" required>
         </div>
 
         <div class="mb-6">
           <label for="description" class="block font-semibold text-text-color mb-2">Description</label>
-          <textarea class="w-full p-3 border border-border-color rounded-lg bg-white text-text-color focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50" id="description" name="description" rows="4" placeholder="Brief summary of the resource..." required></textarea>
+          <textarea class="w-full p-3 border border-border-color rounded-lg bg-white text-text-color focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50" id="description" name="description" rows="4" placeholder="Brief summary of the resource..." required><?php echo htmlspecialchars($description); ?></textarea>
           <div class="text-medium-gray opacity-90 text-sm mt-1">Max 200 characters recommended.</div>
         </div>
 
@@ -75,8 +274,8 @@
           <label for="resourceType" class="block font-semibold text-text-color mb-2">Resource Type</label>
           <select class="w-full p-3 border border-border-color rounded-lg bg-white text-text-color focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50" id="resourceType" name="resourceType" required>
             <option value="">Select type...</option>
-            <option value="1">Educational</option>
-            <option value="2">Culinary</option>
+            <option value="1" <?php echo ($resourceTypeID == '1') ? 'selected' : ''; ?>>Educational</option>
+            <option value="2" <?php echo ($resourceTypeID == '2') ? 'selected' : ''; ?>>Culinary</option>
           </select>
         </div>
 
