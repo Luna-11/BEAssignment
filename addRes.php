@@ -237,7 +237,7 @@ function uploadAndSaveFile($conn, $resourceID, $file, $uploadPath, $fileType) {
 </head>
 <body class="bg-light-yellow text-text-color font-segoe min-h-screen relative">
   <canvas id="leavesCanvas"></canvas>
-  <?php include('nav.php'); ?>
+  <?php include('navbar.php'); ?>
 
   <div class="pb-12 relative z-10">
     <header class="bg-primary text-white text-center py-12 sm:py-16 rounded-b-2xl mb-8">
