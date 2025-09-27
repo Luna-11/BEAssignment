@@ -43,25 +43,9 @@
         </div>
     </section>
 
-    <!-- Learning Categories -->
-    <section class="learning-categories bg-white shadow-md py-8">
-        <div class="categories-container max-w-6xl mx-auto px-4">
-            <div class="category-nav flex flex-wrap justify-center gap-4">
-                <button class="category-btn active bg-primary text-white px-6 py-2 rounded-full border-2 border-primary font-semibold transition-all duration-300 hover:bg-medium-pink" onclick="showEducationalCategory('all')">All Resources</button>
-                <button class="category-btn bg-transparent text-primary px-6 py-2 rounded-full border-2 border-primary font-semibold transition-all duration-300 hover:bg-primary hover:text-white" onclick="showEducationalCategory('nutrition')">Nutrition</button>
-                <button class="category-btn bg-transparent text-primary px-6 py-2 rounded-full border-2 border-primary font-semibold transition-all duration-300 hover:bg-primary hover:text-white" onclick="showEducationalCategory('food-science')">Food Science</button>
-                <button class="category-btn bg-transparent text-primary px-6 py-2 rounded-full border-2 border-primary font-semibold transition-all duration-300 hover:bg-primary hover:text-white" onclick="showEducationalCategory('culinary-history')">Culinary History</button>
-                <button class="category-btn bg-transparent text-primary px-6 py-2 rounded-full border-2 border-primary font-semibold transition-all duration-300 hover:bg-primary hover:text-white" onclick="showEducationalCategory('sustainability')">Sustainability</button>
-                <button class="category-btn bg-transparent text-primary px-6 py-2 rounded-full border-2 border-primary font-semibold transition-all duration-300 hover:bg-primary hover:text-white" onclick="showEducationalCategory('food-safety')">Food Safety</button>
-            </div>
-        </div>
-    </section>
-
     <!-- Nutrition Education Section -->
     <section class="educational-section py-16" id="nutrition-section">
         <div class="section-container max-w-6xl mx-auto px-4">
-            <h2 class="text-3xl font-bold text-text mb-4 flex items-center gap-4 justify-center"><i class="fas fa-apple-alt text-primary"></i> Nutrition & Health</h2>
-            <p class="text-lg text-text/80 mb-10 text-center">Learn about balanced nutrition and healthy cooking practices</p>
             
             <?php
             include('./configMysql.php');

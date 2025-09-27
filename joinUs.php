@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Register Popup</title>
   <style>
-    /* ===== GLOBAL STYLES ===== */
     :root {
       --primary-color: #C89091;
       --text-color: #7b4e48;
@@ -18,12 +17,10 @@
       --light-gray: #bbb;
       --medium-gray: #555;
       --shadow-color: rgba(0,0,0,0.1);
-      --border-color: #ccc;
-      --button-color: #333;
     }
-    /* ===== POPUP BACKGROUND ===== */
+    
     .popup {
-      display: flex; /* visible on load */
+      display: flex;
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
@@ -33,7 +30,6 @@
       z-index: 9999;
     }
 
-    /* ===== POPUP BOX ===== */
     .popup-content {
       background: var(--lightest-color);
       padding: 30px;
@@ -44,7 +40,6 @@
       box-shadow: 0 10px 30px var(--shadow-color);
     }
 
-    /* Close button */
     .close {
       position: absolute;
       top: 15px;
@@ -60,7 +55,6 @@
       color: var(--black);
     }
 
-    /* Input fields */
     .input-group {
       margin-bottom: 20px;
       text-align: left;
@@ -68,6 +62,7 @@
 
     .input-container {
       position: relative;
+      margin-bottom: 15px;
     }
 
     .input-container input {
@@ -78,13 +73,30 @@
       font-size: 16px;
       outline: none;
       transition: border 0.3s;
+      box-sizing: border-box;
     }
 
     .input-container input:focus {
       border-color: var(--primary-color);
     }
 
-    /* Submit button */
+    .error {
+      color: #d9534f;
+      font-size: 14px;
+      margin-top: 5px;
+      text-align: left;
+      padding-left: 15px;
+    }
+
+    .success {
+      color: #5cb85c;
+      font-size: 16px;
+      margin: 15px 0;
+      padding: 10px;
+      background-color: #dff0d8;
+      border-radius: 5px;
+    }
+
     .submit-btn {
       width: 100%;
       padding: 12px;
@@ -101,7 +113,6 @@
       background: var(--primary-color);
     }
 
-    /* Sign in link */
     .signup-link {
       margin-top: 15px;
       font-size: 14px;
@@ -117,54 +128,137 @@
       text-decoration: underline;
     }
 
+    .spinner {
+      display: none;
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-left-color: var(--primary-color);
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
 
-  <!-- Popup -->
   <div class="popup" id="registerPopup">
     <div class="popup-content">
       <span class="close" onclick="closePopup()">&times;</span>
       <div class="form-header">
-        <h1>Create Account</h1>
+        <h1>Sign Up Now</h1>
       </div>
-      <form>
+      
+      <div id="message"></div>
+      
+      <form id="registrationForm">
         <div class="input-group">
           <div class="input-container">
-            <input type="text" placeholder="Username" required>
+            <input type="text" id="first_name" name="first_name" placeholder="First Name" required>
+          </div>
+          <div class="input-container">
+            <input type="text" id="last_name" name="last_name" placeholder="Last Name" required>
           </div>
         </div>
         <div class="input-group">
           <div class="input-container">
-            <input type="email" placeholder="Email" required>
+            <input type="email" id="email" name="email" placeholder="Email" required>
           </div>
         </div>
         <div class="input-group">
           <div class="input-container">
-            <input type="password" placeholder="Password" required>
+            <input type="password" id="password" name="password" placeholder="Password" required>
           </div>
         </div>
-        <button type="submit" class="submit-btn">Sign Up</button>
+        <button type="submit" class="submit-btn" id="submitBtn">
+          <span id="btnText">Sign Up</span>
+          <div class="spinner" id="spinner"></div>
+        </button>
       </form>
+      
       <div class="signup-link">
-        Already have an account? <a href="#">Login</a>
+        Already have an account? <a href="#" onclick="showLogin()">Sign in</a>
       </div>
     </div>
   </div>
 
   <script>
     function closePopup() {
-      // hide overlay + box
       document.getElementById('registerPopup').style.display = 'none';
     }
 
-    // Close if user clicks outside the box
     window.onclick = function(event) {
       const popup = document.getElementById('registerPopup');
       if (event.target === popup) {
         closePopup();
       }
     }
+
+    function showLogin() {
+      alert('Login functionality would go here');
+    }
+
+    document.getElementById('registrationForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(this);
+      
+      // Show loading state
+      document.getElementById('submitBtn').disabled = true;
+      document.getElementById('btnText').style.display = 'none';
+      document.getElementById('spinner').style.display = 'block';
+      
+      // Send data to PHP file using Fetch API
+      fetch('registerPopUp.php', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+          throw new Error('HTTP error! status: ' + response.status);
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('Response data:', data);
+        
+        // Hide loading state
+        document.getElementById('submitBtn').disabled = false;
+        document.getElementById('btnText').style.display = 'block';
+        document.getElementById('spinner').style.display = 'none';
+        
+        // Display message
+        const messageDiv = document.getElementById('message');
+        messageDiv.innerHTML = '';
+        
+        if (data.success) {
+          messageDiv.className = 'success';
+          messageDiv.innerHTML = data.message;
+          document.getElementById('registrationForm').reset();
+          setTimeout(() => {
+            closePopup();
+          }, 2000);
+        } else {
+          messageDiv.className = 'error';
+          messageDiv.innerHTML = data.message || 'An error occurred. Please try again.';
+        }
+      })
+      .catch(error => {
+        console.error('Fetch error:', error);
+        document.getElementById('submitBtn').disabled = false;
+        document.getElementById('btnText').style.display = 'block';
+        document.getElementById('spinner').style.display = 'none';
+        
+        const messageDiv = document.getElementById('message');
+        messageDiv.className = 'error';
+        messageDiv.innerHTML = 'Network error: ' + error.message;
+      });
+    });
   </script>
 
 </body>

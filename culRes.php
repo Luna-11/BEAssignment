@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Educational Resources - FoodFusion</title>
+    <title>Culinary Resources - FoodFusion</title>
     
     <!-- Tailwind CSS with your custom colors -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -38,7 +38,7 @@
     <!-- Educational Resources Header -->
     <section class="resources-header bg-gradient-to-r from-primary to-medium-pink text-white py-20">
         <div class="resources-hero text-center max-w-4xl mx-auto px-4">
-            <h1 class="text-4xl md:text-5xl font-bold mb-4">Educational Resources</h1>
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">Culinary Resources</h1>
             <p class="text-xl opacity-90">Expand your culinary knowledge with our comprehensive educational materials, infographics, and learning guides</p>
         </div>
     </section>
