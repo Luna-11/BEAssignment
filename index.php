@@ -374,7 +374,7 @@
 
 
     <!-- Cookie Consent -->
-    <?php include 'cookie-consent.php'; ?>
+    <?php include 'cookies.php'; ?>
 
     <?php include 'footer.php'; ?>
 

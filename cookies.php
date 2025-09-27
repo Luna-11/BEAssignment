@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cute Cookie Banner</title>
+    <title>Cute Cookie Banner - Fixed</title>
     <style>
         :root {
             --food-primary: #C89091;
@@ -18,9 +18,14 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--food-light-yellow);
             color: var(--food-text);
-            margin: 0;
-            padding: 20px;
             min-height: 150vh; /* To demonstrate scrolling */
+            line-height: 1.6;
+        }
+
+        .content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
         }
 
         .cookie-banner {
@@ -56,13 +61,11 @@
         .cookie-banner::before {
             content: "🍪";
             position: absolute;
-            top: -15px;
-            left: 20px;
-            font-size: 1.8rem;
-            background: var(--food-lightest);
+            top: -35px;
+            left: 15px;
+            font-size: 2.5rem;
             padding: 5px;
-            border-radius: 50%;
-            border: 2px solid var(--food-light-pink);
+            z-index: 1001;
         }
 
         .cookie-banner p {
@@ -140,18 +143,22 @@
                 transform: translateX(-50%);
             }
         }
+
+        /* Ensure content has enough bottom padding to avoid overlap */
+        .content {
+            padding-bottom: 120px;
+        }
     </style>
 </head>
 <body>
-    <h1>Website Content</h1>
-    <p>Scroll down to see the cute cookie banner appear at the bottom.</p>
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-    
-    <div id="cookieBanner" class="cookie-banner">
+
+
+    <div id="cookieBanner" class="cookie-banner" style="display: none;">
         <p>
-            We use cookies to improve your experience, analyze site usage, and show personalized content and offers.
-            By clicking "Accept" you agree to our use of cookies. You can manage preferences or read our full
-            <a href="cookies.php">Cookie Policy</a>.
+            We use cookies to improve your experience, analyze site usage,  
+            and show personalized content and offers. By clicking 'Accept'  
+            you agree to our use of cookies. You can manage preferences or  
+            read our full <a href="cookies.php">Cookie Policy</a>.
         </p>
         <button id="acceptCookies">Accept</button>
     </div>
