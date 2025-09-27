@@ -166,7 +166,7 @@
             <div class="slideshow-container">
                 <!-- Slide 1 -->
                 <div class="mySlides fade">
-                    <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Delicious Pasta Dish">
+                    <img src="BEpics/a1.jpg" alt="Delicious Pasta Dish">
                     <div class="slide-text">
                         <h3 class="text-xl font-bold">Global Cuisine Collection</h3>
                         <p>Explore recipes from around the world in our extensive collection</p>
@@ -175,7 +175,7 @@
                 
                 <!-- Slide 2 -->
                 <div class="mySlides fade">
-                    <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Fresh Pizza">
+                    <img src="BEpics/a2.jpg" alt="Fresh Pizza">
                     <div class="slide-text">
                         <h3 class="text-xl font-bold">Community Recipes</h3>
                         <p>Discover creations shared by our vibrant community of home cooks</p>
@@ -184,7 +184,7 @@
                 
                 <!-- Slide 3 -->
                 <div class="mySlides fade">
-                    <img src="https://images.unsplash.com/photo-1565958011703-44f9829ba187?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Healthy Salad">
+                    <img src="BEpics/a3.jpg" alt="Healthy Salad">
                     <div class="slide-text">
                         <h3 class="text-xl font-bold">Healthy Options</h3>
                         <p>Find nutritious meals for every dietary preference and lifestyle</p>
@@ -193,7 +193,7 @@
                 
                 <!-- Slide 4 -->
                 <div class="mySlides fade">
-                    <img src="https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Dessert">
+                    <img src="BEpics/a4.jpg" alt="Dessert">
                     <div class="slide-text">
                         <h3 class="text-xl font-bold">Sweet Treats</h3>
                         <p>Indulge in delightful desserts and baked goods from our community</p>
