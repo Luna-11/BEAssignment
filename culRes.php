@@ -43,56 +43,60 @@
         </div>
     </section>
 
-    <!-- Learning Categories -->
-    <section class="learning-categories bg-white shadow-md py-8">
-        <div class="categories-container max-w-6xl mx-auto px-4">
-            <div class="category-nav flex flex-wrap justify-center gap-4">
-                <button class="category-btn active bg-primary text-white px-6 py-2 rounded-full border-2 border-primary font-semibold transition-all duration-300 hover:bg-medium-pink" onclick="showEducationalCategory('all')">All Resources</button>
-                <button class="category-btn bg-transparent text-primary px-6 py-2 rounded-full border-2 border-primary font-semibold transition-all duration-300 hover:bg-primary hover:text-white" onclick="showEducationalCategory('nutrition')">Nutrition</button>
-                <button class="category-btn bg-transparent text-primary px-6 py-2 rounded-full border-2 border-primary font-semibold transition-all duration-300 hover:bg-primary hover:text-white" onclick="showEducationalCategory('food-science')">Food Science</button>
-                <button class="category-btn bg-transparent text-primary px-6 py-2 rounded-full border-2 border-primary font-semibold transition-all duration-300 hover:bg-primary hover:text-white" onclick="showEducationalCategory('culinary-history')">Culinary History</button>
-                <button class="category-btn bg-transparent text-primary px-6 py-2 rounded-full border-2 border-primary font-semibold transition-all duration-300 hover:bg-primary hover:text-white" onclick="showEducationalCategory('sustainability')">Sustainability</button>
-                <button class="category-btn bg-transparent text-primary px-6 py-2 rounded-full border-2 border-primary font-semibold transition-all duration-300 hover:bg-primary hover:text-white" onclick="showEducationalCategory('food-safety')">Food Safety</button>
-            </div>
-        </div>
-    </section>
-
     <!-- Nutrition Education Section -->
     <section class="educational-section py-16" id="nutrition-section">
         <div class="section-container max-w-6xl mx-auto px-4">
-            <h2 class="text-3xl font-bold text-text mb-4 flex items-center gap-4 justify-center"><i class="fas fa-apple-alt text-primary"></i> Nutrition & Health</h2>
-            <p class="text-lg text-text/80 mb-10 text-center">Learn about balanced nutrition and healthy cooking practices</p>
             
             <?php
             include('./configMysql.php');
 
-            // Get all Culinary resources (resourceTypeID = 2)
-            $sql = "SELECT r.resourceID, r.resourceName, r.description, r.resourcesImage, r.Video, f.filename AS pdfFile
-                    FROM Resource r
-                    LEFT JOIN files f ON r.resourceID = f.resourcesID
-                    WHERE r.resourceTypeID = 2
-                    ORDER BY r.resourceID DESC";
+            // Debug: Check connection
+            if (!$conn) {
+                die("Connection failed: " . mysqli_connect_error());
+            }
+
+            // Corrected SQL query - use direct columns from Resource table
+            $sql = "SELECT resourceID, resourceName, description, resourcesImage, PDF_file, Video 
+                    FROM Resource 
+                    WHERE resourceTypeID = 1
+                    ORDER BY resourceID DESC";
 
             $result = mysqli_query($conn, $sql);
 
-            if ($result && mysqli_num_rows($result) > 0): ?>
+            // Debug: Check if query executed successfully
+            if (!$result) {
+                echo "<p class='text-center text-red-500 py-8'>Error executing query: " . mysqli_error($conn) . "</p>";
+            } else if (mysqli_num_rows($result) > 0): ?>
+            
                 <div class="education-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <?php while ($row = mysqli_fetch_assoc($result)): ?>
+                    <?php while ($row = mysqli_fetch_assoc($result)): 
+                        // Debug: Output row data for testing
+                        // echo "<!-- Debug: " . print_r($row, true) . " -->";
+                    ?>
                         <div class="education-card bg-white rounded-xl shadow-lg overflow-hidden transition-transform duration-300 hover:-translate-y-2 hover:shadow-xl">
                             <div class="education-image relative overflow-hidden">
-                                <img src="uploads/resources/images/<?php echo htmlspecialchars($row['resourcesImage']); ?>" 
-                                     alt="<?php echo htmlspecialchars($row['resourceName']); ?>" 
-                                     class="w-full h-48 object-cover">
-                                <div class="education-overlay absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center opacity-0 transition-opacity duration-300">
-                                    <?php if (!empty($row['pdfFile'])): ?>
-                                        <a href="uploads/resources/pdfs/<?php echo htmlspecialchars($row['pdfFile']); ?>" 
-                                           class="download-btn bg-primary text-white px-4 py-2 rounded-full font-semibold transition-all duration-300 hover:bg-medium-pink mr-2" download>
+                                <?php if (!empty($row['resourcesImage'])): ?>
+                                    <img src="uploads/resources/images/<?php echo htmlspecialchars($row['resourcesImage']); ?>" 
+                                         alt="<?php echo htmlspecialchars($row['resourceName']); ?>" 
+                                         class="w-full h-48 object-cover">
+                                <?php else: ?>
+                                    <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
+                                        <i class="fas fa-utensils text-4xl text-gray-400"></i>
+                                    </div>
+                                <?php endif; ?>
+                                
+                                <div class="education-overlay absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300">
+                                    <?php if (!empty($row['PDF_file'])): ?>
+                                        <a href="uploads/resources/pdfs/<?php echo htmlspecialchars($row['PDF_file']); ?>" 
+                                           class="download-btn bg-primary text-white px-4 py-2 rounded-full font-semibold transition-all duration-300 hover:bg-medium-pink mr-2" 
+                                           target="_blank">
                                             <i class="fas fa-download mr-2"></i> PDF
                                         </a>
                                     <?php endif; ?>
                                     <?php if (!empty($row['Video'])): ?>
                                         <a href="uploads/resources/videos/<?php echo htmlspecialchars($row['Video']); ?>" 
-                                           class="download-btn bg-primary text-white px-4 py-2 rounded-full font-semibold transition-all duration-300 hover:bg-medium-pink" target="_blank">
+                                           class="download-btn bg-primary text-white px-4 py-2 rounded-full font-semibold transition-all duration-300 hover:bg-medium-pink" 
+                                           target="_blank">
                                             <i class="fas fa-play mr-2"></i> Video
                                         </a>
                                     <?php endif; ?>
@@ -107,7 +111,11 @@
                 </div>
             <?php else: ?>
                 <p class="text-center text-text/80 py-8">No culinary resources found yet.</p>
-            <?php endif; ?>
+            <?php endif; 
+            
+            // Close connection
+            mysqli_close($conn);
+            ?>
         </div>
     </section>
 
