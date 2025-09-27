@@ -555,10 +555,10 @@
                         </div>
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a href="recipe_upload.html">Recipe Upload</a></li>
+                        <li><a href="AddRecipe.php">Recipe Upload</a></li>
                         <li><a href="event_upload.html">Event Upload</a></li>
                         <li><a href="community_upload.html">Community Post Upload</a></li>
-                        <li><a href="resource_upload.html">Resource Upload</a></li>
+                          <li><a href="addRes.php">Resource upload</a></li>
                     </ul>
                 </li>
                 <li class="mobile-only mobile-profile-dropdown" id="mobileProfileDropdown">
@@ -591,10 +591,10 @@
                         </div>
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a href="recipe_upload.html">Recipe Upload</a></li>
+                        <li><a href="AddRecipe.php">Recipe Upload</a></li>
                         <li><a href="addEvent.php">Event Upload</a></li>
                         <li><a href="community_upload.html">Community Post Upload</a></li>
-                        <li><a href="resource_upload.html">Resource Upload</a></li>
+                        <li><a href="addRes.php">Resource Upload</a></li>
                     </ul>
                 </div>
                 <div class="dropdown profile-dropdown" id="desktopProfileDropdown">

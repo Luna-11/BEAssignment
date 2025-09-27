@@ -1,14 +1,14 @@
 <?php
-session_start();
-if (!isset($_SESSION['userID'])) {
-    header("Location: logIn.php");
-    exit;
-}
+// session_start();
+// if (!isset($_SESSION['userID'])) {
+//     header("Location: logIn.php");
+//     exit;
+// }
 
-if (isset($_SESSION['success_message'])) {
-    $success_message = $_SESSION['success_message'];
-    unset($_SESSION['success_message']); // Clear the message after displaying
-}
+// if (isset($_SESSION['success_message'])) {
+//     $success_message = $_SESSION['success_message'];
+//     unset($_SESSION['success_message']); // Clear the message after displaying
+// }
 ?>
 <!DOCTYPE html>
 <html lang="en">

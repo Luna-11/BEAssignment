@@ -1,3 +1,20 @@
+<?php
+session_start();
+include('./function.php');
+
+// Ensure user is logged in
+if (!isset($_SESSION['userID'])) {
+    header("Location: login.php");
+    exit();
+}
+
+$userID = $_SESSION['userID'];
+$userData = showUser($userID);
+
+// Since fetch_all returns an array, grab the first record
+$user = !empty($userData) ? $userData[0] : null;
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -122,59 +139,66 @@
         <div class="ml-64 flex-1 p-8">
             <div id="tab-content">
                 <!-- Profile Tab -->
-                <div id="profile" class="tab-content active">
-                    <div class="bg-lightest rounded-lg shadow-md p-6">
-                        <h2 class="text-2xl font-bold text-primary mb-6 flex items-center">
-                            <i class="fas fa-user-circle mr-2"></i> My Profile
-                        </h2>
-                        
-                        <div class="flex flex-col md:flex-row gap-8">
-                            <div class="md:w-1/3 flex flex-col items-center">
-                                <div class="relative mb-4">
-                                    <img src="https://via.placeholder.com/200" alt="Profile Picture" class="w-48 h-48 rounded-full object-cover border-4 border-medium-pink shadow-lg">
-                                    <button class="absolute bottom-2 right-2 bg-primary text-white p-2 rounded-full hover:bg-medium-pink transition-colors">
-                                        <i class="fas fa-camera"></i>
-                                    </button>
-                                </div>
-                                <h3 class="text-xl font-bold text-text-color">John Doe</h3>
-                                <div class="mt-4 flex space-x-2">
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-light-pink text-text-color">
-                                        <i class="fas fa-utensils mr-1"></i> 12 Recipes
-                                    </span>
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-light-pink text-text-color">
-                                        <i class="fas fa-heart mr-1"></i> 45 Likes
-                                    </span>
-                                </div>
-                            </div>
-                            
-                            <div class="md:w-2/3">
-                                <form class="space-y-4">
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label for="name" class="block text-sm font-medium text-text-color">Full Name</label>
-                                            <input type="text" id="name" name="name" value="John Doe" class="mt-1 block w-full px-3 py-2 border border-border-color rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
-                                        </div>
-                                        <div>
-                                            <label for="username" class="block text-sm font-medium text-text-color">Username</label>
-                                            <input type="text" id="username" name="username" value="johndoe" class="mt-1 block w-full px-3 py-2 border border-border-color rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
-                                        </div>
-                                    </div>
-                                    
-                                    <div>
-                                        <label for="email" class="block text-sm font-medium text-text-color">Email Address</label>
-                                        <input type="email" id="email" name="email" value="john.doe@example.com" class="mt-1 block w-full px-3 py-2 border border-border-color rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
-                                    </div>                             
-                                    
-                                    <div class="pt-4">
-                                        <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-primary hover:bg-medium-pink focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
-                                            <i class="fas fa-save mr-2"></i> Update Profile
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
+<div id="profile" class="tab-content active">
+    <div class="bg-gray-50 rounded-lg shadow-md p-6">
+        <h2 class="text-2xl font-bold text-pink-600 mb-6 flex items-center">
+            <i class="fas fa-user-circle mr-2"></i> My Profile
+        </h2>
+        
+        <div class="flex flex-col md:flex-row gap-8">
+            <!-- Profile Picture + Info -->
+            <div class="md:w-1/3 flex flex-col items-center">
+                <div class="relative mb-4">
+                    <img src="https://via.placeholder.com/200" alt="Profile Picture" 
+                         class="w-48 h-48 rounded-full object-cover border-4 border-pink-400 shadow-lg">
+                    <button class="absolute bottom-2 right-2 bg-pink-600 text-white p-2 rounded-full hover:bg-pink-500 transition-colors">
+                        <i class="fas fa-camera"></i>
+                    </button>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800">John Doe</h3>
+                <div class="mt-4 flex space-x-2">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-pink-100 text-gray-700">
+                        <i class="fas fa-utensils mr-1"></i> 12 Recipes
+                    </span>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-pink-100 text-gray-700">
+                        <i class="fas fa-heart mr-1"></i> 45 Likes
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Profile Form -->
+            <div class="md:w-2/3">
+                <form class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
+                            <input type="text" id="name" name="name" value="John Doe"
+                                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:border-pink-600 focus:ring-2 focus:ring-pink-200">
+                        </div>
+                        <div>
+                            <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                            <input type="text" id="username" name="username" value="johndoe"
+                                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:border-pink-600 focus:ring-2 focus:ring-pink-200">
                         </div>
                     </div>
-                </div>
+                    
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
+                        <input type="email" id="email" name="email" value="john.doe@example.com"
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:border-pink-600 focus:ring-2 focus:ring-pink-200">
+                    </div>
+                    
+                    <div class="pt-4">
+                        <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-pink-600 hover:bg-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-600 transition-colors">
+                            <i class="fas fa-save mr-2"></i> Update Profile
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 
                 <!-- My Recipes Tab -->
                 <div id="posts" class="tab-content">

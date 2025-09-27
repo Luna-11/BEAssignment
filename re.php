@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recipe Cards with Floating Leaves</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* ===== GLOBAL STYLES ===== */
         :root {
             --primary-color: #C89091;
             --text-color: #7b4e48;
@@ -18,353 +18,6 @@
             --black: #222;
             --light-gray: #bbb;
             --medium-gray: #555;
-        }
-    
-
-        body {
-            background-color: var(--light_yellow);
-            color: var(--text-color);
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            width: 100%;
-            position: relative;
-            z-index: 2;
-        }
-
-        header {
-            text-align: center;
-            padding: 30px 0;
-        }
-
-        h1 {
-            font-size: 2.8rem;
-            color: var(--text-color);
-            margin-bottom: 15px;
-            font-weight: 700;
-        }
-
-        .subtitle {
-            font-size: 1.2rem;
-            color: var(--primary-color);
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        /* Filter Section */
-        .filter-section {
-            background: rgba(255, 255, 255, 0.85);
-            border-radius: 20px;
-            padding: 25px;
-            margin: 20px 0 40px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-        }
-
-        .filter-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-color);
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .filter-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-        }
-
-        .filter-group {
-            flex: 1;
-            min-width: 200px;
-        }
-
-        .filter-label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: 600;
-            color: var(--primary-color);
-        }
-
-        .filter-select {
-            width: 100%;
-            padding: 12px 15px;
-            border-radius: 12px;
-            border: 1px solid var(--light_pink);
-            background-color: white;
-            color: var(--text-color);
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .filter-select:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(200, 144, 145, 0.3);
-        }
-
-        .filter-reset {
-            display: block;
-            margin: 20px auto 0;
-            padding: 10px 20px;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .filter-reset:hover {
-            background: #b37d7e;
-            transform: translateY(-2px);
-        }
-
-        /* Recipe Cards Grid */
-        .recipes-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 30px;
-            padding: 40px 0;
-            position: relative;
-        }
-
-        /* Recipe Card */
-        .recipe-card {
-            background: rgba(255, 255, 255, 0.85);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            position: relative;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            z-index: 2;
-        }
-
-        .recipe-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
-        }
-
-        .recipe-image {
-            width: 100%;
-            height: 200px;
-            border-radius: 15px;
-            overflow: hidden;
-            margin-bottom: 20px;
-            position: relative;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .recipe-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-
-        .recipe-card:hover .recipe-image img {
-            transform: scale(1.05);
-        }
-
-        .recipe-time {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--primary-color);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .recipe-content {
-            padding: 0 5px;
-        }
-
-        .recipe-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-color);
-            margin-bottom: 8px;
-        }
-
-        .recipe-subtitle {
-            font-size: 1rem;
-            color: var(--primary-color);
-            margin-bottom: 15px;
-            font-weight: 500;
-        }
-
-        .recipe-description {
-            font-size: 0.95rem;
-            line-height: 1.6;
-            color: var(--medium-gray);
-            margin-bottom: 20px;
-            min-height: 70px;
-        }
-
-        .recipe-price {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin-bottom: 20px;
-            text-align: right;
-        }
-
-        .recipe-meta {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            font-size: 0.85rem;
-            color: var(--medium-gray);
-        }
-
-        .recipe-tag {
-            background: var(--light_pink);
-            padding: 3px 10px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-        }
-
-        .add-to-cart {
-            width: 100%;
-            padding: 15px;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(200, 144, 145, 0.3);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .add-to-cart:hover {
-            background: #b37d7e;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(200, 144, 145, 0.4);
-        }
-
-        /* Leaf Decorations - FIXED */
-        .leaf-decoration {
-            position: fixed;
-            z-index: 1;
-            opacity: 0.7;
-            pointer-events: none;
-            width: 500px;
-            height: 400px;
-            filter: drop-shadow(2px 4px 3px rgba(0,0,0,0.1));
-        }
-
-        .leaf-decoration img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        /* Leaf positions */
-        .leaf-1 {
-            top: 15%;
-            left: 5%;
-            transform: rotate(-15deg);
-        }
-
-        .leaf-2 {
-            top: 20%;
-            right: 8%;
-            transform: scaleX(-1) rotate(25deg);
-        }
-
-        .leaf-3 {
-            bottom: 5%;
-            left: 7%;
-            transform: rotate(-30deg);
-            width: 700px;
-            height: 370px;
-        }
-
-        .leaf-4 {
-            bottom: 15%;
-            right: 6%;
-            transform: scaleX(-1) rotate(40deg);
-            width: 650px;
-            height: 605px;
-        }
-
-        /* Floating leaves over cards */
-        .floating-leaf {
-            position: absolute;
-            z-index: 3;
-            pointer-events: none;
-            width: 90px;
-            height: 90px;
-            opacity: 0.85;
-            filter: drop-shadow(2px 3px 2px rgba(0,0,0,0.2));
-            animation: float 6s ease-in-out infinite;
-        }
-
-        .floating-leaf img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        /* Individual floating leaf positions */
-        .float-leaf-1 {
-            top: 90%;
-            left: 0%;
-            animation-delay: 0s;
-        }
-
-        .float-leaf-2 {
-            top: 65%;
-            right: 20%;
-            animation-delay: 0.6s;
-            transform: rotate(40deg);
-        }
-
-        .float-leaf-3 {
-            top: 40%;
-            left: 29%;
-            animation-delay: 0.8s;
-            transform: rotate(-20deg);
-        }
-
-        .float-leaf-4 {
-            top: 35%;
-            right: 0%;
-            animation-delay: 1s;
-            transform: rotate(30deg);
-        }
-
-        .float-leaf-5 {
-            top: 50%;
-            left: 65%;
-            animation-delay: 1s;
-            transform: rotate(-15deg);
-        }
-
-        .float-leaf-6 {
-            top: 95%;
-            left: 85%;
-            animation-delay: 0.6s;
-            transform: rotate(60deg);
         }
 
         /* Floating animation */
@@ -380,304 +33,308 @@
             }
         }
 
-        /* Canvas for animated leaves */
-        #leavesCanvas {
-            position: fixed;
-            top: 40%;
-            left: 0;
-            width: 50%;
-            height: 100%;
-            z-index: 1;
-            pointer-events: none;
+        .floating-leaf {
+            animation: float 6s ease-in-out infinite;
         }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .recipes-grid {
-                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-                gap: 20px;
-            }
-            
-            h1 {
-                font-size: 2.2rem;
-            }
-            
-            .subtitle {
-                font-size: 1rem;
-            }
-            
-            .filter-container {
-                flex-direction: column;
-            }
-            
-            .leaf-decoration {
-                display: none;
-            }
-            
-            .floating-leaf {
-                display: none;
-            }
+        
+        /* Custom styles for better visual feedback */
+        .filter-section {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        .recipe-card {
+            transition: all 0.3s ease;
+        }
+        
+        .recipe-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .filter-select {
+            transition: all 0.3s ease;
+        }
+        
+        .filter-select:focus {
+            box-shadow: 0 0 0 3px rgba(200, 144, 145, 0.3);
+        }
+        
+        .no-results {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+            font-size: 1.2rem;
+            color: #7b4e48;
         }
     </style>
 </head>
-<body>
-<?php include 'navbar.php'; ?>
-    <canvas id="leavesCanvas"></canvas>
-
+<body class="bg-[#f9f1e5] text-[#7b4e48]">
+    <?php include 'navbar.php'; ?>
+    <canvas id="leavesCanvas" class="fixed top-2/5 left-0 w-1/2 h-full z-10 pointer-events-none"></canvas>
     
-    <div class="container">
+    <div class="mx-auto w-full relative z-20">
         <!-- Filter Section -->
-        <section class="filter-section">
-            <h2 class="filter-title">Filter Recipes</h2>
-            <div class="filter-container">
-                <div class="filter-group">
-                    <label class="filter-label" for="food-type">Food Type</label>
-                    <select id="food-type" class="filter-select">
+        <section class="filter-section rounded-2xl p-6 my-5 mx-4 shadow-lg">
+            <h2 class="text-2xl font-bold text-[#7b4e48] mb-5 text-center">Filter Recipes</h2>
+            <div class="flex flex-wrap gap-5 justify-center">
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block mb-2 font-semibold text-[#C89091]" for="food-type">Food Type</label>
+                    <select id="food-type" class="filter-select w-full p-3 rounded-xl border border-[#e9d0cb] bg-white text-[#7b4e48] text-base cursor-pointer transition-all focus:outline-none focus:border-[#C89091]">
                         <option value="all">All Types</option>
-                        <option value="meat">Meat</option>
-                        <option value="vegetarian">Vegetarian</option>
-                        <option value="vegan">Vegan</option>
-                        <option value="seafood">Seafood</option>
-                        <option value="pasta">Pasta</option>
+                        <?php
+                        // Database connection
+                        $servername = "localhost";
+                        $username = "root";
+                        $password = "";
+                        $dbname = "BEAssignment";
+                        
+                        // Create connection
+                        $conn = new mysqli($servername, $username, $password, $dbname);
+                        
+                        // Check connection
+                        if ($conn->connect_error) {
+                            die("Connection failed: " . $conn->connect_error);
+                        }
+                        
+                        // Fetch food types from database
+                        $sql = "SELECT * FROM foodType";
+                        $result = $conn->query($sql);
+                        
+                        if ($result->num_rows > 0) {
+                            while($row = $result->fetch_assoc()) {
+                                echo "<option value='" . $row["foodType"] . "'>" . $row["foodType"] . "</option>";
+                            }
+                        }
+                        ?>
                     </select>
                 </div>
-                <div class="filter-group">
-                    <label class="filter-label" for="difficulty">Difficulty Level</label>
-                    <select id="difficulty" class="filter-select">
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block mb-2 font-semibold text-[#C89091]" for="cuisine-type">Cuisine Type</label>
+                    <select id="cuisine-type" class="filter-select w-full p-3 rounded-xl border border-[#e9d0cb] bg-white text-[#7b4e48] text-base cursor-pointer transition-all focus:outline-none focus:border-[#C89091]">
+                        <option value="all">All Cuisines</option>
+                        <?php
+                        // Fetch cuisine types from database
+                        $sql = "SELECT * FROM cuisineType";
+                        $result = $conn->query($sql);
+                        
+                        if ($result->num_rows > 0) {
+                            while($row = $result->fetch_assoc()) {
+                                echo "<option value='" . $row["cuisineType"] . "'>" . $row["cuisineType"] . "</option>";
+                            }
+                        }
+                        ?>
+                    </select>
+                </div>
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block mb-2 font-semibold text-[#C89091]" for="difficulty">Difficulty Level</label>
+                    <select id="difficulty" class="filter-select w-full p-3 rounded-xl border border-[#e9d0cb] bg-white text-[#7b4e48] text-base cursor-pointer transition-all focus:outline-none focus:border-[#C89091]">
                         <option value="all">All Levels</option>
-                        <option value="easy">Easy</option>
-                        <option value="medium">Medium</option>
-                        <option value="hard">Hard</option>
+                        <?php
+                        // Fetch difficulty levels from difficultyLev table
+                        $sql = "SELECT * FROM difficultyLev";
+                        $result = $conn->query($sql);
+                        
+                        if ($result->num_rows > 0) {
+                            while($row = $result->fetch_assoc()) {
+                                echo "<option value='" . $row["difficultyName"] . "'>" . ucfirst($row["difficultyName"]) . "</option>";
+                            }
+                        }
+                        ?>
                     </select>
                 </div>
-                <div class="filter-group">
-                    <label class="filter-label" for="diet">Diet Preference</label>
-                    <select id="diet" class="filter-select">
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block mb-2 font-semibold text-[#C89091]" for="diet">Diet Preference</label>
+                    <select id="diet" class="filter-select w-full p-3 rounded-xl border border-[#e9d0cb] bg-white text-[#7b4e48] text-base cursor-pointer transition-all focus:outline-none focus:border-[#C89091]">
                         <option value="all">All Diets</option>
-                        <option value="keto">Keto</option>
-                        <option value="gluten-free">Gluten-Free</option>
-                        <option value="low-carb">Low-Carb</option>
-                        <option value="paleo">Paleo</option>
+                        <?php
+                        // Fetch diet preferences from database
+                        $sql = "SELECT * FROM dietPreferences";
+                        $result = $conn->query($sql);
+                        
+                        if ($result->num_rows > 0) {
+                            while($row = $result->fetch_assoc()) {
+                                echo "<option value='" . $row["dietName"] . "'>" . $row["dietName"] . "</option>";
+                            }
+                        }
+                        ?>
                     </select>
                 </div>
             </div>
-            <button class="filter-reset" id="reset-filters">Reset Filters</button>
+            <button id="reset-filters" class="block mx-auto mt-5 px-5 py-2.5 bg-[#C89091] text-white border-none rounded-xl text-base font-semibold cursor-pointer transition-all hover:bg-[#b37d7e] hover:-translate-y-0.5">
+                Reset Filters
+            </button>
         </section>
-
-        <!-- Background Leaf Decorations - FIXED -->
-        <div class="leaf-decoration leaf-3">
-            <img src="./BEpics/basil.png" alt="Leaf decoration">
-        </div>
-        <div class="leaf-decoration leaf-3">
-            <img src="./BEpics/basil.png" alt="Leaf decoration">
-        </div>
-
         <!-- Floating leaves over cards -->
-        <div class="floating-leaf float-leaf-1">
-            <img src="./BEpics/leaf.png" alt="Leaf decoration">
+        <div class="floating-leaf absolute z-30 pointer-events-none w-24 h-24 opacity-85 filter drop-shadow-[2px_3px_2px_rgba(0,0,0,0.2)] top-[90%] left-0">
+            <img src="./BEpics/leaf.png" alt="Leaf decoration" class="w-full h-full object-contain">
         </div>
-        <div class="floating-leaf float-leaf-2">
-            <img src="./BEpics/leaf.png" alt="Leaf decoration">
+        <div class="floating-leaf absolute z-30 pointer-events-none w-24 h-24 opacity-85 filter drop-shadow-[2px_3px_2px_rgba(0,0,0,0.2)] top-[65%] right-[20%] rotate-40" style="animation-delay: 0.6s;">
+            <img src="./BEpics/leaf.png" alt="Leaf decoration" class="w-full h-full object-contain">
         </div>
-        <div class="floating-leaf float-leaf-3">
-            <img src="./BEpics/leaf.png" alt="Leaf decoration">
+        <div class="floating-leaf absolute z-30 pointer-events-none w-24 h-24 opacity-85 filter drop-shadow-[2px_3px_2px_rgba(0,0,0,0.2)] top-[40%] left-[29%] -rotate-20" style="animation-delay: 0.8s;">
+            <img src="./BEpics/leaf.png" alt="Leaf decoration" class="w-full h-full object-contain">
         </div>
-        <div class="floating-leaf float-leaf-4">
-            <img src="./BEpics/leaf.png" alt="Leaf decoration">
+        <div class="floating-leaf absolute z-30 pointer-events-none w-24 h-24 opacity-85 filter drop-shadow-[2px_3px_2px_rgba(0,0,0,0.2)] top-[35%] right-0 rotate-30" style="animation-delay: 1s;">
+            <img src="./BEpics/leaf.png" alt="Leaf decoration" class="w-full h-full object-contain">
         </div>
-        <div class="floating-leaf float-leaf-5">
-            <img src="./BEpics/leaf.png" alt="Leaf decoration">
+        <div class="floating-leaf absolute z-30 pointer-events-none w-24 h-24 opacity-85 filter drop-shadow-[2px_3px_2px_rgba(0,0,0,0.2)] top-[50%] left-[65%] -rotate-15" style="animation-delay: 1s;">
+            <img src="./BEpics/leaf.png" alt="Leaf decoration" class="w-full h-full object-contain">
         </div>
-        <div class="floating-leaf float-leaf-6">
-            <img src="./BEpics/leaf.png" alt="Leaf decoration">
+        <div class="floating-leaf absolute z-30 pointer-events-none w-24 h-24 opacity-85 filter drop-shadow-[2px_3px_2px_rgba(0,0,0,0.2)] top-[95%] left-[85%] rotate-60" style="animation-delay: 0.6s;">
+            <img src="./BEpics/leaf.png" alt="Leaf decoration" class="w-full h-full object-contain">
         </div>
 
-        <div class="recipes-grid">
-            <!-- Recipe Card 1 -->
-            <div class="recipe-card" data-food-type="meat" data-difficulty="medium" data-diet="low-carb">
-                <div class="recipe-image">
-                    <img src="https://images.unsplash.com/photo-1606728035253-49e8a23146de?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80" alt="Chicken Slice">
-                    <div class="recipe-time">25 mins</div>
-                </div>
-                <div class="recipe-content">
-                    <h3 class="recipe-title">Chicken Slice</h3>
-                    <p class="recipe-subtitle">Real chicken</p>
-                    <div class="recipe-meta">
-                        <span class="recipe-tag">Meat</span>
-                        <span class="recipe-tag">Medium</span>
-                        <span class="recipe-tag">Low-Carb</span>
+        <!-- Recipe Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-10 relative">
+            <?php
+            // Fetch recipes from database
+            $sql = "SELECT r.*, 
+                           ft.foodType, 
+                           ct.cuisineType, 
+                           dl.difficultyName, 
+                           dp.dietName,
+                           r.image as imageUrl,
+                           r.recipeName as title,
+                           r.recipeDescription as description
+                    FROM recipe r 
+                    LEFT JOIN foodType ft ON r.foodTypeID = ft.foodTypeID
+                    LEFT JOIN cuisineType ct ON r.cuisineTypeID = ct.cuisineTypeID
+                    LEFT JOIN difficultyLev dl ON r.difficultID = dl.difficultyID
+                    LEFT JOIN dietPreferences dp ON r.dietaryID = dp.dietID
+                    WHERE r.recipeName IS NOT NULL";
+
+            $result = $conn->query($sql);
+
+            if ($result && $result->num_rows > 0): ?>
+                <?php while ($row = $result->fetch_assoc()): ?>
+                    <div class="recipe-card bg-white/85 rounded-2xl p-6 shadow-lg relative overflow-hidden border border-white/50 transition-all duration-300 z-20" 
+                         data-food-type="<?php echo htmlspecialchars($row["foodType"] ?? ''); ?>" 
+                         data-cuisine-type="<?php echo htmlspecialchars($row["cuisineType"] ?? ''); ?>" 
+                         data-difficulty="<?php echo htmlspecialchars($row["difficultyName"] ?? ''); ?>" 
+                         data-diet="<?php echo htmlspecialchars($row["dietName"] ?? ''); ?>">
+                        <div class="recipe-image w-full h-48 rounded-xl overflow-hidden mb-5 relative shadow-lg">
+                            <img src="<?php echo htmlspecialchars($row["imageUrl"] ?? './BEpics/placeholder.jpg'); ?>" 
+                                 alt="<?php echo htmlspecialchars($row["title"] ?? 'Recipe'); ?>" 
+                                 class="w-full h-full object-cover transition-transform duration-500">
+                        </div>
+                        <div class="recipe-content px-1">
+                            <h3 class="recipe-title text-xl font-bold text-[#7b4e48] mb-2">
+                                <?php echo htmlspecialchars($row["title"] ?? 'Untitled Recipe'); ?>
+                            </h3>
+                            <div class="recipe-meta flex flex-wrap gap-2 mb-4 text-sm text-[#555]">
+                                <span class="recipe-tag bg-[#e9d0cb] px-3 py-1 rounded-full text-xs">
+                                    <?php echo htmlspecialchars($row["foodType"] ?? 'Not specified'); ?>
+                                </span>
+                                <span class="recipe-tag bg-[#e9d0cb] px-3 py-1 rounded-full text-xs">
+                                    <?php echo htmlspecialchars($row["cuisineType"] ?? 'Not specified'); ?>
+                                </span>
+                                <span class="recipe-tag bg-[#e9d0cb] px-3 py-1 rounded-full text-xs">
+                                    <?php echo htmlspecialchars(ucfirst($row["difficultyName"] ?? 'Medium')); ?>
+                                </span>
+                                <span class="recipe-tag bg-[#e9d0cb] px-3 py-1 rounded-full text-xs">
+                                    <?php echo htmlspecialchars($row["dietName"] ?? 'Not specified'); ?>
+                                </span>
+                            </div>
+                            <p class="recipe-description text-[#555] text-sm leading-relaxed mb-5 min-h-[70px]">
+                                <?php 
+                                $description = $row["description"] ?? 'No description available.';
+                                if (strlen($description) > 150) {
+                                    $description = substr($description, 0, 150) . '...';
+                                }
+                                echo htmlspecialchars($description); 
+                                ?>
+                            </p>
+                            <button class="w-full p-4 bg-[#C89091] text-white border-none rounded-xl text-base font-semibold cursor-pointer transition-all shadow-lg hover:bg-[#b37d7e] hover:-translate-y-0.5 hover:shadow-xl flex justify-center items-center gap-2">
+                                View Detail
+                            </button>
+                        </div>
                     </div>
-                    <p class="recipe-description">Tender chicken slices with special herbs and spices, served with fresh vegetables.</p>
-                    <p class="recipe-price">$12.00</p>
-                    <button class="add-to-cart"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
+                <?php endwhile; ?>
+            <?php else: ?>
+                <div class="col-span-3 text-center py-10">
+                    <i class="fas fa-utensils fa-3x text-[#C89091] mb-4"></i>
+                    <h3 class="text-xl font-bold text-[#7b4e48]">No recipes found</h3>
+                    <p class="text-[#555]">There are no recipes in the database yet.</p>
                 </div>
-            </div>
-
-            <!-- Recipe Card 2 -->
-            <div class="recipe-card" data-food-type="vegetarian" data-difficulty="easy" data-diet="gluten-free">
-                <div class="recipe-image">
-                    <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80" alt="Eggs Curry">
-                    <div class="recipe-time">30 mins</div>
-                </div>
-                <div class="recipe-content">
-                    <h3 class="recipe-title">Eggs Curry</h3>
-                    <p class="recipe-subtitle">Chef's Special</p>
-                    <div class="recipe-meta">
-                        <span class="recipe-tag">Vegetarian</span>
-                        <span class="recipe-tag">Easy</span>
-                        <span class="recipe-tag">Gluten-Free</span>
-                    </div>
-                    <p class="recipe-description">Eggs Curry with tomato and cucumbers our chefs special healthy and fat free dish for those who want to lose weight.</p>
-                    <p class="recipe-price">$15.00</p>
-                    <button class="add-to-cart"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
-                </div>
-            </div>
-
-            <!-- Recipe Card 3 -->
-            <div class="recipe-card" data-food-type="vegetarian" data-difficulty="easy" data-diet="vegetarian">
-                <div class="recipe-image">
-                    <img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80" alt="Margherita Pizza">
-                    <div class="recipe-time">20 mins</div>
-                </div>
-                <div class="recipe-content">
-                    <h3 class="recipe-title">Margherita Pizza</h3>
-                    <p class="recipe-subtitle">Classic Italian</p>
-                    <div class="recipe-meta">
-                        <span class="recipe-tag">Vegetarian</span>
-                        <span class="recipe-tag">Easy</span>
-                        <span class="recipe-tag">Vegetarian</span>
-                    </div>
-                    <p class="recipe-description">Traditional pizza with tomato sauce, fresh mozzarella, and basil leaves on a thin crust.</p>
-                    <p class="recipe-price">$14.50</p>
-                    <button class="add-to-cart"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
-                </div>
-            </div>
-
-            <!-- Recipe Card 4 -->
-            <div class="recipe-card" data-food-type="seafood" data-difficulty="medium" data-diet="paleo">
-                <div class="recipe-image">
-                    <img src="https://images.unsplash.com/photo-1559715745-e1b33a271c8f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80" alt="Grilled Salmon">
-                    <div class="recipe-time">35 mins</div>
-                </div>
-                <div class="recipe-content">
-                    <h3 class="recipe-title">Grilled Salmon</h3>
-                    <p class="recipe-subtitle">Fresh Atlantic</p>
-                    <div class="recipe-meta">
-                        <span class="recipe-tag">Seafood</span>
-                        <span class="recipe-tag">Medium</span>
-                        <span class="recipe-tag">Paleo</span>
-                    </div>
-                    <p class="recipe-description">Fresh Atlantic salmon grilled to perfection with lemon butter sauce and seasonal vegetables.</p>
-                    <p class="recipe-price">$18.50</p>
-                    <button class="add-to-cart"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
-                </div>
-            </div>
-
-            <!-- Recipe Card 5 -->
-            <div class="recipe-card" data-food-type="vegan" data-difficulty="hard" data-diet="vegan">
-                <div class="recipe-image">
-                    <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80" alt="Vegan Buddha Bowl">
-                    <div class="recipe-time">40 mins</div>
-                </div>
-                <div class="recipe-content">
-                    <h3 class="recipe-title">Vegan Buddha Bowl</h3>
-                    <p class="recipe-subtitle">Plant Power</p>
-                    <div class="recipe-meta">
-                        <span class="recipe-tag">Vegan</span>
-                        <span class="recipe-tag">Hard</span>
-                        <span class="recipe-tag">Vegan</span>
-                    </div>
-                    <p class="recipe-description">A colorful bowl packed with quinoa, roasted vegetables, avocado, and tahini dressing.</p>
-                    <p class="recipe-price">$13.75</p>
-                    <button class="add-to-cart"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
-                </div>
-            </div>
-
-            <!-- Recipe Card 6 -->
-            <div class="recipe-card" data-food-type="pasta" data-difficulty="easy" data-diet="keto">
-                <div class="recipe-image">
-                    <img src="https://images.unsplash.com/photo-1621996346565-e3dbc353d2e5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80" alt="Zucchini Pasta">
-                    <div class="recipe-time">15 mins</div>
-                </div>
-                <div class="recipe-content">
-                    <h3 class="recipe-title">Zucchini Pasta</h3>
-                    <p class="recipe-subtitle">Keto Friendly</p>
-                    <div class="recipe-meta">
-                        <span class="recipe-tag">Pasta</span>
-                        <span class="recipe-tag">Easy</span>
-                        <span class="recipe-tag">Keto</span>
-                    </div>
-                    <p class="recipe-description">Spiralized zucchini noodles with pesto, cherry tomatoes, and parmesan cheese.</p>
-                    <p class="recipe-price">$11.25</p>
-                    <button class="add-to-cart"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
-                </div>
-            </div>
+            <?php endif; ?>
+            <?php $conn->close(); ?>
         </div>
 
-        <footer>
-            <p>© 2023 Gourmet Recipes | Made with <i class="fas fa-heart" style="color: var(--primary-color);"></i></p>
-        </footer>
+        <!-- No Results Message -->
+        <div id="no-results" class="no-results">
+            <i class="fas fa-search fa-2x mb-4 text-[#C89091]"></i>
+            <h3 class="text-xl font-bold mb-2">No recipes found</h3>
+            <p>Try adjusting your filters to see more results.</p>
+        </div>
+                    <?php include 'footer.php'; ?>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Add to cart functionality
-            const addToCartButtons = document.querySelectorAll('.add-to-cart');
-            addToCartButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const card = this.closest('.recipe-card');
-                    const title = card.querySelector('.recipe-title').textContent;
-                    
-                    this.innerHTML = '<i class="fas fa-check"></i> Added to Cart';
-                    this.style.background = '#7b4e48';
-                    
-                    setTimeout(() => {
-                        this.innerHTML = '<i class="fas fa-shopping-cart"></i> Add to Cart';
-                        this.style.background = '';
-                    }, 2000);
-                    
-                    console.log(`Added ${title} to cart`);
-                });
-            });
-
             // Filter functionality
             const foodTypeFilter = document.getElementById('food-type');
+            const cuisineTypeFilter = document.getElementById('cuisine-type');
             const difficultyFilter = document.getElementById('difficulty');
             const dietFilter = document.getElementById('diet');
             const resetButton = document.getElementById('reset-filters');
             const recipeCards = document.querySelectorAll('.recipe-card');
+            const noResultsMessage = document.getElementById('no-results');
 
             function filterRecipes() {
                 const selectedFoodType = foodTypeFilter.value;
+                const selectedCuisineType = cuisineTypeFilter.value;
                 const selectedDifficulty = difficultyFilter.value;
                 const selectedDiet = dietFilter.value;
 
+                let visibleCount = 0;
+
                 recipeCards.forEach(card => {
                     const cardFoodType = card.getAttribute('data-food-type');
+                    const cardCuisineType = card.getAttribute('data-cuisine-type');
                     const cardDifficulty = card.getAttribute('data-difficulty');
                     const cardDiet = card.getAttribute('data-diet');
 
                     const showCard = 
                         (selectedFoodType === 'all' || selectedFoodType === cardFoodType) &&
+                        (selectedCuisineType === 'all' || selectedCuisineType === cardCuisineType) &&
                         (selectedDifficulty === 'all' || selectedDifficulty === cardDifficulty) &&
                         (selectedDiet === 'all' || selectedDiet === cardDiet);
 
-                    card.style.display = showCard ? 'block' : 'none';
+                    if (showCard) {
+                        card.style.display = 'block';
+                        visibleCount++;
+                    } else {
+                        card.style.display = 'none';
+                    }
                 });
+
+                // Show/hide no results message
+                if (visibleCount === 0) {
+                    noResultsMessage.style.display = 'block';
+                } else {
+                    noResultsMessage.style.display = 'none';
+                }
             }
 
             // Add event listeners to filters
             foodTypeFilter.addEventListener('change', filterRecipes);
+            cuisineTypeFilter.addEventListener('change', filterRecipes);
             difficultyFilter.addEventListener('change', filterRecipes);
             dietFilter.addEventListener('change', filterRecipes);
 
             // Reset filters
             resetButton.addEventListener('click', function() {
                 foodTypeFilter.value = 'all';
+                cuisineTypeFilter.value = 'all';
                 difficultyFilter.value = 'all';
                 dietFilter.value = 'all';
                 filterRecipes();
             });
+
+            // Apply filters on page load
+            filterRecipes();
         });
 
         // Floating Leaves Animation
@@ -697,11 +354,11 @@
             constructor() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * -canvas.height;
-                this.size = Math.random() * 30 + 20; // Larger leaves: 20-50px
-                this.speed = Math.random() * 1 + 0.5; // Slower speed: 0.5-1.5px/frame
+                this.size = Math.random() * 30 + 20;
+                this.speed = Math.random() * 1 + 0.5;
                 this.angle = Math.random() * Math.PI * 2;
                 this.spin = (Math.random() - 0.5) * 0.05;
-                this.color = Math.random() > 0.5 ? '#A8D5BA' : '#4A7043'; // Light and medium green
+                this.color = Math.random() > 0.5 ? '#A8D5BA' : '#4A7043';
             }
 
             update() {
@@ -709,13 +366,12 @@
                 this.x += Math.sin(this.angle) * 0.5;
                 this.angle += this.spin;
 
-                // Reset leaf when it goes off-screen
                 if (this.y > canvas.height + this.size) {
                     this.y = -this.size;
                     this.x = Math.random() * canvas.width;
                     this.speed = Math.random() * 1 + 0.5;
                     this.angle = Math.random() * Math.PI * 2;
-                    this.size = Math.random() * 30 + 20; // Ensure reset leaves are also 20-50px
+                    this.size = Math.random() * 30 + 20;
                 }
             }
 
@@ -733,7 +389,7 @@
 
         // Create leaves
         const leaves = [];
-        for (let i = 0; i < 20; i++) {
+        for (let i = 0; i < 40; i++) {
             leaves.push(new Leaf());
         }
 

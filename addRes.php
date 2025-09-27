@@ -43,7 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $errors[] = "Description is required";
     } else {
         $description = trim($_POST["description"]);
-        if (strlen($description) > 200) $errors[] = "Description must be less than 200 characters";
+        if (strlen($description) > 500) $errors[] = "Description must be less than 500 characters";
     }
 
     if (empty($_POST["resourceType"])) {
