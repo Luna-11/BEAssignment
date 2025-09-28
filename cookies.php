@@ -158,7 +158,7 @@
             We use cookies to improve your experience, analyze site usage,  
             and show personalized content and offers. By clicking 'Accept'  
             you agree to our use of cookies. You can manage preferences or  
-            read our full <a href="cookies.php">Cookie Policy</a>.
+            read our full <a href="cookiesPage.php">Cookie Policy</a>.
         </p>
         <button id="acceptCookies">Accept</button>
     </div>
