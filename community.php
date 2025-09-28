@@ -1,230 +1,19 @@
 <?php
-session_start();
-include('./configMysql.php');
+// Include the handler at the top
+include('community_handler.php');
 
-// Enable error reporting for debugging
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-// Check if user is logged in
-if (!isset($_SESSION['userID'])) {
-    header("Location: login.php");
-    exit();
-}
-
-$userID = $_SESSION['userID'];
-$error = '';
-$success = '';
-$title = '';
-$description = '';
-
-// Check if community table exists, if not create it
-$tableCheck = $conn->query("SHOW TABLES LIKE 'community'");
-if ($tableCheck->num_rows == 0) {
-    // Create the community table
-    $createTableSQL = "
-        CREATE TABLE community (
-            postID INT AUTO_INCREMENT PRIMARY KEY,
-            post TEXT NOT NULL,
-            postDate DATETIME NOT NULL,
-            userID INT NOT NULL,
-            media VARCHAR(255) DEFAULT NULL,
-            mediaType ENUM('image', 'video') DEFAULT NULL,
-            FOREIGN KEY (userID) REFERENCES users(userID) ON DELETE CASCADE
-        )
-    ";
-    
-    if ($conn->query($createTableSQL)) {
-        $success = "Community table created successfully!";
-    } else {
-        $error = "Error creating community table: " . $conn->error;
-    }
-}
-
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $title = trim($_POST['title']);
-    $description = trim($_POST['description']);
-    
-    // Validate input
-    if (empty($title) || empty($description)) {
-        $error = "Error: Title and description are required.";
-    } elseif (strlen($title) > 100) {
-        $error = "Error: Title must be less than 100 characters.";
-    } else {
-        // Combine title and description for the post field
-        $post = $title . ': ' . $description;
-        $date = date("Y-m-d H:i:s");
-
-        $file = $_FILES['media'] ?? null;
-        $targetDir = "uploads/post/";
+// Get comment counts for all posts
+$postCommentCounts = [];
+if (!empty($posts)) {
+    foreach ($posts as $post) {
+        $commentCountQuery = $conn->prepare("SELECT COUNT(*) as count FROM comment WHERE communityID = ?");
+        $commentCountQuery->bind_param("i", $post['communityID']);
+        $commentCountQuery->execute();
+        $commentResult = $commentCountQuery->get_result();
+        $commentCount = $commentResult->fetch_assoc()['count'];
+        $commentCountQuery->close();
         
-        // Create directory if it doesn't exist with proper permissions
-        if (!file_exists($targetDir)) {
-            if (!mkdir($targetDir, 0755, true)) {
-                $error = "Error: Could not create upload directory. Please check folder permissions.";
-            }
-        }
-
-        // Check if directory is writable
-        if (empty($error) && file_exists($targetDir) && !is_writable($targetDir)) {
-            $error = "Error: Upload directory is not writable. Please check permissions (chmod 755).";
-        }
-
-        $mediaName = null;
-        $mediaType = null;
-
-        // Allowed types
-        $allowedImageTypes = ['image/jpeg','image/jpg','image/png','image/gif','image/webp'];
-        $allowedVideoTypes = ['video/mp4','video/webm','video/ogg'];
-        $maxImageSize = 4 * 1024 * 1024;  // 4MB
-        $maxVideoSize = 10 * 1024 * 1024; // 10MB
-
-        // Handle file upload
-        if (empty($error) && $file && $file['error'] == UPLOAD_ERR_OK) {
-            $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-            
-            // Verify the uploaded file
-            if (!is_uploaded_file($file['tmp_name'])) {
-                $error = "Error: Invalid file upload attempt.";
-            } else {
-                $mimeType = mime_content_type($file['tmp_name']);
-
-                if (in_array($mimeType, $allowedImageTypes)) {
-                    if ($file['size'] > $maxImageSize) {
-                        $error = "Error: Image too large (max 4MB).";
-                    } else {
-                        $mediaType = "image";
-                    }
-                } elseif (in_array($mimeType, $allowedVideoTypes)) {
-                    if ($file['size'] > $maxVideoSize) {
-                        $error = "Error: Video too large (max 10MB).";
-                    } else {
-                        $mediaType = "video";
-                    }
-                } else {
-                    $error = "Error: Unsupported file type. Please upload images (JPEG, PNG, GIF, WebP) or videos (MP4, WebM, OGG).";
-                }
-
-                if (empty($error)) {
-                    $mediaName = uniqid() . '.' . $extension;
-                    $mediaPath = $targetDir . $mediaName;
-                    
-                    if (move_uploaded_file($file['tmp_name'], $mediaPath)) {
-                        // Double-check that file was created
-                        if (!file_exists($mediaPath)) {
-                            $error = "Error: File was not saved properly. Please try again.";
-                            $mediaName = null;
-                            $mediaType = null;
-                        } else {
-                            // Verify file size after upload
-                            if (filesize($mediaPath) == 0) {
-                                $error = "Error: Uploaded file is empty or corrupted.";
-                                unlink($mediaPath); // Remove empty file
-                                $mediaName = null;
-                                $mediaType = null;
-                            }
-                        }
-                    } else {
-                        $error = "Error: Failed to save file. Please check directory permissions.";
-                        $mediaName = null;
-                        $mediaType = null;
-                    }
-                }
-            }
-        } elseif ($file && $file['error'] != UPLOAD_ERR_NO_FILE) {
-            // Handle upload errors
-            $uploadErrors = [
-                UPLOAD_ERR_INI_SIZE => 'File too large (server limit exceeded)',
-                UPLOAD_ERR_FORM_SIZE => 'File too large (form limit exceeded)',
-                UPLOAD_ERR_PARTIAL => 'File upload was incomplete',
-                UPLOAD_ERR_NO_FILE => 'No file was uploaded',
-                UPLOAD_ERR_NO_TMP_DIR => 'Missing temporary folder',
-                UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk',
-                UPLOAD_ERR_EXTENSION => 'File upload stopped by extension'
-            ];
-            $errorCode = $file['error'];
-            $error = "Upload error: " . ($uploadErrors[$errorCode] ?? "Unknown error (Code: $errorCode)");
-        }
-
-        // Insert into database if no errors
-        if (empty($error)) {
-            // Ensure only valid enum values for ENUM field
-            if ($mediaType && !in_array($mediaType, ['image', 'video'])) {
-                $mediaType = null;
-            }
-
-            $stmt = $conn->prepare("
-                INSERT INTO community (post, postDate, userID, media, mediaType) 
-                VALUES (?, ?, ?, ?, ?)
-            ");
-
-            if (!$stmt) {
-                $error = "Database Error: " . $conn->error;
-            } else {
-                // Handle NULL values properly
-                $bindMediaName = !empty($mediaName) ? $mediaName : null;
-                $bindMediaType = !empty($mediaType) ? $mediaType : null;
-
-                $stmt->bind_param("ssiss", 
-                    $post, 
-                    $date, 
-                    $userID, 
-                    $bindMediaName, 
-                    $bindMediaType
-                );
-
-                if ($stmt->execute()) {
-                    $success = "Post shared successfully!" . ($bindMediaName ? " File: $bindMediaName" : "");
-                    // Clear form fields
-                    $title = "";
-                    $description = "";
-                } else {
-                    $error = "Database Error: " . $stmt->error;
-                    if (!empty($mediaName)) {
-                        unlink($targetDir . $mediaName);
-                    }
-                }
-                $stmt->close();
-            }
-        }
-    }
-}
-
-// Check what columns exist in the users table
-$userColumns = $conn->query("SHOW COLUMNS FROM users");
-$userColumnNames = [];
-if ($userColumns) {
-    while ($col = $userColumns->fetch_assoc()) {
-        $userColumnNames[] = $col['Field'];
-    }
-}
-
-// Build the query based on available columns
-$selectColumns = "c.*";
-$joinClause = "";
-
-if (in_array('username', $userColumnNames)) {
-    $selectColumns .= ", u.username";
-    $joinClause = "LEFT JOIN users u ON c.userID = u.userID";
-} elseif (in_array('name', $userColumnNames)) {
-    $selectColumns .= ", u.name as username";
-    $joinClause = "LEFT JOIN users u ON c.userID = u.userID";
-} elseif (in_array('email', $userColumnNames)) {
-    $selectColumns .= ", u.email as username";
-    $joinClause = "LEFT JOIN users u ON c.userID = u.userID";
-} else {
-    // If no user identifying column exists, just get the userID
-    $selectColumns .= ", c.userID";
-}
-
-// Fetch existing posts from database to display
-$posts = [];
-$query = "SELECT $selectColumns FROM community c $joinClause ORDER BY c.postDate DESC";
-$postsQuery = $conn->query($query);
-
-if ($postsQuery) {
-    while ($row = $postsQuery->fetch_assoc()) {
-        $posts[] = $row;
+        $postCommentCounts[$post['communityID']] = $commentCount;
     }
 }
 ?>
@@ -296,6 +85,19 @@ if ($postsQuery) {
             cursor: pointer;
             transition: all 0.3s ease;
             background-color: #f9f9f9;
+        }
+        
+        .comment-count {
+            background-color: #C89091;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            margin-left: 0.25rem;
         }
         
         .file-upload-label:hover {
@@ -389,27 +191,30 @@ if ($postsQuery) {
                             <?php foreach ($posts as $post): ?>
                                 <div class="bg-white rounded-lg shadow-md mb-6 overflow-hidden">
                                     <div class="p-6 pb-0">
-                                        <div class="flex items-center space-x-4 mb-4">
-                                            <div class="w-11 h-11 bg-primary rounded-full flex items-center justify-center text-white">
-                                                <i class="fas fa-user"></i>
-                                            </div>
-                                            <div>
-                                                <h4 class="font-semibold text-black">
-                                                    <?php 
-                                                    if (isset($post['username'])) {
-                                                        echo htmlspecialchars($post['username']);
-                                                    } elseif (isset($post['userID'])) {
-                                                        echo "User " . htmlspecialchars($post['userID']);
-                                                    } else {
-                                                        echo "User";
-                                                    }
-                                                    ?>
-                                                </h4>
-                                                <p class="text-sm text-medium-gray">
-                                                    <?php echo date('F j, Y g:i A', strtotime($post['postDate'])); ?>
-                                                </p>
-                                            </div>
-                                        </div>
+<!-- In the posts display section of community.php -->
+<div class="flex items-center space-x-4 mb-4">
+    <div class="w-11 h-11 bg-primary rounded-full flex items-center justify-center text-white">
+        <i class="fas fa-user"></i>
+    </div>
+    <div>
+        <h4 class="font-semibold text-black">
+            <?php 
+            if (isset($post['first_name'])) {
+                echo htmlspecialchars($post['first_name']);
+            } elseif (isset($post['username'])) {
+                echo htmlspecialchars($post['username']);
+            } elseif (isset($post['userID'])) {
+                echo "User " . htmlspecialchars($post['userID']);
+            } else {
+                echo "User";
+            }
+            ?>
+        </h4>
+        <p class="text-sm text-medium-gray">
+            <?php echo date('F j, Y g:i A', strtotime($post['postDate'])); ?>
+        </p>
+    </div>
+</div>
                                     </div>
                                     
                                     <div class="p-6 pt-0">
@@ -459,12 +264,20 @@ if ($postsQuery) {
                                                     <i class="far fa-heart"></i>
                                                     <span>Like</span>
                                                 </button>
-                                                <button class="flex items-center space-x-2 text-medium-gray hover:text-primary transition-colors">
+                                                <button class="comment-btn flex items-center space-x-2 text-medium-gray hover:text-primary transition-colors" 
+                                                        data-post-id="<?php echo $post['communityID']; ?>">
                                                     <i class="far fa-comment"></i>
                                                     <span>Comment</span>
+                                                    <?php if (isset($postCommentCounts[$post['communityID']]) && $postCommentCounts[$post['communityID']] > 0): ?>
+                                                        <span class="comment-count"><?php echo $postCommentCounts[$post['communityID']]; ?></span>
+                                                    <?php endif; ?>
                                                 </button>
                                             </div>
-                                            <div class="text-sm text-medium-gray">0 likes • 0 comments</div>
+                                            <div class="text-sm text-medium-gray">
+                                                0 likes • 
+                                                <?php echo isset($postCommentCounts[$post['communityID']]) ? $postCommentCounts[$post['communityID']] : 0; ?> 
+                                                comments
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -480,6 +293,44 @@ if ($postsQuery) {
                 </div>
             </div>
         </section>
+    </div>
+
+    <!-- Comments Modal -->
+    <div id="commentsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] overflow-hidden">
+            <div class="p-6 border-b border-border">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-bold text-text">Comments</h2>
+                    <button id="closeComments" class="text-light-gray text-2xl hover:text-black">&times;</button>
+                </div>
+                <div id="commentsPostTitle" class="text-sm text-medium-gray mt-2"></div>
+            </div>
+            
+            <!-- Comments List -->
+            <div id="commentsList" class="p-6 overflow-y-auto max-h-96">
+                <div class="text-center text-medium-gray">Loading comments...</div>
+            </div>
+            
+            <!-- Add Comment Form -->
+            <div class="p-6 border-t border-border">
+                <form id="addCommentForm" class="space-y-4">
+                    <input type="hidden" id="currentCommunityID" name="communityID">
+                    <div>
+                        <textarea id="commentText" name="comment" rows="3" 
+                                  placeholder="Write your comment..." required
+                                  class="w-full p-3 border-2 border-border rounded focus:border-primary outline-none"
+                                  maxlength="300"></textarea>
+                        <div class="text-sm text-medium-gray mt-1 flex justify-between">
+                            <span>Max 300 characters</span>
+                            <span id="charCount">0/300</span>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-primary text-white p-3 rounded hover:bg-medium-pink font-semibold transition-colors">
+                        Post Comment
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
 
     <!-- Share Recipe Modal -->
@@ -535,126 +386,18 @@ if ($postsQuery) {
         </div>
     </div>
 
+    <!-- Include the external JavaScript files -->
+    <script src="community_script.js"></script>
+    
+    <?php if (!empty($success)): ?>
     <script>
-        // Modal functionality
-        const shareRecipeBtn = document.getElementById('shareRecipeBtn');
-        const shareRecipeModal = document.getElementById('shareRecipeModal');
-        const closeShareRecipe = document.getElementById('closeShareRecipe');
-        const mediaUpload = document.getElementById('mediaUpload');
-        const fileUploadLabel = document.getElementById('fileUploadLabel');
-        const previewContainer = document.getElementById('previewContainer');
-        const fileInfo = document.getElementById('fileInfo');
-
-        shareRecipeBtn.addEventListener('click', () => {
-            shareRecipeModal.classList.remove('hidden');
-            shareRecipeModal.classList.add('flex');
-        });
-        
-        closeShareRecipe.addEventListener('click', () => {
-            closeModal();
-        });
-
-        // File upload preview with enhanced feedback
-        mediaUpload.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            previewContainer.classList.add('hidden');
-            previewContainer.innerHTML = '';
-            fileInfo.classList.add('hidden');
-            fileInfo.innerHTML = '';
-
-            if (file) {
-                // Show file information
-                const fileSize = (file.size / 1024 / 1024).toFixed(2);
-                fileInfo.innerHTML = `Selected: ${file.name} (${fileSize} MB)`;
-                fileInfo.classList.remove('hidden');
-
-                if (file.size > 10 * 1024 * 1024) {
-                    fileInfo.innerHTML = `<span style="color: red;">File too large: ${fileSize} MB (max 10MB)</span>`;
-                    mediaUpload.value = '';
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    previewContainer.innerHTML = '';
-                    
-                    // Create remove button
-                    const removeBtn = document.createElement('button');
-                    removeBtn.type = 'button';
-                    removeBtn.className = 'remove-media-btn';
-                    removeBtn.innerHTML = '<i class="fas fa-times"></i>';
-                    removeBtn.title = 'Remove file';
-                    removeBtn.addEventListener('click', function() {
-                        mediaUpload.value = '';
-                        previewContainer.classList.add('hidden');
-                        previewContainer.innerHTML = '';
-                        fileInfo.classList.add('hidden');
-                    });
-                    
-                    if (file.type.startsWith('image/')) {
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        img.alt = 'Preview';
-                        img.className = 'w-full h-64 object-cover';
-                        previewContainer.appendChild(img);
-                    } else if (file.type.startsWith('video/')) {
-                        const video = document.createElement('video');
-                        video.src = e.target.result;
-                        video.controls = true;
-                        video.className = 'w-full h-64 object-cover';
-                        previewContainer.appendChild(video);
-                    } else {
-                        fileInfo.innerHTML = `<span style="color: orange;">Unsupported file type: ${file.type}</span>`;
-                        return;
-                    }
-                    
-                    previewContainer.appendChild(removeBtn);
-                    previewContainer.classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        // Close modal when clicking outside
-        shareRecipeModal.addEventListener('click', function(e) {
-            if (e.target === shareRecipeModal) {
-                closeModal();
-            }
-        });
-
-        // Close modal with Escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && !shareRecipeModal.classList.contains('hidden')) {
-                closeModal();
-            }
-        });
-
-        function closeModal() {
-            shareRecipeModal.classList.add('hidden');
-            shareRecipeModal.classList.remove('flex');
-            document.getElementById('recipeForm').reset();
-            previewContainer.classList.add('hidden');
-            previewContainer.innerHTML = '';
-            fileInfo.classList.add('hidden');
-        }
-
-        // Form validation
-        document.getElementById('recipeForm').addEventListener('submit', function(e) {
-            const title = document.querySelector('input[name="title"]').value.trim();
-            const description = document.querySelector('textarea[name="description"]').value.trim();
-            
-            if (!title || !description) {
-                e.preventDefault();
-                alert('Please fill in both title and description fields.');
-            }
-        });
-
-        // Auto-refresh after successful post submission
-        <?php if (!empty($success)): ?>
+        document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 window.location.href = window.location.href.split('?')[0];
             }, 2000);
-        <?php endif; ?>
+        });
     </script>
+    <?php endif; ?>
+
 </body>
 </html>

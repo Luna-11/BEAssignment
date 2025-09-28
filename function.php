@@ -313,4 +313,113 @@ function uploadImage($file) {
     error_log("Failed to move uploaded file");
     return null;
 }
+
+
+
+//for the comment 
+
+
+/**
+ * Function to store comment from user
+ */
+function storeComment($conn, $userID, $comment, $communityID, $recipeID = null) {
+    // Validate inputs
+    if (empty($comment) || empty($communityID)) {
+        return ["success" => false, "message" => "Comment and community ID are required"];
+    }
+    
+    if (strlen($comment) > 300) {
+        return ["success" => false, "message" => "Comment must be less than 300 characters"];
+    }
+    
+    // Check if user exists and is logged in
+    if (!$userID) {
+        return ["success" => false, "message" => "User must be logged in to comment"];
+    }
+    
+    // Check if community post exists
+    $postCheck = $conn->prepare("SELECT postID FROM community WHERE postID = ?");
+    $postCheck->bind_param("i", $communityID);
+    $postCheck->execute();
+    $postResult = $postCheck->get_result();
+    
+    if ($postResult->num_rows == 0) {
+        return ["success" => false, "message" => "Community post not found"];
+    }
+    $postCheck->close();
+    
+    // Prepare and execute insert statement
+    $date = date("Y-m-d H:i:s");
+    $stmt = $conn->prepare("INSERT INTO comment (comment, userID, communityID, recipeID, commentDate) VALUES (?, ?, ?, ?, ?)");
+    
+    if (!$stmt) {
+        return ["success" => false, "message" => "Database error: " . $conn->error];
+    }
+    
+    $stmt->bind_param("siiis", $comment, $userID, $communityID, $recipeID, $date);
+    
+    if ($stmt->execute()) {
+        $commentID = $stmt->insert_id;
+        $stmt->close();
+        return ["success" => true, "message" => "Comment added successfully", "commentID" => $commentID];
+    } else {
+        $error = $stmt->error;
+        $stmt->close();
+        return ["success" => false, "message" => "Failed to add comment: " . $error];
+    }
+}
+
+/**
+ * Function to get comments for a community post
+ */
+function getComments($conn, $communityID) {
+    $comments = [];
+    
+    // Check what columns exist in the users table
+    $userColumns = $conn->query("SHOW COLUMNS FROM users");
+    $userColumnNames = [];
+    if ($userColumns) {
+        while ($col = $userColumns->fetch_assoc()) {
+            $userColumnNames[] = $col['Field'];
+        }
+    }
+    
+    // Build the query based on available columns
+    $selectColumns = "c.*";
+    $joinClause = "";
+    
+    if (in_array('username', $userColumnNames)) {
+        $selectColumns .= ", u.username";
+        $joinClause = "LEFT JOIN users u ON c.userID = u.userID";
+    } elseif (in_array('name', $userColumnNames)) {
+        $selectColumns .= ", u.name as username";
+        $joinClause = "LEFT JOIN users u ON c.userID = u.userID";
+    } elseif (in_array('email', $userColumnNames)) {
+        $selectColumns .= ", u.email as username";
+        $joinClause = "LEFT JOIN users u ON c.userID = u.userID";
+    } else {
+        $selectColumns .= ", c.userID";
+    }
+    
+    $stmt = $conn->prepare("
+        SELECT $selectColumns 
+        FROM comment c 
+        $joinClause 
+        WHERE c.communityID = ? 
+        ORDER BY c.commentDate ASC
+    ");
+    
+    if ($stmt) {
+        $stmt->bind_param("i", $communityID);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        while ($row = $result->fetch_assoc()) {
+            $comments[] = $row;
+        }
+        $stmt->close();
+    }
+    
+    return $comments;
+}
 ?>
