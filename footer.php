@@ -6,10 +6,10 @@
         <h3 class="text-lg md:text-xl font-bold mb-3">FoodFusion</h3>
         <p class="mb-4 text-sm md:text-base">Bringing culinary enthusiasts together through the love of cooking.</p>
         <div class="social-links flex gap-4">
-          <a href="#" aria-label="Facebook" class="text-white hover:text-gray-200"><i class="fab fa-facebook"></i></a>
-          <a href="#" aria-label="Instagram" class="text-white hover:text-gray-200"><i class="fab fa-instagram"></i></a>
-          <a href="#" aria-label="Twitter" class="text-white hover:text-gray-200"><i class="fab fa-twitter"></i></a>
-          <a href="#" aria-label="YouTube" class="text-white hover:text-gray-200"><i class="fab fa-youtube"></i></a>
+          <a href="https://www.facebook.com" aria-label="Facebook" class="text-white hover:text-gray-200"><i class="fab fa-facebook"></i></a>
+          <a href="https://www.instagram.com/" aria-label="Instagram" class="text-white hover:text-gray-200"><i class="fab fa-instagram"></i></a>
+          <a href="https://x.com/?lang=en" aria-label="Twitter" class="text-white hover:text-gray-200"><i class="fab fa-twitter"></i></a>
+          <a href="https://www.youtube.com/" aria-label="YouTube" class="text-white hover:text-gray-200"><i class="fab fa-youtube"></i></a>
         </div>
       </div>
       
@@ -18,7 +18,7 @@
         <ul class="space-y-2 text-sm md:text-base">
           <li><a href="#privacy" class="hover:underline">Privacy Policy</a></li>
           <li><a href="#terms" class="hover:underline">Terms of Service</a></li>
-          <li><a href="#cookies" class="hover:underline">Cookie Policy</a></li>
+          <li><a href="cookiesPage" class="hover:underline">Cookie Policy</a></li>
         </ul>
       </div>
       

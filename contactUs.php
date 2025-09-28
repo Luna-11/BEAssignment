@@ -1,448 +1,307 @@
 <?php
 session_start();
-
-// Enable error reporting for debugging
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-// Include database configuration
 include('configMysql.php');
+include('functions.php');
 
-// Try different paths for functions.php
-$functionPaths = [
-    './functions.php',
-    'functions.php',
-    __DIR__ . '/functions.php',
-    dirname(__FILE__) . '/functions.php'
-];
+$userID = isset($_SESSION['userID']) ? $_SESSION['userID'] : null;
+$usersData = $userID ? showUser($userID) : [];
+$users = $usersData[0] ?? null;
 
-$functionsLoaded = false;
-foreach ($functionPaths as $path) {
-    if (file_exists($path)) {
-        include($path);
-        $functionsLoaded = true;
-        break;
-    }
-}
-
-// If functions.php still not found, handle gracefully
-if (!$functionsLoaded) {
-    function showUser($userID) {
-        return [];
-    }
-}
-
-// Fetch user data if logged in
-$userData = [];
-if (isset($_SESSION['userID'])) {
-    $userData = showUser($_SESSION['userID']);
-    $userData = !empty($userData) ? $userData[0] : [];
-}
-
-// Handle form submission
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['contactFirstName'])) {
-    // Sanitize input
-    $firstName = trim(filter_var($_POST['contactFirstName'], FILTER_SANITIZE_STRING));
-    $lastName = trim(filter_var($_POST['contactLastName'], FILTER_SANITIZE_STRING));
-    $email = trim(filter_var($_POST['contactEmail'], FILTER_SANITIZE_EMAIL));
-    $subject = trim(filter_var($_POST['contactSubject'], FILTER_SANITIZE_STRING));
-    $message = trim(filter_var($_POST['contactMessage'], FILTER_SANITIZE_STRING));
-
-    // Validate required fields
-    if (empty($firstName) || empty($lastName) || empty($email) || empty($subject) || empty($message)) {
-        $errorMessage = 'All fields are required';
-    }
-    // Validate email format
-    elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $errorMessage = 'Invalid email format';
-    } else {
-        // Set userID (NULL if not logged in)
-        $userID = isset($_SESSION['userID']) ? $_SESSION['userID'] : NULL;
-
-        try {
-            // Prepare SQL statement
-            $stmt = $conn->prepare("INSERT INTO contact_form (userID, FirstName, LastName, email, subject, message, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())");
-            
-            if ($stmt) {
-                $stmt->bind_param("isssss", $userID, $firstName, $lastName, $email, $subject, $message);
-                
-                if ($stmt->execute()) {
-                    $successMessage = 'Thank you for your message! We will get back to you soon.';
-                    // Clear form fields after successful submission
-                    $_POST = array();
-                } else {
-                    $errorMessage = 'Failed to send message. Please try again.';
-                }
-                $stmt->close();
-            } else {
-                $errorMessage = 'Database error. Please try again.';
-            }
-        } catch (Exception $e) {
-            $errorMessage = 'Sorry, there was an error sending your message. Please try again.';
-        }
-    }
+$message = '';
+$message_type = '';
+if (isset($_SESSION['message'])) {
+    $message = $_SESSION['message'];
+    $message_type = isset($_SESSION['message_type']) ? $_SESSION['message_type'] : 'danger';
+    unset($_SESSION['message']);
+    unset($_SESSION['message_type']);
 }
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Us - FoodFusion</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <style>
-        :root {
-            --primary-color: #C89091;
-            --text-color: #7b4e48;
-            --lightest-color: #fcfaf2;
-            --light_pink: #e9d0cb;
-            --medium_pink: #ddb2b1;
-            --light_yellow: #f9f1e5;
-            --white: #fff;
-            --black: #222;
-            --shadow-color: rgba(0,0,0,0.1);
-            --border-color: #ccc;
-            --button-color: #333;
-        }
-
-        /* Modal animations */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Custom styles for modal */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            animation: fadeIn 0.3s ease;
-        }
-
-        .modal-content {
-            background-color: var(--white);
-            margin: 5% auto;
-            padding: 30px;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 500px;
-            position: relative;
-            box-shadow: 0 10px 30px var(--shadow-color);
-            animation: slideIn 0.3s ease;
-        }
-
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            position: absolute;
-            right: 20px;
-            top: 15px;
-        }
-
-        .close:hover {
-            color: var(--text-color);
-        }
-
-        /* Custom form styles */
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--text-color);
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s ease;
-            font-family: inherit;
-            box-sizing: border-box;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: var(--primary-color);
-        }
-
-        .btn {
-            background: var(--primary-color);
-            color: var(--white);
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
-        }
-
-        .btn:hover {
-            background: var(--medium_pink);
-            transform: translateY(-2px);
-        }
-
-        .modal-link {
-            text-align: center;
-            margin-top: 15px;
-        }
-
-        .modal-link a {
-            color: var(--primary-color);
-            text-decoration: none;
-        }
-
-        .modal-link a:hover {
-            text-decoration: underline;
-        }
-
-        /* Success/Error message styles */
-        .alert {
-            padding: 15px;
-            margin-bottom: 20px;
-            border: 1px solid transparent;
-            border-radius: 8px;
-        }
-
-        .alert-success {
-            color: #155724;
-            background-color: #d4edda;
-            border-color: #c3e6cb;
-        }
-
-        .alert-error {
-            color: #721c24;
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us - FoodFusion</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --food-primary: #C89091;
+      --food-text: #7b4e48;
+      --food-lightest: #fcfaf2;
+      --food-light-pink: #e9d0cb;
+      --food-light-yellow: #f9f1e5;
+      --food-medium-pink: #ddb2b1;
+    }
+    
+    .food-primary-bg {
+      background-color: var(--food-primary);
+    }
+    
+    .food-light-pink-bg {
+      background-color: var(--food-light-pink);
+    }
+    
+    .food-light-yellow-bg {
+      background-color: var(--food-light-yellow);
+    }
+    
+    .food-medium-pink-bg {
+      background-color: var(--food-medium-pink);
+    }
+    
+    .food-text {
+      color: var(--food-text);
+    }
+    
+    .food-primary-text {
+      color: var(--food-primary);
+    }
+  </style>
 </head>
-<body class="bg-[#fcfaf2] font-sans">
-    <!-- Navigation Bar -->
-    <?php include 'navbar.php'; ?>
+<body class="bg-[#fcfaf2] text-[#7b4e48] font-sans min-h-screen flex flex-col">
 
-    <!-- Contact Header -->
-    <section class="bg-cover bg-center bg-no-repeat py-20" style="background-image: url('./BEpics/banner3.jpg');">
-        <div class="container mx-auto px-4 text-center text-white">
-            <h1 class="text-4xl md:text-5xl font-bold mb-4">Contact Us</h1>
-            <p class="text-xl md:text-2xl opacity-90 max-w-2xl mx-auto">We'd love to hear from you! Get in touch with any questions, recipe requests, or feedback.</p>
-        </div>
-    </section>
+<!-- Navigation -->
+<nav class="food-primary-bg text-white p-4 shadow-md">
+  <div class="container mx-auto flex flex-col md:flex-row justify-between items-center">
+    <a href="index.html" class="text-2xl font-bold mb-4 md:mb-0">FoodFusion</a>
+    <div class="flex flex-wrap justify-center space-x-4 md:space-x-6">
+      <a href="index.html" class="hover:underline py-1">Home</a>
+      <a href="about.html" class="hover:underline py-1">About Us</a>
+      <a href="recipes.html" class="hover:underline py-1">Recipe Collection</a>
+      <a href="cookbook.html" class="hover:underline py-1">Community Cookbook</a>
+      <a href="resources.html" class="hover:underline py-1">Culinary Resources</a>
+      <a href="contact.html" class="font-bold underline py-1">Contact Us</a>
+    </div>
+    <div class="flex items-center space-x-4 mt-4 md:mt-0">
+      <a href="login.html" class="hover:underline">Login</a>
+      <a href="register.html" class="bg-white text-[#7b4e48] px-4 py-2 rounded hover:bg-gray-100 font-medium">Sign Up</a>
+    </div>
+  </div>
+</nav>
 
-    <!-- Contact Content -->
-    <section class="py-16">
-        <div class="container mx-auto px-4 max-w-6xl">
-            <!-- Display success/error messages -->
-            <?php if (isset($successMessage)): ?>
-                <div class="alert alert-success mb-6">
-                    <?php echo $successMessage; ?>
-                </div>
-            <?php endif; ?>
+<!-- Hero Section -->
+<section class="food-light-yellow-bg py-16">
+  <div class="container mx-auto px-4 text-center">
+    <h1 class="text-4xl md:text-5xl font-bold food-text mb-4">Contact Us</h1>
+    <p class="text-xl max-w-2xl mx-auto">We'd love to hear from you! Reach out with enquiries, recipe requests, or feedback.</p>
+  </div>
+</section>
 
-            <?php if (isset($errorMessage)): ?>
-                <div class="alert alert-error mb-6">
-                    <?php echo $errorMessage; ?>
-                </div>
-            <?php endif; ?>
+<!-- Contact Content -->
+<section class="py-12">
+  <div class="container mx-auto px-4">
+    <div class="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
-                <!-- Contact Info -->
-                <div class="lg:col-span-1 space-y-6">
-                    <div class="bg-white rounded-xl shadow-lg p-8 text-center">
-                        <i class="fas fa-envelope text-4xl text-[#C89091] mb-4"></i>
-                        <h3 class="text-xl font-bold text-[#7b4e48] mb-3">Email Us</h3>
-                        <p class="text-gray-600">hello@foodfusion.com</p>
-                        <p class="text-gray-600">support@foodfusion.com</p>
-                    </div>
-                    <div class="bg-white rounded-xl shadow-lg p-8 text-center">
-                        <i class="fas fa-phone text-4xl text-[#C89091] mb-4"></i>
-                        <h3 class="text-xl font-bold text-[#7b4e48] mb-3">Call Us</h3>
-                        <p class="text-gray-600">+1 (555) 123-4567</p>
-                        <p class="text-gray-600">Mon-Fri: 9AM-6PM EST</p>
-                    </div>
-                </div>
+      <!-- Contact Info -->
+      <div class="food-light-pink-bg rounded-lg p-8">
+        <h2 class="text-3xl font-bold food-text mb-6">Get in Touch</h2>
+        <p class="text-lg mb-8">Whether you have questions about recipes, want to share feedback, or need cooking advice, we're here to help!</p>
 
-                <!-- Contact Form -->
-                <div class="lg:col-span-2 bg-white rounded-xl shadow-lg p-8">
-                    <h2 class="text-3xl font-bold text-[#7b4e48] mb-6 text-center">Send us a Message</h2>
-                    <form id="contactForm" action="contactUs.php" method="POST" class="space-y-6">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div class="form-group">
-                                <label for="contactFirstName">First Name</label>
-                                <input type="text" id="contactFirstName" name="contactFirstName" 
-                                       value="<?php echo isset($_POST['contactFirstName']) ? htmlspecialchars($_POST['contactFirstName']) : (isset($userData['firstName']) ? htmlspecialchars($userData['firstName']) : ''); ?>" 
-                                       required>
-                            </div>
-                            <div class="form-group">
-                                <label for="contactLastName">Last Name</label>
-                                <input type="text" id="contactLastName" name="contactLastName" 
-                                       value="<?php echo isset($_POST['contactLastName']) ? htmlspecialchars($_POST['contactLastName']) : (isset($userData['lastName']) ? htmlspecialchars($userData['lastName']) : ''); ?>" 
-                                       required>
-                            </div>
-                            <div class="form-group">
-                                <label for="contactEmail">Email Address</label>
-                                <input type="email" id="contactEmail" name="contactEmail" 
-                                       value="<?php echo isset($_POST['contactEmail']) ? htmlspecialchars($_POST['contactEmail']) : (isset($userData['email']) ? htmlspecialchars($userData['email']) : ''); ?>" 
-                                       required>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="contactSubject">Subject</label>
-                            <select id="contactSubject" name="contactSubject" required>
-                                <option value="">Select a subject</option>
-                                <option value="general" <?php echo (isset($_POST['contactSubject']) && $_POST['contactSubject'] == 'general') ? 'selected' : ''; ?>>General Inquiry</option>
-                                <option value="recipe-request" <?php echo (isset($_POST['contactSubject']) && $_POST['contactSubject'] == 'recipe-request') ? 'selected' : ''; ?>>Recipe Request</option>
-                                <option value="feedback" <?php echo (isset($_POST['contactSubject']) && $_POST['contactSubject'] == 'feedback') ? 'selected' : ''; ?>>Feedback</option>
-                                <option value="technical" <?php echo (isset($_POST['contactSubject']) && $_POST['contactSubject'] == 'technical') ? 'selected' : ''; ?>>Technical Support</option>
-                                <option value="partnership" <?php echo (isset($_POST['contactSubject']) && $_POST['contactSubject'] == 'partnership') ? 'selected' : ''; ?>>Partnership</option>
-                                <option value="other" <?php echo (isset($_POST['contactSubject']) && $_POST['contactSubject'] == 'other') ? 'selected' : ''; ?>>Other</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="contactMessage">Message</label>
-                            <textarea id="contactMessage" name="contactMessage" rows="6" required placeholder="Tell us how we can help you..."><?php echo isset($_POST['contactMessage']) ? htmlspecialchars($_POST['contactMessage']) : ''; ?></textarea>
-                        </div>
-                        <button type="submit" class="btn w-full">Send Message</button>
-                    </form>
-                </div>
+        <div class="space-y-8">
+          <!-- Email -->
+          <div class="flex items-start">
+            <div class="food-primary-text text-2xl mr-4 mt-1">
+              <i class="fas fa-envelope"></i>
             </div>
-        </div>
-    </section>
+            <div>
+              <h3 class="text-xl font-bold food-text mb-2">Email Us</h3>
+              <p class="mb-1">hello@foodfusion.com</p>
+              <p>support@foodfusion.com</p>
+            </div>
+          </div>
 
-    <!-- Join Us Modal -->
-    <div id="joinModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeJoinModal()">&times;</span>
-            <h2 class="text-2xl font-bold text-[#7b4e48] mb-4">Join FoodFusion Community</h2>
-            <form id="joinForm" class="space-y-4">
-                <div class="form-group">
-                    <label for="firstName">First Name</label>
-                    <input type="text" id="firstName" name="firstName" required>
-                </div>
-                <div class="form-group">
-                    <label for="lastName">Last Name</label>
-                    <input type="text" id="lastName" name="lastName" required>
-                </div>
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" required>
-                </div>
-                <button type="submit" class="btn w-full">Join Us</button>
-            </form>
+          <!-- Phone -->
+          <div class="flex items-start">
+            <div class="food-primary-text text-2xl mr-4 mt-1">
+              <i class="fas fa-phone"></i>
+            </div>
+            <div>
+              <h3 class="text-xl font-bold food-text mb-2">Call Us</h3>
+              <p class="mb-1">+1 (555) 123-4567</p>
+              <p>Mon–Fri, 9AM–6PM EST</p>
+            </div>
+          </div>
         </div>
+
+        <!-- Social Media -->
+        <div class="mt-10">
+          <h3 class="text-xl font-bold food-text mb-4">Connect With Us</h3>
+          <div class="flex space-x-4">
+            <a href="#" class="food-primary-text text-2xl hover:opacity-80">
+              <i class="fab fa-facebook"></i>
+            </a>
+            <a href="#" class="food-primary-text text-2xl hover:opacity-80">
+              <i class="fab fa-instagram"></i>
+            </a>
+            <a href="#" class="food-primary-text text-2xl hover:opacity-80">
+              <i class="fab fa-twitter"></i>
+            </a>
+            <a href="#" class="food-primary-text text-2xl hover:opacity-80">
+              <i class="fab fa-youtube"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Form -->
+      <div class="food-light-yellow-bg rounded-lg p-8">
+        <!-- Success/Error Message -->
+        <?php if ($message): ?>
+          <div class="p-4 mb-6 rounded <?= $message_type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' ?>">
+            <?= htmlspecialchars($message) ?>
+          </div>
+        <?php endif; ?>
+
+        <form id="contactForm" class="contact-form" method="POST" action="contactSave.php">
+          <h2 class="text-3xl font-bold food-text mb-6">Send us a Message</h2>
+
+          <?php if (!$userID): ?>
+            <!-- Guest user: must fill name + email -->
+            <div class="grid md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label for="firstName" class="block food-text font-medium mb-2">First Name</label>
+                <input type="text" id="firstName" name="firstName" required 
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C89091] focus:border-transparent">
+              </div>
+              <div>
+                <label for="lastName" class="block food-text font-medium mb-2">Last Name</label>
+                <input type="text" id="lastName" name="lastName" required 
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C89091] focus:border-transparent">
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label for="email" class="block food-text font-medium mb-2">Email Address</label>
+              <input type="email" id="email" name="email" required 
+                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C89091] focus:border-transparent">
+            </div>
+          <?php else: ?>
+            <!-- Logged in user: autofill -->
+            <?php if ($users): ?>
+              <input type="hidden" name="userID" value="<?= htmlspecialchars($users['userID']) ?>">
+              <input type="hidden" name="firstName" value="<?= htmlspecialchars($users['FirstName']) ?>">
+              <input type="hidden" name="lastName" value="<?= htmlspecialchars($users['LastName']) ?>">
+              <input type="hidden" name="email" value="<?= htmlspecialchars($users['email']) ?>">
+              <div class="mb-4 p-4 bg-[#e9d0cb] rounded-lg">
+                <p class="food-text">
+                  <strong>Logged in as:</strong><br>
+                  <?= htmlspecialchars($users['FirstName'] . " " . $users['LastName']) ?><br>
+                  <?= htmlspecialchars($users['email']) ?>
+                </p>
+              </div>
+            <?php else: ?>
+              <div class="mb-4 p-4 bg-red-100 text-red-800 rounded-lg">
+                <p><strong>Error:</strong> User not found in database.</p>
+              </div>
+            <?php endif; ?>
+          <?php endif; ?>
+
+          <!-- Subject -->
+          <div class="mb-4">
+            <label for="subject" class="block food-text font-medium mb-2">Subject</label>
+            <input type="text" id="subject" name="subject" required placeholder="Enter subject..." 
+                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C89091] focus:border-transparent">
+          </div>
+
+          <!-- Message -->
+          <div class="mb-6">
+            <label for="message" class="block food-text font-medium mb-2">Message</label>
+            <textarea id="message" name="message" rows="6" placeholder="Tell us how we can help you..." required 
+                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C89091] focus:border-transparent"></textarea>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" 
+                  class="w-full food-primary-bg text-white py-3 px-6 rounded-lg font-bold text-lg hover:bg-[#b58081] transition duration-300">
+            Send Message
+          </button>
+          
+          <p id="formResponse" class="mt-4 text-center"></p>
+        </form>
+      </div>
+
     </div>
+  </div>
+</section>
 
-    <!-- Login Modal -->
-    <div id="loginModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeLoginModal()">&times;</span>
-            <h2 class="text-2xl font-bold text-[#7b4e48] mb-4">Login to FoodFusion</h2>
-            <form id="loginForm" class="space-y-4">
-                <div class="form-group">
-                    <label for="loginEmail">Email</label>
-                    <input type="email" id="loginEmail" name="loginEmail" required>
-                </div>
-                <div class="form-group">
-                    <label for="loginPassword">Password</label>
-                    <input type="password" id="loginPassword" name="loginPassword" required>
-                </div>
-                <button type="submit" class="btn w-full">Login</button>
-                <p class="modal-link">Don't have an account? <a href="#" onclick="switchToJoin()">Join us</a></p>
-            </form>
+<!-- Footer -->
+<footer class="food-primary-bg text-white py-8 mt-auto">
+  <div class="container mx-auto px-4">
+    <div class="grid md:grid-cols-4 gap-8">
+      <div>
+        <h3 class="text-xl font-bold mb-4">FoodFusion</h3>
+        <p>Bringing food enthusiasts together through shared culinary experiences.</p>
+      </div>
+      <div>
+        <h3 class="text-xl font-bold mb-4">Quick Links</h3>
+        <ul class="space-y-2">
+          <li><a href="index.html" class="hover:underline">Home</a></li>
+          <li><a href="about.html" class="hover:underline">About Us</a></li>
+          <li><a href="recipes.html" class="hover:underline">Recipe Collection</a></li>
+          <li><a href="cookbook.html" class="hover:underline">Community Cookbook</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="text-xl font-bold mb-4">Resources</h3>
+        <ul class="space-y-2">
+          <li><a href="resources.html" class="hover:underline">Culinary Resources</a></li>
+          <li><a href="educational.html" class="hover:underline">Educational Resources</a></li>
+          <li><a href="privacy.html" class="hover:underline">Privacy Policy</a></li>
+          <li><a href="cookies.html" class="hover:underline">Cookie Policy</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="text-xl font-bold mb-4">Connect With Us</h3>
+        <div class="flex space-x-4">
+          <a href="#" class="hover:opacity-80">Facebook</a>
+          <a href="#" class="hover:opacity-80">Instagram</a>
+          <a href="#" class="hover:opacity-80">Twitter</a>
+          <a href="#" class="hover:opacity-80">Pinterest</a>
         </div>
+      </div>
     </div>
+    <div class="border-t border-white border-opacity-30 mt-8 pt-8 text-center">
+      <p>&copy; 2024 FoodFusion. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
 
-    <!-- Footer -->
-    <?php include 'footer.php'; ?>
+<script>
+  // Form submission handling
+  document.getElementById('contactForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Simple validation
+    const formData = new FormData(this);
+    let isValid = true;
+    
+    // Check required fields
+    for (let [key, value] of formData.entries()) {
+      if (!value.trim()) {
+        isValid = false;
+        break;
+      }
+    }
+    
+    if (!isValid) {
+      document.getElementById('formResponse').textContent = 'Please fill in all required fields.';
+      document.getElementById('formResponse').className = 'mt-4 text-center text-red-600';
+      return;
+    }
+    
+    // Simulate form submission
+    document.getElementById('formResponse').textContent = 'Sending message...';
+    document.getElementById('formResponse').className = 'mt-4 text-center text-blue-600';
+    
+    // In a real implementation, you would send the form data to the server here
+    setTimeout(() => {
+      document.getElementById('formResponse').textContent = 'Message sent successfully!';
+      document.getElementById('formResponse').className = 'mt-4 text-center text-green-600';
+      this.reset();
+    }, 1500);
+  });
+</script>
 
-    <script>
-        // Modal functionality
-        function openJoinModal() {
-            document.getElementById('joinModal').style.display = 'block';
-            document.getElementById('loginModal').style.display = 'none';
-        }
-
-        function closeJoinModal() {
-            document.getElementById('joinModal').style.display = 'none';
-        }
-
-        function openLoginModal() {
-            document.getElementById('loginModal').style.display = 'block';
-            document.getElementById('joinModal').style.display = 'none';
-        }
-
-        function closeLoginModal() {
-            document.getElementById('loginModal').style.display = 'none';
-        }
-
-        function switchToJoin() {
-            closeLoginModal();
-            openJoinModal();
-        }
-
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const joinModal = document.getElementById('joinModal');
-            const loginModal = document.getElementById('loginModal');
-            
-            if (event.target === joinModal) {
-                closeJoinModal();
-            }
-            if (event.target === loginModal) {
-                closeLoginModal();
-            }
-        }
-
-        // Modal form handlers (prevent actual submission for demo)
-        document.getElementById('joinForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('Welcome to FoodFusion! Your account has been created.');
-            closeJoinModal();
-            this.reset();
-        });
-
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('Successfully logged in!');
-            closeLoginModal();
-            this.reset();
-        });
-    </script>
 </body>
 </html>

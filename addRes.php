@@ -43,7 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $errors[] = "Description is required";
     } else {
         $description = trim($_POST["description"]);
-        if (strlen($description) > 500) $errors[] = "Description must be less than 500 characters";
+        // No character limit for TEXT data type - removed the 500 character limit
     }
 
     if (empty($_POST["resourceType"])) {
@@ -233,6 +233,21 @@ function uploadAndSaveFile($conn, $resourceID, $file, $uploadPath, $fileType) {
       margin: 10px 0;
       border-radius: 5px;
     }
+    /* Custom scrollbar for textarea */
+    textarea::-webkit-scrollbar {
+      width: 8px;
+    }
+    textarea::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+    textarea::-webkit-scrollbar-thumb {
+      background: #C89091;
+      border-radius: 10px;
+    }
+    textarea::-webkit-scrollbar-thumb:hover {
+      background: #ddb2b1;
+    }
   </style>
 </head>
 <body class="bg-light-yellow text-text-color font-segoe min-h-screen relative">
@@ -266,8 +281,8 @@ function uploadAndSaveFile($conn, $resourceID, $file, $uploadPath, $fileType) {
 
         <div class="mb-6">
           <label for="description" class="block font-semibold text-text-color mb-2">Description</label>
-          <textarea class="w-full p-3 border border-border-color rounded-lg bg-white text-text-color focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50" id="description" name="description" rows="4" placeholder="Brief summary of the resource..." required><?php echo htmlspecialchars($description); ?></textarea>
-          <div class="text-medium-gray opacity-90 text-sm mt-1">Max 200 characters recommended.</div>
+          <textarea class="w-full p-3 border border-border-color rounded-lg bg-white text-text-color focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50" id="description" name="description" rows="8" placeholder="Detailed description of the resource..." required><?php echo htmlspecialchars($description); ?></textarea>
+          <div class="text-medium-gray opacity-90 text-sm mt-1">Supports long-form content with TEXT data type.</div>
         </div>
 
         <div class="mb-6">

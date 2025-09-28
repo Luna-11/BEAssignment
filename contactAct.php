@@ -1,77 +1,55 @@
 <?php
 session_start();
+include('config/database.php');
+include('functions.php');
 
-// Enable error reporting
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // collect data
+    $userID     = isset($_POST['userID']) ? intval($_POST['userID']) : null;
+    $firstName  = trim($_POST['firstName'] ?? '');
+    $lastName   = trim($_POST['lastName'] ?? '');
+    $email      = trim($_POST['email'] ?? '');
+    $subject    = trim($_POST['subject'] ?? '');
+    $message    = trim($_POST['message'] ?? '');
 
-// Include database configuration
-include('configMysql.php');
-
-// Check if the form is submitted
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['contactFirstName'])) {
-    
-    // Sanitize input
-    $firstName = trim(filter_var($_POST['contactFirstName'], FILTER_SANITIZE_STRING));
-    $lastName = trim(filter_var($_POST['contactLastName'], FILTER_SANITIZE_STRING));
-    $email = trim(filter_var($_POST['contactEmail'], FILTER_SANITIZE_EMAIL));
-    $subject = trim(filter_var($_POST['contactSubject'], FILTER_SANITIZE_STRING));
-    $message = trim(filter_var($_POST['contactMessage'], FILTER_SANITIZE_STRING));
-
-    // Validate required fields
-    if (empty($firstName) || empty($lastName) || empty($email) || empty($subject) || empty($message)) {
-        $_SESSION['error_message'] = 'All fields are required';
-        header('Location: contactUs.php');
-        exit;
+    // basic validation
+    if (empty($subject) || empty($message)) {
+        $_SESSION['message'] = "Subject and message are required.";
+        $_SESSION['message_type'] = "danger";
+        header("Location: contact.php");
+        exit();
     }
 
-    // Validate email format
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $_SESSION['error_message'] = 'Invalid email format';
-        header('Location: contactUs.php');
-        exit;
+    // if guest user, require name + email
+    if (!$userID && (empty($firstName) || empty($lastName) || empty($email))) {
+        $_SESSION['message'] = "Please fill in your name and email.";
+        $_SESSION['message_type'] = "danger";
+        header("Location: contact.php");
+        exit();
     }
 
-    // Set userID (NULL if not logged in)
-    $userID = isset($_SESSION['userID']) ? $_SESSION['userID'] : NULL;
+    // prepare data
+    $data = [
+        'userID'    => $userID ?: null,
+        'FirstName' => $firstName,
+        'LastName'  => $lastName,
+        'email'     => $email,
+        'subject'   => $subject,
+        'message'   => $message
+    ];
 
-    try {
-        // Check if connection exists
-        if (!$conn) {
-            throw new Exception('Database connection failed');
-        }
-
-        // Prepare SQL statement
-        $stmt = $conn->prepare("INSERT INTO contact_form(userID, FirstName, LastName, email, subject, message, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())");
-        
-        if ($stmt === false) {
-            throw new Exception('Failed to prepare statement: ' . $conn->error);
-        }
-
-        // Bind parameters
-        $stmt->bind_param("isssss", $userID, $firstName, $lastName, $email, $subject, $message);
-
-        // Execute the statement
-        if ($stmt->execute()) {
-            $_SESSION['success_message'] = 'Thank you for your message! We will get back to you soon.';
-        } else {
-            throw new Exception('Failed to execute statement: ' . $stmt->error);
-        }
-
-        // Close statement
-        $stmt->close();
-        
-    } catch (Exception $e) {
-        error_log("Database error: " . $e->getMessage());
-        $_SESSION['error_message'] = 'Sorry, there was an error sending your message. Please try again.';
+    // save to DB
+    if (saveContactMessage($data)) {
+        $_SESSION['message'] = "Your message has been sent successfully!";
+        $_SESSION['message_type'] = "success";
+    } else {
+        $_SESSION['message'] = "Something went wrong. Please try again.";
+        $_SESSION['message_type'] = "danger";
     }
 
-    // Redirect back to contact page
-    header('Location: contactUs.php');
-    exit;
+    header("Location: contact.php");
+    exit();
 } else {
-    // If someone tries to access this page directly
-    header('Location: contactUs.php');
-    exit;
+    header("Location: contact.php");
+    exit();
 }
-?>
