@@ -1,19 +1,35 @@
 <?php
 session_start();
-include('configMysql.php');
-include('functions.php');
+require_once 'configMysql.php'; // Your database connection
 
-$userID = isset($_SESSION['userID']) ? $_SESSION['userID'] : null;
-$usersData = $userID ? showUser($userID) : [];
-$users = $usersData[0] ?? null;
+// Check if user is logged in and get user data
+$userID = null;
+$users = null;
 
+if (isset($_SESSION['userID'])) {
+    $userID = $_SESSION['userID'];
+    
+    // Fetch user details from database - UPDATED TO MATCH YOUR USERS TABLE
+    $sql = "SELECT id, first_name, last_name, mail FROM users WHERE id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $userID);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $users = $result->fetch_assoc();
+    $stmt->close();
+}
+
+// Check for contact form messages
 $message = '';
 $message_type = '';
-if (isset($_SESSION['message'])) {
-    $message = $_SESSION['message'];
-    $message_type = isset($_SESSION['message_type']) ? $_SESSION['message_type'] : 'danger';
-    unset($_SESSION['message']);
-    unset($_SESSION['message_type']);
+
+if (isset($_SESSION['contact_message'])) {
+    $message = $_SESSION['contact_message'];
+    $message_type = $_SESSION['contact_message_type'];
+    
+    // Clear the session messages
+    unset($_SESSION['contact_message']);
+    unset($_SESSION['contact_message_type']);
 }
 ?>
 <!DOCTYPE html>
@@ -62,23 +78,7 @@ if (isset($_SESSION['message'])) {
 <body class="bg-[#fcfaf2] text-[#7b4e48] font-sans min-h-screen flex flex-col">
 
 <!-- Navigation -->
-<nav class="food-primary-bg text-white p-4 shadow-md">
-  <div class="container mx-auto flex flex-col md:flex-row justify-between items-center">
-    <a href="index.html" class="text-2xl font-bold mb-4 md:mb-0">FoodFusion</a>
-    <div class="flex flex-wrap justify-center space-x-4 md:space-x-6">
-      <a href="index.html" class="hover:underline py-1">Home</a>
-      <a href="about.html" class="hover:underline py-1">About Us</a>
-      <a href="recipes.html" class="hover:underline py-1">Recipe Collection</a>
-      <a href="cookbook.html" class="hover:underline py-1">Community Cookbook</a>
-      <a href="resources.html" class="hover:underline py-1">Culinary Resources</a>
-      <a href="contact.html" class="font-bold underline py-1">Contact Us</a>
-    </div>
-    <div class="flex items-center space-x-4 mt-4 md:mt-0">
-      <a href="login.html" class="hover:underline">Login</a>
-      <a href="register.html" class="bg-white text-[#7b4e48] px-4 py-2 rounded hover:bg-gray-100 font-medium">Sign Up</a>
-    </div>
-  </div>
-</nav>
+    <?php include('navbar.php'); ?>
 
 <!-- Hero Section -->
 <section class="food-light-yellow-bg py-16">
@@ -179,15 +179,15 @@ if (isset($_SESSION['message'])) {
           <?php else: ?>
             <!-- Logged in user: autofill -->
             <?php if ($users): ?>
-              <input type="hidden" name="userID" value="<?= htmlspecialchars($users['userID']) ?>">
-              <input type="hidden" name="firstName" value="<?= htmlspecialchars($users['FirstName']) ?>">
-              <input type="hidden" name="lastName" value="<?= htmlspecialchars($users['LastName']) ?>">
-              <input type="hidden" name="email" value="<?= htmlspecialchars($users['email']) ?>">
+              <input type="hidden" name="userID" value="<?= htmlspecialchars($users['id']) ?>">
+              <input type="hidden" name="firstName" value="<?= htmlspecialchars($users['first_name']) ?>">
+              <input type="hidden" name="lastName" value="<?= htmlspecialchars($users['last_name']) ?>">
+              <input type="hidden" name="email" value="<?= htmlspecialchars($users['mail']) ?>">
               <div class="mb-4 p-4 bg-[#e9d0cb] rounded-lg">
                 <p class="food-text">
                   <strong>Logged in as:</strong><br>
-                  <?= htmlspecialchars($users['FirstName'] . " " . $users['LastName']) ?><br>
-                  <?= htmlspecialchars($users['email']) ?>
+                  <?= htmlspecialchars($users['first_name'] . " " . $users['last_name']) ?><br>
+                  <?= htmlspecialchars($users['mail']) ?>
                 </p>
               </div>
             <?php else: ?>
@@ -226,80 +226,35 @@ if (isset($_SESSION['message'])) {
 </section>
 
 <!-- Footer -->
-<footer class="food-primary-bg text-white py-8 mt-auto">
-  <div class="container mx-auto px-4">
-    <div class="grid md:grid-cols-4 gap-8">
-      <div>
-        <h3 class="text-xl font-bold mb-4">FoodFusion</h3>
-        <p>Bringing food enthusiasts together through shared culinary experiences.</p>
-      </div>
-      <div>
-        <h3 class="text-xl font-bold mb-4">Quick Links</h3>
-        <ul class="space-y-2">
-          <li><a href="index.html" class="hover:underline">Home</a></li>
-          <li><a href="about.html" class="hover:underline">About Us</a></li>
-          <li><a href="recipes.html" class="hover:underline">Recipe Collection</a></li>
-          <li><a href="cookbook.html" class="hover:underline">Community Cookbook</a></li>
-        </ul>
-      </div>
-      <div>
-        <h3 class="text-xl font-bold mb-4">Resources</h3>
-        <ul class="space-y-2">
-          <li><a href="resources.html" class="hover:underline">Culinary Resources</a></li>
-          <li><a href="educational.html" class="hover:underline">Educational Resources</a></li>
-          <li><a href="privacy.html" class="hover:underline">Privacy Policy</a></li>
-          <li><a href="cookies.html" class="hover:underline">Cookie Policy</a></li>
-        </ul>
-      </div>
-      <div>
-        <h3 class="text-xl font-bold mb-4">Connect With Us</h3>
-        <div class="flex space-x-4">
-          <a href="#" class="hover:opacity-80">Facebook</a>
-          <a href="#" class="hover:opacity-80">Instagram</a>
-          <a href="#" class="hover:opacity-80">Twitter</a>
-          <a href="#" class="hover:opacity-80">Pinterest</a>
-        </div>
-      </div>
-    </div>
-    <div class="border-t border-white border-opacity-30 mt-8 pt-8 text-center">
-      <p>&copy; 2024 FoodFusion. All rights reserved.</p>
-    </div>
-  </div>
-</footer>
+    <?php include('footer.php'); ?>
 
 <script>
-  // Form submission handling
+  // Remove the form submission prevention to allow actual form submission
+  // Only keep validation if needed, but don't prevent default behavior
+  
   document.getElementById('contactForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // Simple validation
+    // Simple validation - but don't prevent form submission
     const formData = new FormData(this);
     let isValid = true;
     
     // Check required fields
     for (let [key, value] of formData.entries()) {
-      if (!value.trim()) {
+      if (!value.trim() && key !== 'userID') { // userID can be empty for guests
         isValid = false;
         break;
       }
     }
     
     if (!isValid) {
+      e.preventDefault();
       document.getElementById('formResponse').textContent = 'Please fill in all required fields.';
       document.getElementById('formResponse').className = 'mt-4 text-center text-red-600';
       return;
     }
     
-    // Simulate form submission
+    // Show loading message but allow form to submit
     document.getElementById('formResponse').textContent = 'Sending message...';
     document.getElementById('formResponse').className = 'mt-4 text-center text-blue-600';
-    
-    // In a real implementation, you would send the form data to the server here
-    setTimeout(() => {
-      document.getElementById('formResponse').textContent = 'Message sent successfully!';
-      document.getElementById('formResponse').className = 'mt-4 text-center text-green-600';
-      this.reset();
-    }, 1500);
   });
 </script>
 
