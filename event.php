@@ -16,43 +16,36 @@ $events = getEvents($conn);
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Popup overlay styling */
-        .popup-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
+        /* Smooth transitions for popup */
+        .event-popup {
+            transition: opacity 0.3s ease;
+            opacity: 0;
         }
-        
-        .popup-content {
-            background-color: white;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            position: relative;
+
+        .event-popup .popup-content {
+            transition: transform 0.3s ease;
+            transform: scale(0.9);
         }
-        
-        .popup-close {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #7b4e48;
-            z-index: 10;
+
+        /* Custom scrollbar for modal */
+        .popup-content::-webkit-scrollbar {
+            width: 8px;
         }
-        
+
+        .popup-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .popup-content::-webkit-scrollbar-thumb {
+            background: #C89091;
+            border-radius: 10px;
+        }
+
+        .popup-content::-webkit-scrollbar-thumb:hover {
+            background: #ddb2b1;
+        }
+
         /* Line clamp utility for text truncation */
         .line-clamp-2 {
             display: -webkit-box;
@@ -60,15 +53,16 @@ $events = getEvents($conn);
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
-        
-        /* Animation for popup */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
+
+        /* Ensure navbar stays below popup */
+        .navbar-container {
+            z-index: 100;
+            position: relative;
         }
-        
-        .popup-content {
-            animation: fadeIn 0.3s ease-out;
+
+        /* Popup overlay - HIGHEST z-index */
+        .popup-overlay {
+            z-index: 99999 !important;
         }
     </style>
     <script>
@@ -95,29 +89,60 @@ $events = getEvents($conn);
         
         // JavaScript functions for popup functionality
         function openEventDetails(eventId) {
-            document.getElementById('event-popup-' + eventId).style.display = 'flex';
+            const popup = document.getElementById('event-popup-' + eventId);
+            popup.classList.remove('hidden');
             document.body.style.overflow = 'hidden'; // Prevent background scrolling
+            
+            // Add smooth entrance animation
+            setTimeout(() => {
+                popup.style.opacity = '1';
+                const popupContent = popup.querySelector('.popup-content');
+                if (popupContent) {
+                    popupContent.style.transform = 'scale(1)';
+                }
+            }, 10);
         }
         
         function closeEventDetails(eventId) {
-            document.getElementById('event-popup-' + eventId).style.display = 'none';
-            document.body.style.overflow = 'auto'; // Restore scrolling
+            const popup = document.getElementById('event-popup-' + eventId);
+            popup.style.opacity = '0';
+            const popupContent = popup.querySelector('.popup-content');
+            if (popupContent) {
+                popupContent.style.transform = 'scale(0.9)';
+            }
+            
+            setTimeout(() => {
+                popup.classList.add('hidden');
+                document.body.style.overflow = 'auto'; // Restore scrolling
+            }, 300);
         }
-        
-        // Close popup when clicking outside the content
-        window.onclick = function(event) {
-            var popups = document.querySelectorAll('.popup-overlay');
-            popups.forEach(function(popup) {
-                if (event.target === popup) {
-                    var eventId = popup.id.split('-').pop();
+
+        // Close popup when clicking outside the content or pressing Escape
+        document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('click', function(event) {
+                if (event.target.classList.contains('popup-overlay')) {
+                    const eventId = event.target.id.split('-').pop();
                     closeEventDetails(eventId);
                 }
             });
-        }
+
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    const openPopups = document.querySelectorAll('.popup-overlay:not(.hidden)');
+                    openPopups.forEach(popup => {
+                        const eventId = popup.id.split('-').pop();
+                        closeEventDetails(eventId);
+                    });
+                }
+            });
+        });
     </script>
 </head>
 <body class="bg-lightest text-text leading-relaxed">
-    <?php include 'navbar.php'; ?>
+    <!-- Navbar with lower z-index -->
+    <div class="navbar-container">
+        <?php include 'navbar.php'; ?>
+    </div>
     
     <!-- Banner Section -->
     <header class="hero bg-gradient-to-r from-[rgba(189,150,180,0.4)] to-[rgba(14,13,14,0.9)] bg-cover bg-center bg-no-repeat h-64 md:h-96 flex items-center justify-center text-[#e9d0cb] text-center px-4" style="background-image: url('./BEpics/event2.jpg');">
@@ -149,6 +174,15 @@ $events = getEvents($conn);
                 <?php unset($_SESSION['success_message']); ?>
             <?php endif; ?>
             
+            <!-- Debug: Check what's in events array -->
+            <?php 
+            // Debug output
+            echo "<!-- DEBUG: Number of events: " . count($events) . " -->";
+            if (!empty($events)) {
+                echo "<!-- DEBUG: First event data: " . print_r($events[0], true) . " -->";
+            }
+            ?>
+            
             <!-- Events List -->
             <?php if (empty($events)): ?>
                 <!-- Debug information will help us see what's happening -->
@@ -174,6 +208,9 @@ $events = getEvents($conn);
                     $month = $eventDate->format('M');
                     $year = $eventDate->format('Y');
                     $time = $eventDate->format('g:i A');
+                    
+                    // Debug the image path
+                    echo "<!-- DEBUG: Event Image Path: " . ($event['eventImage'] ?? 'NOT SET') . " -->";
                 ?>
                     <div class="flex mb-4 bg-light-yellow rounded-xl overflow-hidden shadow-custom hover:shadow-custom-hover hover:-translate-y-1 transition-all duration-300 border-l-4 border-primary min-h-44">
                         <!-- Date Box -->
@@ -205,30 +242,38 @@ $events = getEvents($conn);
                                 <!-- Event Image Thumbnail -->
                                 <?php if (!empty($event['eventImage'])): ?>
                                     <div class="w-16 h-16 rounded-lg overflow-hidden border-2 border-light-pink">
-                                        <img src="uploads/events/<?php echo htmlspecialchars($event['eventImage']); ?>" 
+                                        <!-- FIX: Use the stored path directly -->
+                                        <img src="<?php echo htmlspecialchars($event['eventImage']); ?>" 
                                              alt="<?php echo htmlspecialchars($event['title']); ?>" 
-                                             class="w-full h-full object-cover">
+                                             class="w-full h-full object-cover"
+                                             onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'w-full h-full bg-light-pink flex items-center justify-center\'><i class=\'fas fa-image text-primary\'></i></div>';">
+                                    </div>
+                                <?php else: ?>
+                                    <div class="w-16 h-16 rounded-lg border-2 border-light-pink bg-light-pink flex items-center justify-center">
+                                        <i class="fas fa-image text-primary"></i>
                                     </div>
                                 <?php endif; ?>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Event Details Popup -->
-                    <div id="event-popup-<?php echo $event['eventID']; ?>" class="popup-overlay">
-                        <div class="popup-content">
-                            <button class="popup-close" onclick="closeEventDetails(<?php echo $event['eventID']; ?>)">
+                    <!-- Event Details Popup - UPDATED with higher z-index -->
+                    <div id="event-popup-<?php echo $event['eventID']; ?>" class="popup-overlay fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4">
+                        <div class="popup-content bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative">
+                            <button class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl z-10 bg-white bg-opacity-90 rounded-full w-10 h-10 flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110" 
+                                    onclick="closeEventDetails(<?php echo $event['eventID']; ?>)">
                                 <i class="fas fa-times"></i>
                             </button>
                             
                             <!-- Popup Header with Event Image -->
                             <div class="relative">
                                 <?php if (!empty($event['eventImage'])): ?>
-                                    <img src="uploads/events/<?php echo htmlspecialchars($event['eventImage']); ?>" 
+                                    <img src="<?php echo htmlspecialchars($event['eventImage']); ?>" 
                                          alt="<?php echo htmlspecialchars($event['title']); ?>" 
-                                         class="w-full h-48 object-cover rounded-t-lg">
+                                         class="w-full max-h-[500px] object-contain rounded-t-lg bg-black"
+                                         onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'w-full h-80 bg-light-pink rounded-t-lg flex items-center justify-center\'><i class=\'fas fa-calendar-alt text-6xl text-primary\'></i></div>';">
                                 <?php else: ?>
-                                    <div class="w-full h-48 bg-light-pink rounded-t-lg flex items-center justify-center">
+                                    <div class="w-full h-80 bg-light-pink rounded-t-lg flex items-center justify-center">
                                         <i class="fas fa-calendar-alt text-6xl text-primary"></i>
                                     </div>
                                 <?php endif; ?>
@@ -257,14 +302,7 @@ $events = getEvents($conn);
                                 
                                 <div class="mb-6">
                                     <h3 class="text-xl font-semibold text-text mb-2">About this Event</h3>
-                                    <p class="text-medium-gray leading-relaxed"><?php echo htmlspecialchars($event['description']); ?></p>
-                                </div>
-                                
-                                <div class="flex justify-between items-center">
-                                    
-                                    <button onclick="closeEventDetails(<?php echo $event['eventID']; ?>)" class="bg-light-pink hover:bg-medium-pink text-text font-bold py-3 px-6 rounded-lg transition-all duration-300">
-                                        Close
-                                    </button>
+                                    <p class="text-medium-gray leading-relaxed whitespace-pre-line"><?php echo htmlspecialchars($event['description']); ?></p>
                                 </div>
                             </div>
                         </div>

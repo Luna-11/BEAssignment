@@ -117,6 +117,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         if (move_uploaded_file($eventImage['tmp_name'], $targetFile)) {
                             echo "<!-- DEBUG: File moved successfully -->\n";
                             
+                            // FIX: Store the relative path in database instead of just filename
+                            $imagePath = "uploads/events/" . $uniqueName;
+                            
                             // Prepare SQL - matches your database schema exactly
                             $sql = "INSERT INTO event (title, eventDate, location, description, eventImage, userID) 
                                     VALUES (?, ?, ?, ?, ?, ?)";
@@ -126,7 +129,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $error = "Error preparing statement: " . $conn->error;
                             }
                             else {
-                                $stmt->bind_param("sssssi", $title, $eventDate, $location, $description, $uniqueName, $userID);
+                                // Use $imagePath instead of $uniqueName
+                                $stmt->bind_param("sssssi", $title, $eventDate, $location, $description, $imagePath, $userID);
 
                                 if ($stmt->execute()) {
                                     // Success - verify session is still valid before redirect
@@ -137,7 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     }
                                     
                                     // Session is valid, redirect to home page instead of event.php
-                          $_SESSION['success_message'] = "Event created successfully!";
+                                    $_SESSION['success_message'] = "Event created successfully!";
     
                                     // Redirect to home page
                                     header("Location: index.php");

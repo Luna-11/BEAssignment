@@ -255,15 +255,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="sidebar-link flex items-center px-6 py-3 text-text-color hover:bg-light-pink transition-colors duration-200" data-tab="saved-posts">
-                            <i class="fas fa-save mr-3 text-primary"></i>
-                            <span>Saved Posts</span>
-                        </a>
-                    </li>
-                    <li>
                         <a href="#" class="sidebar-link flex items-center px-6 py-3 text-text-color hover:bg-light-pink transition-colors duration-200" data-tab="liked-posts">
                             <i class="fas fa-heart mr-3 text-primary"></i>
-                            <span>Liked Posts</span>
+                            <span>Comments</span>
                         </a>
                     </li>
                     <li>
@@ -294,183 +288,299 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
             <div id="tab-content">
                 <!-- Profile Tab -->
 
-<div id="profile" class="tab-content active">
-    <div class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-2xl font-bold text-text-color mb-6 flex items-center">
-            <i class="fas fa-user-circle mr-2 text-primary"></i> My Profile
-        </h2>
-        
-        <?php if (!empty($message)): ?>
-            <div class="mb-4 p-4 border rounded <?php echo $messageType === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700'; ?>">
-                <?php echo htmlspecialchars($message); ?>
-            </div>
-        <?php endif; ?>
-        
-        <div class="flex flex-col md:flex-row gap-8">
-            <!-- Profile Picture + Info -->
-            <div class="md:w-1/3 flex flex-col items-center">
-                <div class="relative mb-4">
-                    <img src="<?php echo htmlspecialchars($user['profileImage'] ?? 'https://via.placeholder.com/200'); ?>" 
-                         alt="Profile Picture" 
-                         class="w-48 h-48 rounded-full object-cover border-4 border-primary shadow-lg"
-                         onerror="this.src='https://via.placeholder.com/200'">
+            <div id="profile" class="tab-content active">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-2xl font-bold text-text-color mb-6 flex items-center">
+                        <i class="fas fa-user-circle mr-2 text-primary"></i> My Profile
+                    </h2>
                     
-                    <!-- Profile Image Upload Form -->
-                    <form method="POST" enctype="multipart/form-data" class="absolute bottom-2 right-2">
-                        <input type="file" id="profileImageInput" name="profileImage" accept="image/*" 
-                               class="hidden" onchange="this.form.submit()">
-                        <button type="button" onclick="document.getElementById('profileImageInput').click()" 
-                                class="bg-primary text-white p-2 rounded-full hover:bg-medium-pink transition-colors">
-                            <i class="fas fa-camera"></i>
-                        </button>
-                    </form>
-                </div>
-                
-                <h3 class="text-xl font-bold text-text-color">
-                    <?php echo htmlspecialchars(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? '')); ?>
-                </h3>
-                
-                <div class="mt-4 flex space-x-2">
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-light-pink text-text-color">
-                        <i class="fas fa-utensils mr-1"></i> 12 Recipes
-                    </span>
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-light-pink text-text-color">
-                        <i class="fas fa-heart mr-1"></i> 45 Likes
-                    </span>
+                    <?php if (!empty($message)): ?>
+                        <div class="mb-4 p-4 border rounded <?php echo $messageType === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700'; ?>">
+                            <?php echo htmlspecialchars($message); ?>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <div class="flex flex-col md:flex-row gap-8">
+                        <!-- Profile Picture + Info -->
+                        <div class="md:w-1/3 flex flex-col items-center">
+                            <div class="relative mb-4">
+                                <img src="<?php echo htmlspecialchars($user['profileImage'] ?? 'https://via.placeholder.com/200'); ?>" 
+                                    alt="Profile Picture" 
+                                    class="w-48 h-48 rounded-full object-cover border-4 border-primary shadow-lg"
+                                    onerror="this.src='https://via.placeholder.com/200'">
+                                
+                                <!-- Profile Image Upload Form -->
+                                <form method="POST" enctype="multipart/form-data" class="absolute bottom-2 right-2">
+                                    <input type="file" id="profileImageInput" name="profileImage" accept="image/*" 
+                                        class="hidden" onchange="this.form.submit()">
+                                    <button type="button" onclick="document.getElementById('profileImageInput').click()" 
+                                            class="bg-primary text-white p-2 rounded-full hover:bg-medium-pink transition-colors">
+                                        <i class="fas fa-camera"></i>
+                                    </button>
+                                </form>
+                            </div>
+                            
+                            <h3 class="text-xl font-bold text-text-color">
+                                <?php echo htmlspecialchars(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? '')); ?>
+                            </h3>
+                            
+                            <div class="mt-4 flex space-x-2">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-light-pink text-text-color">
+                                    <i class="fas fa-utensils mr-1"></i> 12 Recipes
+                                </span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-light-pink text-text-color">
+                                    <i class="fas fa-heart mr-1"></i> 45 Likes
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Profile Form -->
+                        <div class="md:w-2/3">
+                            <form method="POST" class="space-y-4">
+                                <input type="hidden" name="update_profile" value="1">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="firstName" class="block text-sm font-medium text-text-color">First Name</label>
+                                        <input type="text" id="firstName" name="firstName" 
+                                            value="<?php echo htmlspecialchars($user['first_name'] ?? ''); ?>"
+                                            class="mt-1 block w-full px-3 py-2 border border-light-pink rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-light-pink"
+                                            required>
+                                    </div>
+                                    <div>
+                                        <label for="lastName" class="block text-sm font-medium text-text-color">Last Name</label>
+                                        <input type="text" id="lastName" name="lastName" 
+                                            value="<?php echo htmlspecialchars($user['last_name'] ?? ''); ?>"
+                                            class="mt-1 block w-full px-3 py-2 border border-light-pink rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-light-pink"
+                                            required>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label for="email" class="block text-sm font-medium text-text-color">Email Address</label>
+                                    <input type="email" id="email" name="email" 
+                                        value="<?php echo htmlspecialchars($user['mail'] ?? ''); ?>"
+                                        class="mt-1 block w-full px-3 py-2 border border-light-pink rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-light-pink"
+                                        required>
+                                </div>
+                                
+                                <div class="pt-4">
+                                    <button type="submit" 
+                                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-primary hover:bg-medium-pink focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+                                        <i class="fas fa-save mr-2"></i> Update Profile
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+<!-- My Recipes Tab -->
+<div id="posts" class="tab-content">
+    <div class="bg-lightest rounded-lg shadow-md p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-primary flex items-center">
+                <i class="fas fa-utensils mr-2"></i> My Recipes
+            </h2>
+        </div>
+        
+        <?php
+        // Fetch user's recipes from the database
+        $userRecipes = [];
+        $recipeCount = 0;
+        
+        if (isset($_SESSION['userID'])) {
+            $userID = $_SESSION['userID'];
             
-            <!-- Profile Form -->
-            <div class="md:w-2/3">
-                <form method="POST" class="space-y-4">
-                    <input type="hidden" name="update_profile" value="1">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="firstName" class="block text-sm font-medium text-text-color">First Name</label>
-                            <input type="text" id="firstName" name="firstName" 
-                                   value="<?php echo htmlspecialchars($user['first_name'] ?? ''); ?>"
-                                   class="mt-1 block w-full px-3 py-2 border border-light-pink rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-light-pink"
-                                   required>
-                        </div>
-                        <div>
-                            <label for="lastName" class="block text-sm font-medium text-text-color">Last Name</label>
-                            <input type="text" id="lastName" name="lastName" 
-                                   value="<?php echo htmlspecialchars($user['last_name'] ?? ''); ?>"
-                                   class="mt-1 block w-full px-3 py-2 border border-light-pink rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-light-pink"
-                                   required>
-                        </div>
-                    </div>
+            // SIMPLIFIED QUERY - Let's start with basic recipe data first
+            $recipeQuery = "
+                SELECT 
+                    r.recipeID,
+                    r.recipeName,
+                    r.difficultID,
+                    r.userID,
+                    r.image,
+                    r.text,
+                    r.recipeDescription,
+                    r.date,
+                    r.cuisineTypeID,
+                    r.foodTypeID,
+                    r.dietaryID,
+                    r.ingredient,
+                    d.difficultyName,
+                    c.cuisineType,
+                    f.foodType,
+                    dp.dietName,
+                    (SELECT COUNT(*) FROM likes WHERE recipeID = r.recipeID) as likeCount
+                FROM recipe r
+                LEFT JOIN difficultyLev d ON r.difficultID = d.difficultyID
+                LEFT JOIN cuisineType c ON r.cuisineTypeID = c.cuisineTypeID
+                LEFT JOIN foodType f ON r.foodTypeID = f.foodTypeID
+                LEFT JOIN dietPreferences dp ON r.dietaryID = dp.dietID
+                WHERE r.userID = ?
+                ORDER BY r.date DESC
+            ";
+            
+            $stmt = $conn->prepare($recipeQuery);
+            if ($stmt) {
+                $stmt->bind_param("i", $userID);
+                if ($stmt->execute()) {
+                    $result = $stmt->get_result();
                     
-                    <div>
-                        <label for="email" class="block text-sm font-medium text-text-color">Email Address</label>
-                        <input type="email" id="email" name="email" 
-                               value="<?php echo htmlspecialchars($user['mail'] ?? ''); ?>"
-                               class="mt-1 block w-full px-3 py-2 border border-light-pink rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-light-pink"
-                               required>
-                    </div>
+                    while ($row = $result->fetch_assoc()) {
+                        $userRecipes[] = $row;
+                    }
+                    $recipeCount = count($userRecipes);
                     
-                    <div class="pt-4">
-                        <button type="submit" 
-                                class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-primary hover:bg-medium-pink focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
-                            <i class="fas fa-save mr-2"></i> Update Profile
-                        </button>
+                    // DEBUG: Show what we found
+                    echo "<!-- Debug: User recipes array count = $recipeCount -->";
+                    if ($recipeCount > 0) {
+                        echo "<!-- Debug: First recipe name = " . htmlspecialchars($userRecipes[0]['recipeName']) . " -->";
+                        echo "<!-- Debug: First recipe userID = " . ($userRecipes[0]['userID'] ?? 'NULL') . " -->";
+                    }
+                } else {
+                    echo "<!-- Debug: Query execution failed: " . $stmt->error . " -->";
+                    
+                    // Fallback: Try simple query without joins
+                    $fallbackQuery = "SELECT * FROM recipe WHERE userID = ? ORDER BY date DESC";
+                    $fallbackStmt = $conn->prepare($fallbackQuery);
+                    if ($fallbackStmt) {
+                        $fallbackStmt->bind_param("i", $userID);
+                        $fallbackStmt->execute();
+                        $fallbackResult = $fallbackStmt->get_result();
+                        
+                        while ($row = $fallbackResult->fetch_assoc()) {
+                            $userRecipes[] = $row;
+                        }
+                        $recipeCount = count($userRecipes);
+                        $fallbackStmt->close();
+                        echo "<!-- Debug: Fallback query found $recipeCount recipes -->";
+                    }
+                }
+                $stmt->close();
+            } else {
+                echo "<!-- Debug: Failed to prepare recipe query: " . $conn->error . " -->";
+                
+                // Final fallback: Direct query
+                $directQuery = "SELECT * FROM recipe WHERE userID = $userID ORDER BY date DESC";
+                $directResult = $conn->query($directQuery);
+                if ($directResult) {
+                    while ($row = $directResult->fetch_assoc()) {
+                        $userRecipes[] = $row;
+                    }
+                    $recipeCount = count($userRecipes);
+                    echo "<!-- Debug: Direct query found $recipeCount recipes -->";
+                }
+            }
+        }
+        ?>
+        
+        <div class="mb-4">
+            <p class="text-text-color">
+                <?php echo $recipeCount; ?> recipe<?php echo $recipeCount != 1 ? 's' : ''; ?> found
+            </p>
+        </div>
+        
+        <div class="space-y-6">
+            <?php if (empty($userRecipes)): ?>
+                <div class="text-center py-12">
+                    <div class="text-6xl text-light-pink mb-4">
+                        <i class="fas fa-utensils"></i>
                     </div>
-                </form>
-            </div>
+                    <h3 class="text-xl font-medium text-text-color mb-2">No recipes yet</h3>
+                    <p class="text-medium-gray mb-6">Start sharing your culinary creations with the community!</p>
+                    <a href="upload-recipe.php" class="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-base font-medium rounded-lg text-white bg-primary hover:bg-medium-pink focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+                        <i class="fas fa-plus mr-2"></i> Create Your First Recipe
+                    </a>
+                </div>
+            <?php else: ?>
+                <?php foreach ($userRecipes as $recipe): ?>
+                    <div class="border border-light-pink rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div class="flex flex-col md:flex-row gap-4">
+                            <!-- Recipe Image -->
+                            <div class="md:w-1/4">
+                                <?php if (!empty($recipe['image']) && $recipe['image'] != 'uploads/'): ?>
+                                    <img src="<?php echo htmlspecialchars($recipe['image']); ?>" 
+                                         alt="<?php echo htmlspecialchars($recipe['recipeName']); ?>" 
+                                         class="w-full h-40 object-cover rounded-lg"
+                                         onerror="this.src='https://via.placeholder.com/300x200?text=Recipe+Image'">
+                                <?php else: ?>
+                                    <div class="h-40 bg-gradient-to-r from-primary to-medium-pink rounded-lg flex items-center justify-center text-white text-4xl">
+                                        <i class="fas fa-utensils"></i>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            
+                            <!-- Recipe Details -->
+                            <div class="md:w-3/4">
+                                <div class="flex justify-between items-start">
+                                    <h3 class="text-lg font-medium text-text-color">
+                                        <?php echo htmlspecialchars($recipe['recipeName']); ?>
+                                    </h3>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-light-pink text-text-color">
+                                        <?php 
+                                        if (!empty($recipe['difficultyName'])) {
+                                            echo htmlspecialchars($recipe['difficultyName']);
+                                        } elseif (!empty($recipe['difficultID'])) {
+                                            echo "Level " . htmlspecialchars($recipe['difficultID']);
+                                        } else {
+                                            echo "Not specified";
+                                        }
+                                        ?>
+                                    </span>
+                                </div>
+                                
+                                <p class="text-sm text-medium-gray mt-1">
+                                    Posted on <?php echo date('F j, Y', strtotime($recipe['date'])); ?>
+                                </p>
+                                
+                                <?php if (!empty($recipe['recipeDescription'])): ?>
+                                    <p class="mt-2 text-text-color">
+                                        <?php echo htmlspecialchars(substr($recipe['recipeDescription'], 0, 150)); ?>
+                                        <?php if (strlen($recipe['recipeDescription']) > 150): ?>...<?php endif; ?>
+                                    </p>
+                                <?php elseif (!empty($recipe['text'])): ?>
+                                    <p class="mt-2 text-text-color">
+                                        <?php echo htmlspecialchars(substr($recipe['text'], 0, 150)); ?>
+                                        <?php if (strlen($recipe['text']) > 150): ?>...<?php endif; ?>
+                                    </p>
+                                <?php endif; ?>                               
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
         </div>
     </div>
 </div>
 
-                <!-- My Recipes Tab -->
-                <div id="posts" class="tab-content">
-                    <div class="bg-lightest rounded-lg shadow-md p-6">
-                        <div class="flex justify-between items-center mb-6">
-                            <h2 class="text-2xl font-bold text-primary flex items-center">
-                                <i class="fas fa-utensils mr-2"></i> My Recipes
-                            </h2>
-                            <a href="upload-recipe.html" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-primary hover:bg-medium-pink focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
-                                <i class="fas fa-plus mr-2"></i> Add New Recipe
-                            </a>
-                        </div>
-                        
-                        <div class="space-y-6">
-                            <div class="border border-light-pink rounded-lg p-4 hover:shadow-md transition-shadow">
-                                <div class="flex flex-col md:flex-row gap-4">
-                                    <div class="md:w-1/4">
-                                        <div class="h-40 bg-gradient-to-r from-primary to-medium-pink rounded-lg flex items-center justify-center text-white text-4xl">
-                                            <i class="fas fa-utensils"></i>
-                                        </div>
-                                    </div>
-                                    <div class="md:w-3/4">
-                                        <div class="flex justify-between items-start">
-                                            <h3 class="text-lg font-medium text-text-color">Spicy Thai Basil Noodles</h3>
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-light-pink text-text-color">
-                                                Published
-                                            </span>
-                                        </div>
-                                        <p class="text-sm text-medium-gray mt-1">Posted on September 20, 2025</p>
-                                        <p class="mt-2 text-text-color">A flavorful fusion dish combining Thai basil with Italian pasta noodles. Perfect for a quick weeknight dinner with a spicy kick.</p>
-                                        <div class="mt-3 flex space-x-2">
-                                            <span class="inline-flex items-center text-sm text-medium-gray">
-                                                <i class="fas fa-clock mr-1"></i> 25 min
-                                            </span>
-                                            <span class="inline-flex items-center text-sm text-medium-gray">
-                                                <i class="fas fa-utensil-spoon mr-1"></i> Medium
-                                            </span>
-                                            <span class="inline-flex items-center text-sm text-medium-gray">
-                                                <i class="fas fa-heart mr-1"></i> 24 likes
-                                            </span>
-                                        </div>
-                                        <div class="mt-3 flex space-x-2">
-                                            <button class="text-sm text-primary hover:text-medium-pink transition-colors">
-                                                <i class="fas fa-edit mr-1"></i> Edit
-                                            </button>
-                                            <button class="text-sm text-primary hover:text-medium-pink transition-colors">
-                                                <i class="fas fa-trash mr-1"></i> Delete
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="border border-light-pink rounded-lg p-4 hover:shadow-md transition-shadow">
-                                <div class="flex flex-col md:flex-row gap-4">
-                                    <div class="md:w-1/4">
-                                        <div class="h-40 bg-gradient-to-r from-primary to-medium-pink rounded-lg flex items-center justify-center text-white text-4xl">
-                                            <i class="fas fa-utensils"></i>
-                                        </div>
-                                    </div>
-                                    <div class="md:w-3/4">
-                                        <div class="flex justify-between items-start">
-                                            <h3 class="text-lg font-medium text-text-color">Mediterranean Breakfast Bowl</h3>
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-light-pink text-text-color">
-                                                Draft
-                                            </span>
-                                        </div>
-                                        <p class="text-sm text-medium-gray mt-1">Last edited on September 18, 2025</p>
-                                        <p class="mt-2 text-text-color">A healthy breakfast bowl with Mediterranean flavors including feta, olives, and fresh vegetables. Perfect for a nutritious start to your day.</p>
-                                        <div class="mt-3 flex space-x-2">
-                                            <span class="inline-flex items-center text-sm text-medium-gray">
-                                                <i class="fas fa-clock mr-1"></i> 15 min
-                                            </span>
-                                            <span class="inline-flex items-center text-sm text-medium-gray">
-                                                <i class="fas fa-utensil-spoon mr-1"></i> Easy
-                                            </span>
-                                        </div>
-                                        <div class="mt-3 flex space-x-2">
-                                            <button class="text-sm text-primary hover:text-medium-pink transition-colors">
-                                                <i class="fas fa-edit mr-1"></i> Edit
-                                            </button>
-                                            <button class="text-sm text-primary hover:text-medium-pink transition-colors">
-                                                <i class="fas fa-trash mr-1"></i> Delete
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<script>
+function confirmDelete(recipeId) {
+    if (confirm('Are you sure you want to delete this recipe? This action cannot be undone.')) {
+        // Send AJAX request to delete the recipe
+        fetch('delete-recipe.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'recipe_id=' + recipeId
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Reload the page to show updated list
+                location.reload();
+            } else {
+                alert('Error deleting recipe: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error deleting recipe');
+        });
+    }
+}
+</script>
 
                 <!-- Saved Recipes Tab -->
                 <div id="recipes" class="tab-content">

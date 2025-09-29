@@ -39,7 +39,7 @@
             box-shadow: 0 2px 5px var(--shadow-color);
             position: sticky;
             top: 0;
-            z-index: 1000;
+            z-index: 100;
             width: 100%;
         }
 
