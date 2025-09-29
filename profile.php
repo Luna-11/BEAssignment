@@ -1,18 +1,129 @@
 <?php
 session_start();
+include('./configMysql.php');
 include('./function.php');
 
-// Ensure user is logged in
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+// Check if user is logged in
 if (!isset($_SESSION['userID'])) {
-    header("Location: login.php");
+    header('Location: login.php');
     exit();
 }
 
 $userID = $_SESSION['userID'];
-$userData = showUser($userID);
 
-// Since fetch_all returns an array, grab the first record
-$user = !empty($userData) ? $userData[0] : null;
+// DEBUG: Check the actual table structure
+echo "<!-- Debug: Checking users table structure -->";
+$result = $conn->query("DESCRIBE users");
+if ($result) {
+    echo "<!-- Users table columns: -->";
+    while ($row = $result->fetch_assoc()) {
+        echo "<!-- " . $row['Field'] . " (" . $row['Type'] . ") -->";
+    }
+} else {
+    echo "<!-- Could not describe users table -->";
+}
+
+// Check if we can find the user with different ID column names
+$possibleIdColumns = ['id', 'userID', 'user_id', 'userId'];
+$userFound = false;
+$actualIdColumn = '';
+
+foreach ($possibleIdColumns as $column) {
+    $checkSql = "SELECT COUNT(*) as count FROM users WHERE $column = ?";
+    if ($stmt = $conn->prepare($checkSql)) {
+        $stmt->bind_param("i", $userID);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        $stmt->close();
+        
+        if ($row['count'] > 0) {
+            $userFound = true;
+            $actualIdColumn = $column;
+            echo "<!-- Found user using column: $column -->";
+            break;
+        }
+    }
+}
+
+if (!$userFound) {
+    echo "<!-- Could not find user with any ID column -->";
+} else {
+    echo "<!-- Using ID column: $actualIdColumn -->";
+}
+
+// Initialize variables
+$message = '';
+$messageType = '';
+$user = [];
+
+// Get user profile data
+$profileResult = getUserProfileMySQLi($userID, $conn);
+if ($profileResult['success']) {
+    $user = $profileResult['user'];
+} else {
+    $message = 'Error loading profile: ' . $profileResult['error'];
+    $messageType = 'error';
+}
+
+// Handle profile image upload
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['profileImage'])) {
+    $uploadResult = handleProfileImageUpload($_FILES['profileImage'], $userID);
+    if ($uploadResult['success']) {
+        // Update user profile with new image path - FIXED: using 'id' instead of 'userID'
+        $updateSql = "UPDATE users SET profileImage = ? WHERE id = ?";
+        $stmt = $conn->prepare($updateSql);
+        if ($stmt) {
+            $stmt->bind_param("si", $uploadResult['filePath'], $userID);
+            if ($stmt->execute()) {
+                $message = 'Profile image updated successfully!';
+                $messageType = 'success';
+                // Reload user data
+                $profileResult = getUserProfileMySQLi($userID, $conn);
+                if ($profileResult['success']) {
+                    $user = $profileResult['user'];
+                }
+            } else {
+                $message = 'Failed to update profile image in database: ' . $stmt->error;
+                $messageType = 'error';
+            }
+            $stmt->close();
+        } else {
+            $message = 'Database prepare error: ' . $conn->error;
+            $messageType = 'error';
+        }
+    } else {
+        $message = $uploadResult['error'];
+        $messageType = 'error';
+    }
+}
+
+// Handle profile form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
+    $updateData = [
+        'first_name' => $_POST['firstName'] ?? '',
+        'last_name' => $_POST['lastName'] ?? '',
+        'mail' => $_POST['email'] ?? ''
+    ];
+    
+    $updateResult = updateUserProfileMySQLi($userID, $updateData, $conn);
+    if ($updateResult['success']) {
+        $message = $updateResult['message'];
+        $messageType = 'success';
+        // Reload user data
+        $profileResult = getUserProfileMySQLi($userID, $conn);
+        if ($profileResult['success']) {
+            $user = $profileResult['user'];
+        }
+    } else {
+        $message = $updateResult['error'];
+        $messageType = 'error';
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -50,6 +161,30 @@ $user = !empty($userData) ? $userData[0] : null;
         }
     </script>
     <style>
+                    /* Ensure smooth transitions */
+            .tab-content {
+                display: none;
+                animation: fadeIn 0.3s ease-in-out;
+            }
+
+            .tab-content.active {
+                display: block;
+            }
+
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+
+            /* Fix any layout shifting */
+            .sidebar-link {
+                transition: all 0.2s ease;
+            }
+
+            /* Prevent content flash */
+            #tab-content {
+                min-height: 600px;
+            }
         .active-tab {
             background-color: #f9f1e5;
             color: #7b4e48;
@@ -66,23 +201,35 @@ $user = !empty($userData) ? $userData[0] : null;
             color: #7b4e48;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+        .notification-unread {
+            background-color: #fef7f7;
+            border-left: 4px solid #C89091;
+        }
+        .notification-read {
+            background-color: #fcfaf2;
+        }
     </style>
 </head>
 <body class="bg-light-yellow text-text-color font-segoe min-h-screen">
     <!-- Navbar Placeholder -->
-            <?php include 'navbar.php'; ?>
+    <?php include 'navbar.php'; ?>
 
     <div class="flex">
         <!-- Sidebar -->
-        <div class="w-64 bg-lightest h-screen shadow-md fixed">
-            <div class="p-6 border-b border-light-pink">
-                <div class="flex items-center space-x-3">
-                    <img src="https://via.placeholder.com/50" alt="Profile" class="w-12 h-12 rounded-full border-2 border-medium-pink">
-                    <div>
-                        <h2 class="font-bold text-text-color">John Doe</h2>
+            <div class="w-64 bg-lightest h-screen shadow-md fixed">
+                <div class="p-6 border-b border-light-pink">
+                    <div class="flex items-center space-x-3">
+                        <img src="<?php echo htmlspecialchars($user['profileImage'] ?? 'https://via.placeholder.com/50'); ?>" 
+                            alt="Profile" 
+                            class="w-12 h-12 rounded-full border-2 border-medium-pink"
+                            onerror="this.src='https://via.placeholder.com/50'">
+                        <div>
+                            <h2 class="font-bold text-text-color">
+                                <?php echo htmlspecialchars(($user['first_name'] ?? 'User') . ' ' . ($user['last_name'] ?? '')); ?>
+                            </h2>
+                        </div>
                     </div>
                 </div>
-            </div>
 
             <nav class="mt-6">
                 <div class="px-6 py-2">
@@ -119,6 +266,13 @@ $user = !empty($userData) ? $userData[0] : null;
                             <span>Liked Posts</span>
                         </a>
                     </li>
+                    <li>
+                        <a href="#" class="sidebar-link flex items-center px-6 py-3 text-text-color hover:bg-light-pink transition-colors duration-200" data-tab="notifications">
+                            <i class="fas fa-bell mr-3 text-primary"></i>
+                            <span>Notifications</span>
+                            <span class="ml-auto bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+                        </a>
+                    </li>
                 </ul>
                 
                 <div class="px-6 py-2 mt-6">
@@ -139,28 +293,48 @@ $user = !empty($userData) ? $userData[0] : null;
         <div class="ml-64 flex-1 p-8">
             <div id="tab-content">
                 <!-- Profile Tab -->
+
 <div id="profile" class="tab-content active">
-    <div class="bg-gray-50 rounded-lg shadow-md p-6">
-        <h2 class="text-2xl font-bold text-pink-600 mb-6 flex items-center">
-            <i class="fas fa-user-circle mr-2"></i> My Profile
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-2xl font-bold text-text-color mb-6 flex items-center">
+            <i class="fas fa-user-circle mr-2 text-primary"></i> My Profile
         </h2>
+        
+        <?php if (!empty($message)): ?>
+            <div class="mb-4 p-4 border rounded <?php echo $messageType === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700'; ?>">
+                <?php echo htmlspecialchars($message); ?>
+            </div>
+        <?php endif; ?>
         
         <div class="flex flex-col md:flex-row gap-8">
             <!-- Profile Picture + Info -->
             <div class="md:w-1/3 flex flex-col items-center">
                 <div class="relative mb-4">
-                    <img src="https://via.placeholder.com/200" alt="Profile Picture" 
-                         class="w-48 h-48 rounded-full object-cover border-4 border-pink-400 shadow-lg">
-                    <button class="absolute bottom-2 right-2 bg-pink-600 text-white p-2 rounded-full hover:bg-pink-500 transition-colors">
-                        <i class="fas fa-camera"></i>
-                    </button>
+                    <img src="<?php echo htmlspecialchars($user['profileImage'] ?? 'https://via.placeholder.com/200'); ?>" 
+                         alt="Profile Picture" 
+                         class="w-48 h-48 rounded-full object-cover border-4 border-primary shadow-lg"
+                         onerror="this.src='https://via.placeholder.com/200'">
+                    
+                    <!-- Profile Image Upload Form -->
+                    <form method="POST" enctype="multipart/form-data" class="absolute bottom-2 right-2">
+                        <input type="file" id="profileImageInput" name="profileImage" accept="image/*" 
+                               class="hidden" onchange="this.form.submit()">
+                        <button type="button" onclick="document.getElementById('profileImageInput').click()" 
+                                class="bg-primary text-white p-2 rounded-full hover:bg-medium-pink transition-colors">
+                            <i class="fas fa-camera"></i>
+                        </button>
+                    </form>
                 </div>
-                <h3 class="text-xl font-bold text-gray-800">John Doe</h3>
+                
+                <h3 class="text-xl font-bold text-text-color">
+                    <?php echo htmlspecialchars(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? '')); ?>
+                </h3>
+                
                 <div class="mt-4 flex space-x-2">
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-pink-100 text-gray-700">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-light-pink text-text-color">
                         <i class="fas fa-utensils mr-1"></i> 12 Recipes
                     </span>
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-pink-100 text-gray-700">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-light-pink text-text-color">
                         <i class="fas fa-heart mr-1"></i> 45 Likes
                     </span>
                 </div>
@@ -168,28 +342,36 @@ $user = !empty($userData) ? $userData[0] : null;
             
             <!-- Profile Form -->
             <div class="md:w-2/3">
-                <form class="space-y-4">
+                <form method="POST" class="space-y-4">
+                    <input type="hidden" name="update_profile" value="1">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
-                            <input type="text" id="name" name="name" value="John Doe"
-                                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:border-pink-600 focus:ring-2 focus:ring-pink-200">
+                            <label for="firstName" class="block text-sm font-medium text-text-color">First Name</label>
+                            <input type="text" id="firstName" name="firstName" 
+                                   value="<?php echo htmlspecialchars($user['first_name'] ?? ''); ?>"
+                                   class="mt-1 block w-full px-3 py-2 border border-light-pink rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-light-pink"
+                                   required>
                         </div>
                         <div>
-                            <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
-                            <input type="text" id="username" name="username" value="johndoe"
-                                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:border-pink-600 focus:ring-2 focus:ring-pink-200">
+                            <label for="lastName" class="block text-sm font-medium text-text-color">Last Name</label>
+                            <input type="text" id="lastName" name="lastName" 
+                                   value="<?php echo htmlspecialchars($user['last_name'] ?? ''); ?>"
+                                   class="mt-1 block w-full px-3 py-2 border border-light-pink rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-light-pink"
+                                   required>
                         </div>
                     </div>
                     
                     <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
-                        <input type="email" id="email" name="email" value="john.doe@example.com"
-                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:border-pink-600 focus:ring-2 focus:ring-pink-200">
+                        <label for="email" class="block text-sm font-medium text-text-color">Email Address</label>
+                        <input type="email" id="email" name="email" 
+                               value="<?php echo htmlspecialchars($user['mail'] ?? ''); ?>"
+                               class="mt-1 block w-full px-3 py-2 border border-light-pink rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-light-pink"
+                               required>
                     </div>
                     
                     <div class="pt-4">
-                        <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-pink-600 hover:bg-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-600 transition-colors">
+                        <button type="submit" 
+                                class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-primary hover:bg-medium-pink focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
                             <i class="fas fa-save mr-2"></i> Update Profile
                         </button>
                     </div>
@@ -198,7 +380,6 @@ $user = !empty($userData) ? $userData[0] : null;
         </div>
     </div>
 </div>
-
 
                 <!-- My Recipes Tab -->
                 <div id="posts" class="tab-content">
@@ -454,63 +635,249 @@ $user = !empty($userData) ? $userData[0] : null;
                         </div>
                     </div>
                 </div>
+
+                <!-- Notifications Tab -->
+                <div id="notifications" class="tab-content">
+                    <div class="bg-lightest rounded-lg shadow-md p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-bold text-primary flex items-center">
+                                <i class="fas fa-bell mr-2"></i> Notifications
+                            </h2>
+                            <div class="flex space-x-2">
+                                <button class="inline-flex items-center px-3 py-1 border border-primary text-sm font-medium rounded-lg text-primary hover:bg-light-pink transition-colors" id="mark-all-read">
+                                    <i class="fas fa-check-double mr-1"></i> Mark All as Read
+                                </button>
+                                <button class="inline-flex items-center px-3 py-1 border border-primary text-sm font-medium rounded-lg text-primary hover:bg-light-pink transition-colors" id="clear-all">
+                                    <i class="fas fa-trash-alt mr-1"></i> Clear All
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <!-- Unread Notification -->
+                            <div class="border border-light-pink rounded-lg p-4 hover:shadow-md transition-shadow notification-unread">
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0">
+                                        <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white">
+                                            <i class="fas fa-heart"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ml-4 flex-1">
+                                        <div class="flex justify-between items-start">
+                                            <p class="text-text-color font-medium">Someone liked your recipe</p>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary text-white">
+                                                New
+                                            </span>
+                                        </div>
+                                        <p class="text-sm text-medium-gray mt-1">Maria Rodriguez liked your "Spicy Thai Basil Noodles" recipe</p>
+                                        <p class="text-xs text-medium-gray mt-1">2 hours ago</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Unread Notification -->
+                            <div class="border border-light-pink rounded-lg p-4 hover:shadow-md transition-shadow notification-unread">
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0">
+                                        <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white">
+                                            <i class="fas fa-comment"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ml-4 flex-1">
+                                        <div class="flex justify-between items-start">
+                                            <p class="text-text-color font-medium">New comment on your recipe</p>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary text-white">
+                                                New
+                                            </span>
+                                        </div>
+                                        <p class="text-sm text-medium-gray mt-1">Chef John commented: "Great recipe! I added some extra chili for more heat."</p>
+                                        <p class="text-xs text-medium-gray mt-1">5 hours ago</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Unread Notification -->
+                            <div class="border border-light-pink rounded-lg p-4 hover:shadow-md transition-shadow notification-unread">
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0">
+                                        <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white">
+                                            <i class="fas fa-user-plus"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ml-4 flex-1">
+                                        <div class="flex justify-between items-start">
+                                            <p class="text-text-color font-medium">New follower</p>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary text-white">
+                                                New
+                                            </span>
+                                        </div>
+                                        <p class="text-sm text-medium-gray mt-1">FoodieFan123 started following you</p>
+                                        <p class="text-xs text-medium-gray mt-1">Yesterday</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Read Notification -->
+                            <div class="border border-light-pink rounded-lg p-4 hover:shadow-md transition-shadow notification-read">
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0">
+                                        <div class="w-10 h-10 bg-medium-gray rounded-full flex items-center justify-center text-white">
+                                            <i class="fas fa-bookmark"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ml-4 flex-1">
+                                        <p class="text-text-color font-medium">Your recipe was saved</p>
+                                        <p class="text-sm text-medium-gray mt-1">CookingEnthusiast saved your "Mediterranean Breakfast Bowl" recipe</p>
+                                        <p class="text-xs text-medium-gray mt-1">2 days ago</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Read Notification -->
+                            <div class="border border-light-pink rounded-lg p-4 hover:shadow-md transition-shadow notification-read">
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0">
+                                        <div class="w-10 h-10 bg-medium-gray rounded-full flex items-center justify-center text-white">
+                                            <i class="fas fa-award"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ml-4 flex-1">
+                                        <p class="text-text-color font-medium">Achievement unlocked!</p>
+                                        <p class="text-sm text-medium-gray mt-1">You've earned the "Recipe Master" badge for publishing 10 recipes</p>
+                                        <p class="text-xs text-medium-gray mt-1">3 days ago</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Get all sidebar links
-            const sidebarLinks = document.querySelectorAll('.sidebar-link');
-            
-            // Add click event listeners to sidebar links
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get all sidebar links
+        const sidebarLinks = document.querySelectorAll('.sidebar-link');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        // Function to switch tabs
+        function switchTab(targetTab) {
+            // Remove active class from all links and contents
             sidebarLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    // Get the target tab from data attribute
-                    const targetTab = this.getAttribute('data-tab');
-                    
-                    // Remove active class from all links
-                    sidebarLinks.forEach(l => {
-                        l.classList.remove('active-tab');
-                    });
-                    
-                    // Add active class to clicked link
-                    this.classList.add('active-tab');
-                    
-                    // Hide all tab content
-                    const tabContents = document.querySelectorAll('.tab-content');
-                    tabContents.forEach(tab => {
-                        tab.classList.remove('active');
-                    });
-                    
-                    // Show the target tab content
-                    const targetContent = document.getElementById(targetTab);
-                    if (targetContent) {
-                        targetContent.classList.add('active');
-                    }
-                });
+                link.classList.remove('active-tab');
             });
             
-            // Set the first tab as active by default
-            if (sidebarLinks.length > 0) {
-                sidebarLinks[0].classList.add('active-tab');
+            tabContents.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Add active class to clicked link
+            const activeLink = document.querySelector(`.sidebar-link[data-tab="${targetTab}"]`);
+            if (activeLink) {
+                activeLink.classList.add('active-tab');
             }
             
-            // Logout button functionality
-            const logoutBtn = document.getElementById('logout-btn');
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    if (confirm('Are you sure you want to logout?')) {
-                        // In a real application, this would redirect to a logout endpoint
-                        alert('Logging out...');
-                        // window.location.href = '/logout.php';
-                    }
-                });
+            // Show the target tab content
+            const targetContent = document.getElementById(targetTab);
+            if (targetContent) {
+                targetContent.classList.add('active');
+            }
+        }
+        
+        // Add click event listeners to sidebar links
+        sidebarLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetTab = this.getAttribute('data-tab');
+                switchTab(targetTab);
+                
+                // Update URL without page reload
+                history.pushState(null, null, `#${targetTab}`);
+            });
+        });
+        
+        // Handle browser back/forward buttons
+        window.addEventListener('popstate', function() {
+            const hash = window.location.hash.substring(1);
+            if (hash) {
+                switchTab(hash);
             }
         });
-    </script>
+        
+        // Check URL hash on page load
+        const initialHash = window.location.hash.substring(1);
+        if (initialHash && document.getElementById(initialHash)) {
+            switchTab(initialHash);
+        } else {
+            // Set the first tab as active by default
+            if (sidebarLinks.length > 0) {
+                const firstTab = sidebarLinks[0].getAttribute('data-tab');
+                switchTab(firstTab);
+            }
+        }
+        
+        // Logout button functionality
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (confirm('Are you sure you want to logout?')) {
+                    window.location.href = 'logout.php';
+                }
+            });
+        }
+
+        // Notification functionality
+        const markAllReadBtn = document.getElementById('mark-all-read');
+        const clearAllBtn = document.getElementById('clear-all');
+        
+        if (markAllReadBtn) {
+            markAllReadBtn.addEventListener('click', function() {
+                const unreadNotifications = document.querySelectorAll('.notification-unread');
+                unreadNotifications.forEach(notification => {
+                    notification.classList.remove('notification-unread');
+                    notification.classList.add('notification-read');
+                    
+                    // Remove the "New" badge
+                    const badge = notification.querySelector('.bg-primary');
+                    if (badge) {
+                        badge.remove();
+                    }
+                    
+                    // Change icon background to gray
+                    const iconContainer = notification.querySelector('.bg-primary');
+                    if (iconContainer) {
+                        iconContainer.classList.remove('bg-primary');
+                        iconContainer.classList.add('bg-medium-gray');
+                    }
+                });
+                
+                // Update notification count in sidebar
+                const notificationCount = document.querySelector('.sidebar-link[data-tab="notifications"] .bg-primary');
+                if (notificationCount) {
+                    notificationCount.remove();
+                }
+            });
+        }
+        
+        if (clearAllBtn) {
+            clearAllBtn.addEventListener('click', function() {
+                if (confirm('Are you sure you want to clear all notifications?')) {
+                    const notificationsContainer = document.querySelector('#notifications .space-y-4');
+                    if (notificationsContainer) {
+                        notificationsContainer.innerHTML = '<p class="text-center text-medium-gray py-4">No notifications</p>';
+                    }
+                    
+                    // Update notification count in sidebar
+                    const notificationCount = document.querySelector('.sidebar-link[data-tab="notifications"] .bg-primary');
+                    if (notificationCount) {
+                        notificationCount.remove();
+                    }
+                }
+            });
+        }
+    });
+</script>
 </body>
 </html>

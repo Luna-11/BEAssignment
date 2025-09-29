@@ -280,44 +280,6 @@ function getDietPrefID($conn, $dietName) {
     }
 }
 
-// CORRECT THE uploadImage FUNCTION (only keep this one, remove the duplicate):
-function uploadImage($file) {
-    $uploadDir = 'uploads/recipe/'; // ADDED trailing slash
-    
-    // Create directory if it doesn't exist
-    if (!file_exists($uploadDir)) {
-        mkdir($uploadDir, 0777, true);
-    }
-    
-    // Validate file type
-    $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-    if (!in_array($file['type'], $allowedTypes)) {
-        error_log("Invalid file type: " . $file['type']);
-        return null;
-    }
-    
-    // Validate file size (5MB)
-    if ($file['size'] > 5 * 1024 * 1024) {
-        error_log("File too large: " . $file['size']);
-        return null;
-    }
-    
-    // Generate unique filename
-    $fileName = uniqid() . '_' . basename($file['name']);
-    $targetPath = $uploadDir . $fileName;
-    
-    if (move_uploaded_file($file['tmp_name'], $targetPath)) {
-        return $targetPath;
-    }
-    
-    error_log("Failed to move uploaded file");
-    return null;
-}
-
-
-
-//for the comment 
-
 
 /**
  * Function to store comment from user
@@ -368,6 +330,7 @@ function storeComment($conn, $userID, $comment, $communityID, $recipeID = null) 
         return ["success" => false, "message" => "Failed to add comment: " . $error];
     }
 }
+
 
 /**
  * Function to get comments for a community post
@@ -422,4 +385,221 @@ function getComments($conn, $communityID) {
     
     return $comments;
 }
+// Helper function to detect the correct user ID column name
+function detectUserIdColumn($conn) {
+    // Since we know your table uses 'id', we can be more specific
+    $possibleColumns = ['id', 'userID', 'user_id', 'userId', 'userid'];
+    
+    $result = $conn->query("SHOW COLUMNS FROM users");
+    if ($result) {
+        while ($row = $result->fetch_assoc()) {
+            if (in_array($row['Field'], $possibleColumns)) {
+                return $row['Field'];
+            }
+        }
+    }
+    
+    // Default to 'id' since that's what your table uses
+    return 'id';
+}
+
+// Update the getUserProfileMySQLi function to be more robust
+function getUserProfileMySQLi($userID, $conn) {
+    try {
+        $idColumn = detectUserIdColumn($conn);
+        $availableColumns = getTableColumns($conn, 'users');
+        
+        if (empty($availableColumns)) {
+            return [
+                'success' => false,
+                'error' => 'Could not read users table structure'
+            ];
+        }
+        
+        // Build select columns - simplified since we know your table structure
+        $selectColumns = [
+            "$idColumn as userID",
+            'first_name',
+            'last_name', 
+            'mail',
+            'profileImage'
+        ];
+        
+        $sql = "SELECT " . implode(', ', $selectColumns) . " FROM users WHERE $idColumn = ?";
+        error_log("Executing SQL: " . $sql);
+        
+        $stmt = $conn->prepare($sql);
+        if (!$stmt) {
+            throw new Exception("Prepare failed: " . $conn->error);
+        }
+        
+        $stmt->bind_param("i", $userID);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+        $stmt->close();
+        
+        if ($user) {
+            return [
+                'success' => true,
+                'user' => $user
+            ];
+        } else {
+            return [
+                'success' => false,
+                'error' => 'User not found'
+            ];
+        }
+    } catch (Exception $e) {
+        error_log("Error in getUserProfileMySQLi: " . $e->getMessage());
+        return [
+            'success' => false,
+            'error' => 'Database error: ' . $e->getMessage()
+        ];
+    }
+}
+
+// Helper function to get table columns
+function getTableColumns($conn, $tableName) {
+    $columns = [];
+    $result = $conn->query("SHOW COLUMNS FROM $tableName");
+    if ($result) {
+        while ($row = $result->fetch_assoc()) {
+            $columns[] = $row['Field'];
+        }
+    }
+    return $columns;
+}
+
+// Function to update user profile (MySQLi version)
+// Function to update user profile (MySQLi version)
+function updateUserProfileMySQLi($userID, $data, $conn) {
+    try {
+        $idColumn = detectUserIdColumn($conn);
+        $availableColumns = getTableColumns($conn, 'users');
+        
+        $updateFields = [];
+        $params = [];
+        $types = '';
+        
+        // Handle first name (check for different column names)
+        if (isset($data['first_name'])) {
+            if (in_array('first_name', $availableColumns)) {
+                $updateFields[] = "first_name = ?";
+                $params[] = trim($data['first_name']);
+                $types .= 's';
+            } elseif (in_array('firstName', $availableColumns)) {
+                $updateFields[] = "firstName = ?";
+                $params[] = trim($data['first_name']);
+                $types .= 's';
+            }
+        }
+        
+        // Handle last name
+        if (isset($data['last_name'])) {
+            if (in_array('last_name', $availableColumns)) {
+                $updateFields[] = "last_name = ?";
+                $params[] = trim($data['last_name']);
+                $types .= 's';
+            } elseif (in_array('lastName', $availableColumns)) {
+                $updateFields[] = "lastName = ?";
+                $params[] = trim($data['last_name']);
+                $types .= 's';
+            }
+        }
+        
+        // Handle email
+        if (isset($data['mail'])) {
+            if (!filter_var($data['mail'], FILTER_VALIDATE_EMAIL)) {
+                return ['success' => false, 'error' => 'Invalid email address'];
+            }
+            
+            if (in_array('mail', $availableColumns)) {
+                $updateFields[] = "mail = ?";
+                $params[] = trim($data['mail']);
+                $types .= 's';
+            } elseif (in_array('email', $availableColumns)) {
+                $updateFields[] = "email = ?";
+                $params[] = trim($data['mail']);
+                $types .= 's';
+            }
+        }
+        
+        if (empty($updateFields)) {
+            return ['success' => false, 'error' => 'No fields to update or column names not found'];
+        }
+        
+        $params[] = $userID;
+        $types .= 'i';
+        
+        $sql = "UPDATE users SET " . implode(', ', $updateFields) . " WHERE $idColumn = ?";
+        error_log("Update SQL: " . $sql);
+        
+        $stmt = $conn->prepare($sql);
+        if (!$stmt) {
+            throw new Exception("Prepare failed: " . $conn->error);
+        }
+        
+        $stmt->bind_param($types, ...$params);
+        
+        if ($stmt->execute()) {
+            return [
+                'success' => true,
+                'message' => 'Profile updated successfully'
+            ];
+        } else {
+            throw new Exception("Execute failed: " . $stmt->error);
+        }
+        
+    } catch (Exception $e) {
+        error_log("Error in updateUserProfileMySQLi: " . $e->getMessage());
+        return [
+            'success' => false,
+            'error' => 'Database error: ' . $e->getMessage()
+        ];
+    }
+}
+
+// Function to handle profile image upload
+function handleProfileImageUpload($file, $userID) {
+    $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    $maxSize = 5 * 1024 * 1024; // 5MB
+    
+    // Check file type
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mimeType = finfo_file($finfo, $file['tmp_name']);
+    finfo_close($finfo);
+    
+    if (!in_array($mimeType, $allowedTypes)) {
+        return ['success' => false, 'error' => 'Invalid file type. Only JPG, PNG, GIF, and WebP are allowed.'];
+    }
+    
+    // Check file size
+    if ($file['size'] > $maxSize) {
+        return ['success' => false, 'error' => 'File too large. Maximum size is 5MB.'];
+    }
+    
+    // Create uploads directory if it doesn't exist
+    $uploadDir = 'uploads/profiles/';
+    if (!file_exists($uploadDir)) {
+        mkdir($uploadDir, 0755, true);
+    }
+    
+    // Generate unique filename
+    $fileExtension = pathinfo($file['name'], PATHINFO_EXTENSION);
+    $fileName = 'profile_' . $userID . '_' . time() . '.' . $fileExtension;
+    $filePath = $uploadDir . $fileName;
+    
+    // Move uploaded file
+    if (move_uploaded_file($file['tmp_name'], $filePath)) {
+        return [
+            'success' => true,
+            'filePath' => $filePath,
+            'message' => 'Profile image uploaded successfully'
+        ];
+    } else {
+        return ['success' => false, 'error' => 'Failed to upload image'];
+    }
+}
+
 ?>
