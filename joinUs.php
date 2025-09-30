@@ -62,7 +62,7 @@
 
     .input-container {
       position: relative;
-      margin-bottom: 15px;
+      margin-bottom: 5px;
     }
 
     .input-container input {
@@ -173,6 +173,7 @@
           <div class="input-container">
             <input type="password" id="password" name="password" placeholder="Password" required>
           </div>
+          <div id="passwordError" class="error"></div>
         </div>
         <button type="submit" class="submit-btn" id="submitBtn">
           <span id="btnText">Sign Up</span>
@@ -181,7 +182,7 @@
       </form>
       
       <div class="signup-link">
-        Already have an account? <a href="#" onclick="showLogin()">Sign in</a>
+        Already have an account? <a href="logIn.php" onclick="showLogin()">Sign in</a>
       </div>
     </div>
   </div>
@@ -202,11 +203,26 @@
       alert('Login functionality would go here');
     }
 
+    // Password Validation
+    function validatePassword(password) {
+      const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[a-z]).{8,}$/;
+      return passwordRegex.test(password);
+    }
+
     document.getElementById('registrationForm').addEventListener('submit', function(e) {
       e.preventDefault();
+
+      const password = document.getElementById('password').value;
+      const passwordError = document.getElementById('passwordError');
+      passwordError.textContent = "";
+
+      if (!validatePassword(password)) {
+        passwordError.textContent = "Password must be at least 8 characters, include one uppercase, one lowercase, and one number.";
+        return;
+      }
       
       const formData = new FormData(this);
-      
+
       // Show loading state
       document.getElementById('submitBtn').disabled = true;
       document.getElementById('btnText').style.display = 'none';
@@ -217,39 +233,26 @@
         method: 'POST',
         body: formData
       })
-      .then(response => {
-        console.log('Response status:', response.status);
-        if (!response.ok) {
-          throw new Error('HTTP error! status: ' + response.status);
-        }
-        return response.json();
-      })
+      .then(response => response.json())
       .then(data => {
-        console.log('Response data:', data);
-        
-        // Hide loading state
         document.getElementById('submitBtn').disabled = false;
         document.getElementById('btnText').style.display = 'block';
         document.getElementById('spinner').style.display = 'none';
         
-        // Display message
         const messageDiv = document.getElementById('message');
         messageDiv.innerHTML = '';
-        
+
         if (data.success) {
           messageDiv.className = 'success';
           messageDiv.innerHTML = data.message;
           document.getElementById('registrationForm').reset();
-          setTimeout(() => {
-            closePopup();
-          }, 2000);
+          setTimeout(() => closePopup(), 2000);
         } else {
           messageDiv.className = 'error';
           messageDiv.innerHTML = data.message || 'An error occurred. Please try again.';
         }
       })
       .catch(error => {
-        console.error('Fetch error:', error);
         document.getElementById('submitBtn').disabled = false;
         document.getElementById('btnText').style.display = 'block';
         document.getElementById('spinner').style.display = 'none';

@@ -51,11 +51,10 @@
             include('./configMysql.php');
 
             // Get all Culinary resources (resourceTypeID = 2)
-            $sql = "SELECT r.resourceID, r.resourceName, r.description, r.resourcesImage, r.Video, f.filename AS pdfFile
-                    FROM Resource r
-                    LEFT JOIN files f ON r.resourceID = f.resourcesID
-                    WHERE r.resourceTypeID = 2
-                    ORDER BY r.resourceID DESC";
+            $sql = "SELECT resourceID, resourceName, description, resourcesImage, PDF_file, Video 
+                    FROM Resource 
+                    WHERE resourceTypeID = 2
+                    ORDER BY resourceID DESC";
 
             $result = mysqli_query($conn, $sql);
 

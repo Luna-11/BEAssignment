@@ -63,7 +63,6 @@
 
             $result = mysqli_query($conn, $sql);
 
-            // Debug: Check if query executed successfully
             if (!$result) {
                 echo "<p class='text-center text-red-500 py-8'>Error executing query: " . mysqli_error($conn) . "</p>";
             } else if (mysqli_num_rows($result) > 0): ?>

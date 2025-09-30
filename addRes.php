@@ -27,9 +27,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $videoUploadPath = $uploadDir . "videos/";
 
     // Create directories if they don't exist
-    if (!file_exists($imageUploadPath)) mkdir($imageUploadPath, 0777, true);
-    if (!file_exists($pdfUploadPath)) mkdir($pdfUploadPath, 0777, true);
-    if (!file_exists($videoUploadPath)) mkdir($videoUploadPath, 0777, true);
+    if (!file_exists($imageUploadPath)) mkdir($imageUploadPath, 0755, true);
+    if (!file_exists($pdfUploadPath)) mkdir($pdfUploadPath, 0755, true);
+    if (!file_exists($videoUploadPath)) mkdir($videoUploadPath, 0755, true);
 
     // Validate input
     if (empty($_POST["resourceTitle"])) {
@@ -43,14 +43,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $errors[] = "Description is required";
     } else {
         $description = trim($_POST["description"]);
-        // No character limit for TEXT data type - removed the 500 character limit
     }
 
     if (empty($_POST["resourceType"])) {
         $errors[] = "Resource type is required";
     } else {
-        $resourceTypeID = $_POST["resourceType"];
-        if (!in_array($resourceTypeID, ['1', '2'])) $errors[] = "Invalid resource type";
+        $resourceTypeID = trim($_POST["resourceType"]);
+        $validTypes = ['1', '2', 1, 2];
+        if (!in_array($resourceTypeID, $validTypes, true)) {
+            $errors[] = "Invalid resource type selected";
+        }
     }
 
     if (empty($_FILES["resourcesImage"]["name"])) {
@@ -64,63 +66,98 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         try {
             $userID = isset($_SESSION['userID']) ? $_SESSION['userID'] : null;
 
-            // --- Handle image upload ---
+            // Initialize file paths
             $imageFileName = null;
+            $pdfFileName = null;
+            $videoFileName = null;
+
+            // --- Handle image upload ---
             if (!empty($_FILES["resourcesImage"]["name"])) {
                 $imageFile = $_FILES["resourcesImage"];
+                $allowedImageTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
                 $ext = strtolower(pathinfo($imageFile["name"], PATHINFO_EXTENSION));
-                $imageFileName = uniqid() . "_" . time() . "." . $ext;
-                $dest = $imageUploadPath . $imageFileName;
-                if (!move_uploaded_file($imageFile["tmp_name"], $dest)) {
-                    $errors[] = "Failed to upload image file.";
+                
+                if (!in_array($ext, $allowedImageTypes)) {
+                    $errors[] = "Only JPG, JPEG, PNG, GIF, and WebP images are allowed";
+                } else {
+                    $uniqueImageName = uniqid() . "_" . time() . "." . $ext;
+                    $imageDest = $imageUploadPath . $uniqueImageName;
+                    if (!move_uploaded_file($imageFile["tmp_name"], $imageDest)) {
+                        $errors[] = "Failed to upload image file. Check directory permissions.";
+                    } else {
+                        $imageFileName = $imageUploadPath . $uniqueImageName;
+                    }
+                }
+            }
+
+            // --- Handle PDF upload (optional) ---
+            if (!empty($_FILES["PDFfile"]["name"]) && empty($errors)) {
+                $pdfFile = $_FILES["PDFfile"];
+                $ext = strtolower(pathinfo($pdfFile["name"], PATHINFO_EXTENSION));
+                
+                if ($ext !== 'pdf') {
+                    $errors[] = "Only PDF files are allowed";
+                } else {
+                    // Check file size (10MB max)
+                    $maxSize = 10 * 1024 * 1024;
+                    if ($pdfFile["size"] > $maxSize) {
+                        $errors[] = "PDF file must be less than 10MB";
+                    } else {
+                        $uniquePdfName = uniqid() . "_" . time() . ".pdf";
+                        $pdfDest = $pdfUploadPath . $uniquePdfName;
+                        if (!move_uploaded_file($pdfFile["tmp_name"], $pdfDest)) {
+                            $errors[] = "Failed to upload PDF file. Check directory permissions.";
+                        } else {
+                            $pdfFileName = $pdfUploadPath . $uniquePdfName;
+                        }
+                    }
                 }
             }
 
             // --- Handle video upload (optional) ---
-            $videoFileName = null;
-            if (!empty($_FILES["Video"]["name"])) {
+            if (!empty($_FILES["Video"]["name"]) && empty($errors)) {
                 $videoFile = $_FILES["Video"];
+                $allowedVideoTypes = ['mp4', 'webm', 'ogg'];
                 $ext = strtolower(pathinfo($videoFile["name"], PATHINFO_EXTENSION));
-                $videoFileName = uniqid() . "_" . time() . "." . $ext;
-                $dest = $videoUploadPath . $videoFileName;
-                if (!move_uploaded_file($videoFile["tmp_name"], $dest)) {
-                    $errors[] = "Failed to upload video file.";
+                
+                if (!in_array($ext, $allowedVideoTypes)) {
+                    $errors[] = "Only MP4, WebM, and OGG videos are allowed";
+                } else {
+                    $uniqueVideoName = uniqid() . "_" . time() . "." . $ext;
+                    $videoDest = $videoUploadPath . $uniqueVideoName;
+                    if (!move_uploaded_file($videoFile["tmp_name"], $videoDest)) {
+                        $errors[] = "Failed to upload video file. Check directory permissions.";
+                    } else {
+                        $videoFileName = $videoUploadPath . $uniqueVideoName;
+                    }
                 }
             }
 
-            // Insert into Resource table
-            $sql = "INSERT INTO Resource (userID, resourceName, description, resourcesImage, Video, resourceTypeID) 
-                    VALUES (?, ?, ?, ?, ?, ?)";
-            $stmt = mysqli_prepare($conn, $sql);
-            if ($stmt) {
-                mysqli_stmt_bind_param($stmt, "issssi", $userID, $resourceName, $description, $imageFileName, $videoFileName, $resourceTypeID);
-                if (mysqli_stmt_execute($stmt)) {
-                    $resourceID = mysqli_insert_id($conn);
-                    mysqli_stmt_close($stmt);
-
-                    // --- Handle PDF upload (into files table) ---
-                    if (!empty($_FILES["PDFfile"]["name"])) {
-                        $pdfFile = $_FILES["PDFfile"];
-                        $pdfResult = uploadAndSaveFile($conn, $resourceID, $pdfFile, $pdfUploadPath, 'pdf');
-                        if (!$pdfResult) {
-                            $errors[] = "Failed to upload PDF file.";
-                        }
-                    }
-
-                    if (empty($errors)) {
+            // If we still have no errors after file uploads, proceed with database insertion
+            if (empty($errors)) {
+                // Insert into Resource table - using PDF_file column name (with underscore)
+                $sql = "INSERT INTO Resource (userID, resourceName, description, resourcesImage, PDF_file, Video, resourceTypeID) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?)";
+                $stmt = mysqli_prepare($conn, $sql);
+                
+                if ($stmt) {
+                    mysqli_stmt_bind_param($stmt, "isssssi", $userID, $resourceName, $description, $imageFileName, $pdfFileName, $videoFileName, $resourceTypeID);
+                    
+                    if (mysqli_stmt_execute($stmt)) {
                         mysqli_commit($conn);
                         $success = "Resource added successfully!";
                         $resourceName = $description = $resourceTypeID = "";
                     } else {
+                        $errors[] = "Error saving resource: " . mysqli_error($conn);
                         mysqli_rollback($conn);
                     }
-
+                    
+                    mysqli_stmt_close($stmt);
                 } else {
-                    $errors[] = "Error saving resource: " . mysqli_error($conn);
+                    $errors[] = "Database error: " . mysqli_error($conn);
                     mysqli_rollback($conn);
                 }
             } else {
-                $errors[] = "Database error: " . mysqli_error($conn);
                 mysqli_rollback($conn);
             }
 
@@ -129,37 +166,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $errors[] = "Transaction failed: " . $e->getMessage();
         }
     }
-}
-
-// File upload helper for PDFs
-function uploadAndSaveFile($conn, $resourceID, $file, $uploadPath, $fileType) {
-    $fileName = basename($file["name"]);
-    $tmp = $file["tmp_name"];
-    $size = $file["size"];
-    $error = $file["error"];
-
-    if ($error !== UPLOAD_ERR_OK) return false;
-    if ($fileType !== 'pdf') return false;
-
-    $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-    if ($ext !== 'pdf') return false;
-    if ($size > 10485760) return false; // 10MB max
-
-    $uniqueName = uniqid() . '_' . time() . '.pdf';
-    $dest = $uploadPath . $uniqueName;
-
-    if (move_uploaded_file($tmp, $dest)) {
-        $sql = "INSERT INTO files (resourcesID, filename, filetype, filesize, filepath) 
-                VALUES (?, ?, ?, ?, ?)";
-        $stmt = mysqli_prepare($conn, $sql);
-        if ($stmt) {
-            mysqli_stmt_bind_param($stmt, "issis", $resourceID, $uniqueName, $fileType, $size, $dest);
-            $result = mysqli_stmt_execute($stmt);
-            mysqli_stmt_close($stmt);
-            return $result;
-        }
-    }
-    return false;
 }
 ?>
 
@@ -233,7 +239,6 @@ function uploadAndSaveFile($conn, $resourceID, $file, $uploadPath, $fileType) {
       margin: 10px 0;
       border-radius: 5px;
     }
-    /* Custom scrollbar for textarea */
     textarea::-webkit-scrollbar {
       width: 8px;
     }
@@ -273,7 +278,7 @@ function uploadAndSaveFile($conn, $resourceID, $file, $uploadPath, $fileType) {
         <div class="success-message mb-4"><?php echo htmlspecialchars($success); ?></div>
       <?php endif; ?>
       
-      <form action="" method="post" enctype="multipart/form-data">
+      <form action="" method="post" enctype="multipart/form-data" id="resourceForm">
         <div class="mb-6">
           <label for="resourceTitle" class="block font-semibold text-text-color mb-2">Title</label>
           <input type="text" class="w-full p-3 border border-border-color rounded-lg bg-white text-text-color focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50" id="resourceTitle" name="resourceTitle" placeholder="e.g. Mastering Knife Skills" value="<?php echo htmlspecialchars($resourceName); ?>" required>
@@ -289,8 +294,8 @@ function uploadAndSaveFile($conn, $resourceID, $file, $uploadPath, $fileType) {
           <label for="resourceType" class="block font-semibold text-text-color mb-2">Resource Type</label>
           <select class="w-full p-3 border border-border-color rounded-lg bg-white text-text-color focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50" id="resourceType" name="resourceType" required>
             <option value="">Select type...</option>
-            <option value="1" <?php echo ($resourceTypeID == '1') ? 'selected' : ''; ?>>Educational</option>
-            <option value="2" <?php echo ($resourceTypeID == '2') ? 'selected' : ''; ?>>Culinary</option>
+            <option value="1" <?php echo ($resourceTypeID == '1') ? 'selected' : ''; ?>>Culinary</option>
+            <option value="2" <?php echo ($resourceTypeID == '2') ? 'selected' : ''; ?>>Educational</option>
           </select>
         </div>
 
@@ -301,8 +306,8 @@ function uploadAndSaveFile($conn, $resourceID, $file, $uploadPath, $fileType) {
 
         <div class="mb-6">
           <label for="PDFfile" class="block font-semibold text-text-color mb-2">PDF (optional)</label>
-          <input class="w-full p-3 border border-border-color rounded-lg bg-white text-text-color file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-light-pink file:text-text-color" type="file" id="PDFfile" name="PDFfile" accept="application/pdf">
-          <div class="text-medium-gray opacity-90 text-sm mt-1">Only PDF up to ~10MB.</div>
+          <input class="w-full p-3 border border-border-color rounded-lg bg-white text-text-color file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-light-pink file:text-text-color" type="file" id="PDFfile" name="PDFfile" accept=".pdf,application/pdf">
+          <div class="text-medium-gray opacity-90 text-sm mt-1">Only PDF up to 10MB.</div>
         </div>
 
         <div class="mb-6">
@@ -340,11 +345,11 @@ function uploadAndSaveFile($conn, $resourceID, $file, $uploadPath, $fileType) {
       constructor() {
         this.x = Math.random() * canvas.width;
         this.y = Math.random() * -canvas.height;
-        this.size = Math.random() * 30 + 20; // Larger leaves: 20-50px
-        this.speed = Math.random() * 1 + 0.5; // Slower speed: 0.5-1.5px/frame
+        this.size = Math.random() * 30 + 20;
+        this.speed = Math.random() * 1 + 0.5;
         this.angle = Math.random() * Math.PI * 2;
         this.spin = (Math.random() - 0.5) * 0.05;
-        this.color = Math.random() > 0.5 ? '#A8D5BA' : '#4A7043'; // Light and medium green
+        this.color = Math.random() > 0.5 ? '#A8D5BA' : '#4A7043';
       }
 
       update() {
@@ -352,13 +357,12 @@ function uploadAndSaveFile($conn, $resourceID, $file, $uploadPath, $fileType) {
         this.x += Math.sin(this.angle) * 0.5;
         this.angle += this.spin;
 
-        // Reset leaf when it goes off-screen
         if (this.y > canvas.height + this.size) {
           this.y = -this.size;
           this.x = Math.random() * canvas.width;
           this.speed = Math.random() * 1 + 0.5;
           this.angle = Math.random() * Math.PI * 2;
-          this.size = Math.random() * 30 + 20; // Ensure reset leaves are also 20-50px
+          this.size = Math.random() * 30 + 20;
         }
       }
 

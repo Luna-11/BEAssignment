@@ -208,7 +208,6 @@ function addRecipe($conn, $data) {
     }
 }
 
-
 function getCuisineTypeID($conn, $cuisineName) {
     if (empty($cuisineName)) return null;
     
