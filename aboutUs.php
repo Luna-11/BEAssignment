@@ -240,7 +240,7 @@
         <section class="food-primary-bg text-white rounded-lg p-8 text-center">
             <h2 class="text-3xl font-bold mb-4">Join Our Culinary Community</h2>
             <p class="text-xl mb-6 max-w-2xl mx-auto">Become part of FoodFusion today and start sharing your culinary creations with food lovers from around the world.</p>
-            <a href="register.html" class="bg-white food-text px-6 py-3 rounded-lg font-bold text-lg hover:bg-gray-100 inline-block">Sign Up Now</a>
+            <a href="register.php" class="bg-white food-text px-6 py-3 rounded-lg font-bold text-lg hover:bg-gray-100 inline-block">Sign Up Now</a>
         </section>
     </main>
 

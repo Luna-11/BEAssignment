@@ -209,7 +209,6 @@ if ($featured_result && $featured_result->num_rows > 0) {
   
   <?php include 'navbar.php'; ?>
 
-  
   <!-- show success message if exists -->
   <?php if (!empty($success_message)): ?>
     <div class="max-w-2xl mx-auto mt-4 px-4">
@@ -271,108 +270,115 @@ if ($featured_result && $featured_result->num_rows > 0) {
     </div>
   </section>
 
-  <!-- Featured Recipes Section -->
-  <section class="featured-recipes py-12 bg-white">
+<?php
+// SIMPLE WORKING VERSION - No JOINs
+$featured_sql = "SELECT 
+    recipeID, 
+    recipeName, 
+    recipeDescription, 
+    image, 
+    date,
+    userID,
+    difficultID
+FROM recipe 
+ORDER BY date DESC 
+LIMIT 4";
+
+$featured_result = $conn->query($featured_sql);
+
+$featured_recipes = [];
+if ($featured_result && $featured_result->num_rows > 0) {
+    while ($row = $featured_result->fetch_assoc()) {
+        $featured_recipes[] = $row;
+    }
+    echo "<!-- Found " . count($featured_recipes) . " recipes with simple query -->";
+} else {
+    echo "<!-- No recipes found even with simple query -->";
+}
+?>
+
+<!-- Featured Recipes Section -->
+<section class="featured-recipes py-12">
     <div class="container mx-auto px-4">
-      <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">Featured Recipes</h2>
-      
-      <?php if (!empty($featured_recipes)): ?>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <?php foreach ($featured_recipes as $recipe): 
-            // Handle recipe image
-            $recipeImage = 'BEpics/default-recipe.jpg';
-            if (!empty($recipe['image'])) {
-                $imagePath = $recipe['image'];
-                $possiblePaths = [
-                    $imagePath,
-                    'BEpics/' . $imagePath,
-                    './BEpics/' . $imagePath,
-                    'BEpics/recipe-default.jpg'
-                ];
-                
-                foreach ($possiblePaths as $path) {
-                    $fullPath = __DIR__ . '/' . $path;
-                    if (file_exists($fullPath)) {
-                        $recipeImage = $path;
-                        break;
+        <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">Featured Recipes</h2>
+        
+        <?php if (!empty($featured_recipes)): ?>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <?php foreach ($featured_recipes as $recipe): 
+                    // Handle recipe image
+                    $recipeImage = 'BEpics/default-recipe.jpg';
+                    if (!empty($recipe['image'])) {
+                        $imageFile = $recipe['image'];
+                        $possiblePaths = [
+                            $imageFile,
+                            'BEpics/' . $imageFile,
+                            './BEpics/' . $imageFile,
+                            'BEpics/recipes/' . $imageFile
+                        ];
+                        
+                        foreach ($possiblePaths as $path) {
+                            if (file_exists($path)) {
+                                $recipeImage = $path;
+                                break;
+                            }
+                        }
                     }
-                }
-            }
 
-            // Handle difficulty styling
-            $difficultyClass = 'difficulty-medium';
-            $difficultyText = $recipe['difficultLevel'] ?? 'Medium';
-            if (isset($recipe['difficultLevel'])) {
-                $difficultyLower = strtolower($recipe['difficultLevel']);
-                if (strpos($difficultyLower, 'easy') !== false) {
-                    $difficultyClass = 'difficulty-easy';
-                } elseif (strpos($difficultyLower, 'hard') !== false || strpos($difficultyLower, 'expert') !== false) {
-                    $difficultyClass = 'difficulty-hard';
-                }
-            }
-
-            // Format date
-            $formattedDate = $recipe['date'] ? date('M j, Y', strtotime($recipe['date'])) : 'Recently';
-          ?>
-          
-          <div class="recipe-card">
-            <a href="recipe-detail.php?id=<?= $recipe['recipeID'] ?>">
-              <img src="<?= htmlspecialchars($recipeImage) ?>" 
-                   alt="<?= htmlspecialchars($recipe['recipeName']) ?>" 
-                   class="recipe-image"
-                   onerror="this.src='BEpics/default-recipe.jpg'">
-            </a>
-            <div class="recipe-content">
-              <h3 class="recipe-title">
-                <a href="recipe-detail.php?id=<?= $recipe['recipeID'] ?>" class="hover:text-[#C89091] transition-colors">
-                  <?= htmlspecialchars($recipe['recipeName']) ?>
-                </a>
-              </h3>
-              
-              <div class="recipe-meta">
-                <span class="recipe-difficulty <?= $difficultyClass ?>">
-                  <?= htmlspecialchars($difficultyText) ?>
-                </span>
-                <span class="recipe-author">
-                  By <?= htmlspecialchars($recipe['username'] ?? 'Anonymous') ?>
-                </span>
-              </div>
-              
-              <?php if (!empty($recipe['recipeDescription'])): ?>
-                <p class="recipe-description">
-                  <?= htmlspecialchars($recipe['recipeDescription']) ?>
-                </p>
-              <?php endif; ?>
-              
-              <div class="recipe-footer">
-                <span class="recipe-date">
-                  <i class="far fa-clock mr-1"></i>
-                  <?= $formattedDate ?>
-                </span>
-                <a href="recipe-detail.php?id=<?= $recipe['recipeID'] ?>" class="text-[#C89091] hover:text-[#7b4e48] transition-colors font-medium">
-                  View Recipe →
-                </a>
-              </div>
+                    // Format date
+                    $formattedDate = 'Recently';
+                    if (!empty($recipe['date']) && $recipe['date'] != '0000-00-00 00:00:00') {
+                        $formattedDate = date('M j, Y', strtotime($recipe['date']));
+                    }
+                ?>
+                
+                <div class="recipe-card">
+                    <a href="recipe-detail.php?id=<?= $recipe['recipeID'] ?>">
+                        <img src="<?= htmlspecialchars($recipeImage) ?>" 
+                             alt="<?= htmlspecialchars($recipe['recipeName'] ?? 'Recipe Image') ?>" 
+                             class="recipe-image"
+                             onerror="this.src='BEpics/default-recipe.jpg'">
+                    </a>
+                    <div class="recipe-content">
+                        <h3 class="recipe-title">
+                            <a href="recipe-detail.php?id=<?= $recipe['recipeID'] ?>" class="hover:text-[#C89091] transition-colors">
+                                <?= htmlspecialchars($recipe['recipeName'] ?? 'Untitled Recipe') ?>
+                            </a>
+                        </h3>
+                      
+                        
+                        <?php if (!empty($recipe['recipeDescription'])): ?>
+                            <p class="recipe-description">
+                                <?= htmlspecialchars(substr($recipe['recipeDescription'], 0, 100)) . (strlen($recipe['recipeDescription']) > 100 ? '...' : '') ?>
+                            </p>
+                        <?php endif; ?>
+                        
+                        <div class="recipe-footer">
+                            <span class="recipe-date">
+                                <i class="far fa-clock mr-1"></i>
+                                <?= $formattedDate ?>
+                            </span>
+                            <a href="recipe-detail.php?id=<?= $recipe['recipeID'] ?>" class="text-[#C89091] hover:text-[#7b4e48] transition-colors font-medium">
+                                View Recipe →
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <?php endforeach; ?>
             </div>
-          </div>
-          
-          <?php endforeach; ?>
-        </div>
-      <?php else: ?>
-        <div class="text-center py-8">
-          <p class="text-lg text-gray-600">No featured recipes found. Be the first to share your recipe!</p>
-          <a href="add-recipe.php" class="inline-block mt-4 bg-[#C89091] text-white px-6 py-2 rounded-full hover:bg-[#7b4e48] transition-colors">
-            Share Your Recipe
-          </a>
-        </div>
-      <?php endif; ?>
+        <?php else: ?>
+            <div class="text-center py-8">
+                <p class="text-lg text-gray-600 mb-4">No featured recipes found at the moment.</p>
+                <a href="add-recipe.php" class="inline-block mt-4 bg-[#C89091] text-white px-6 py-2 rounded-full hover:bg-[#7b4e48] transition-colors">
+                    Share Your Recipe
+                </a>
+            </div>
+        <?php endif; ?>
     </div>
-  </section>
-
-
+</section>
 
 <!-- Event Slideshow Section - Debug Version -->
-<section class="events-slideshow py-10 bg-[#f3e9dd]">
+<section class="events-slideshow py-10">
     <h2 class="text-2xl md:text-3xl mb-8 text-center">Upcoming Food Events</h2>
     
     <?php
@@ -475,14 +481,6 @@ if ($featured_result && $featured_result->num_rows > 0) {
     <?php endif; ?>
 </section>
 
-  <!-- Example Other Sections -->
-  <section class="menu py-10 text-center">
-    <h2 class="text-2xl md:text-3xl mb-8">Share your cooking experience with us</h2>
-    <div class="menu-items flex justify-center gap-4 flex-wrap">
-      <div class="item w-40"><img src="./BEpics/cc1.png" alt="Dish 1"><p class="font-bold">팜미엔 볶음밥</p><span>5,500원</span></div>
-      <div class="item w-40"><img src="./BEpics/cc2.png" alt="Dish 2"><p class="font-bold">팜미엔 짬뽕</p><span>5,500원</span></div>
-    </div>
-  </section>
 
   <section class="share-hero text-center py-8 relative">
     <h1 class="text-2xl md:text-4xl font-bold mb-3">Share your cooking tips!</h1>

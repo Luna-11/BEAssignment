@@ -16,9 +16,9 @@
       <div class="footer-section">
         <h4 class="text-base md:text-lg font-semibold mb-3">Legal</h4>
         <ul class="space-y-2 text-sm md:text-base">
-          <li><a href="#privacy" class="hover:underline">Privacy Policy</a></li>
-          <li><a href="#terms" class="hover:underline">Terms of Service</a></li>
-          <li><a href="cookiesPage" class="hover:underline">Cookie Policy</a></li>
+          <li><a href="cookiesPage.php" class="hover:underline">Privacy Policy</a></li>
+          <li><a href="cookiesPage.php" class="hover:underline">Terms of Service</a></li>
+          <li><a href="cookiesPage.php" class="hover:underline">Cookie Policy</a></li>
         </ul>
       </div>
       
@@ -27,7 +27,7 @@
         <ul class="space-y-2 text-sm md:text-base">
           <li><i class="fas fa-envelope mr-2"></i>info@foodfusion.com</li>
           <li><i class="fas fa-phone mr-2"></i>+1 (555) 123-4567</li>
-          <li><i class="fas fa-map-marker-alt mr-2"></i>123 Culinary Street, Food City</li>
+          <li><i class="fas fa-map-marker-alt mr-2"></i>123 Molly Street, Food City</li>
         </ul>
       </div>
     </div>
