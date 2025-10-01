@@ -80,6 +80,14 @@
       border-color: var(--primary-color);
     }
 
+    .input-container input.error-border {
+      border-color: #d9534f;
+    }
+
+    .input-container input.success-border {
+      border-color: #5cb85c;
+    }
+
     .error {
       color: #d9534f;
       font-size: 14px;
@@ -113,6 +121,11 @@
       background: var(--primary-color);
     }
 
+    .submit-btn:disabled {
+      background: var(--light-gray);
+      cursor: not-allowed;
+    }
+
     .signup-link {
       margin-top: 15px;
       font-size: 14px;
@@ -141,6 +154,14 @@
 
     @keyframes spin {
       to { transform: rotate(360deg); }
+    }
+
+    .password-match {
+      color: #5cb85c;
+      font-size: 14px;
+      margin-top: 5px;
+      text-align: left;
+      padding-left: 15px;
     }
   </style>
 </head>
@@ -174,6 +195,13 @@
             <input type="password" id="password" name="password" placeholder="Password" required>
           </div>
           <div id="passwordError" class="error"></div>
+        </div>
+        <div class="input-group">
+          <div class="input-container">
+            <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm Password" required>
+          </div>
+          <div id="confirmPasswordError" class="error"></div>
+          <div id="passwordMatch" class="password-match"></div>
         </div>
         <button type="submit" class="submit-btn" id="submitBtn">
           <span id="btnText">Sign Up</span>
@@ -209,15 +237,69 @@
       return passwordRegex.test(password);
     }
 
+    function validatePasswordMatch(password, confirmPassword) {
+      return password === confirmPassword;
+    }
+
+    function updatePasswordMatchStatus() {
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirm_password').value;
+      const passwordMatchDiv = document.getElementById('passwordMatch');
+      const confirmPasswordError = document.getElementById('confirmPasswordError');
+      const confirmPasswordInput = document.getElementById('confirm_password');
+
+      // Clear previous messages
+      passwordMatchDiv.textContent = '';
+      confirmPasswordError.textContent = '';
+
+      // Remove previous border classes
+      confirmPasswordInput.classList.remove('error-border', 'success-border');
+
+      if (confirmPassword === '') {
+        return false;
+      }
+
+      if (validatePasswordMatch(password, confirmPassword)) {
+        passwordMatchDiv.textContent = '✓ Passwords match';
+        confirmPasswordInput.classList.add('success-border');
+        return true;
+      } else {
+        confirmPasswordError.textContent = 'Passwords do not match';
+        confirmPasswordInput.classList.add('error-border');
+        return false;
+      }
+    }
+
+    function redirectToSecurityQuestions(userId) {
+      // Redirect to security questions page with user_id parameter
+      window.location.href = `securityQuestions.php?user_id=${userId}`;
+    }
+
+    // Event listeners for real-time password matching
+    document.getElementById('password').addEventListener('input', updatePasswordMatchStatus);
+    document.getElementById('confirm_password').addEventListener('input', updatePasswordMatchStatus);
+
     document.getElementById('registrationForm').addEventListener('submit', function(e) {
       e.preventDefault();
 
       const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirm_password').value;
       const passwordError = document.getElementById('passwordError');
+      const confirmPasswordError = document.getElementById('confirmPasswordError');
+      
+      // Clear previous errors
       passwordError.textContent = "";
+      confirmPasswordError.textContent = "";
 
+      // Validate password strength
       if (!validatePassword(password)) {
         passwordError.textContent = "Password must be at least 8 characters, include one uppercase, one lowercase, and one number.";
+        return;
+      }
+
+      // Validate password match
+      if (!validatePasswordMatch(password, confirmPassword)) {
+        confirmPasswordError.textContent = "Passwords do not match";
         return;
       }
       
@@ -246,7 +328,16 @@
           messageDiv.className = 'success';
           messageDiv.innerHTML = data.message;
           document.getElementById('registrationForm').reset();
-          setTimeout(() => closePopup(), 2000);
+          
+          // Redirect to security questions after successful registration
+          setTimeout(() => {
+            if (data.user_id) {
+              redirectToSecurityQuestions(data.user_id);
+            } else {
+              // Fallback: redirect to security questions page
+              window.location.href = 'securityQuestions.php';
+            }
+          }, 1500);
         } else {
           messageDiv.className = 'error';
           messageDiv.innerHTML = data.message || 'An error occurred. Please try again.';

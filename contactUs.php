@@ -128,16 +128,16 @@ if (isset($_SESSION['contact_message'])) {
         <div class="mt-10">
           <h3 class="text-xl font-bold food-text mb-4">Connect With Us</h3>
           <div class="flex space-x-4">
-            <a href="#" class="food-primary-text text-2xl hover:opacity-80">
+            <a href="https://www.facebook.com/" class="food-primary-text text-2xl hover:opacity-80">
               <i class="fab fa-facebook"></i>
             </a>
-            <a href="#" class="food-primary-text text-2xl hover:opacity-80">
+            <a href="https://www.instagram.com/" class="food-primary-text text-2xl hover:opacity-80">
               <i class="fab fa-instagram"></i>
             </a>
-            <a href="#" class="food-primary-text text-2xl hover:opacity-80">
+            <a href="https://x.com/?lang=en" class="food-primary-text text-2xl hover:opacity-80">
               <i class="fab fa-twitter"></i>
             </a>
-            <a href="#" class="food-primary-text text-2xl hover:opacity-80">
+            <a href="https://www.youtube.com/" class="food-primary-text text-2xl hover:opacity-80">
               <i class="fab fa-youtube"></i>
             </a>
           </div>
@@ -229,11 +229,8 @@ if (isset($_SESSION['contact_message'])) {
     <?php include('footer.php'); ?>
 
 <script>
-  // Remove the form submission prevention to allow actual form submission
-  // Only keep validation if needed, but don't prevent default behavior
   
   document.getElementById('contactForm').addEventListener('submit', function(e) {
-    // Simple validation - but don't prevent form submission
     const formData = new FormData(this);
     let isValid = true;
     

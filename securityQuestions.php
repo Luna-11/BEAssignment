@@ -253,10 +253,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="security-question-group">
                 <div class="question-number">Question 1</div>
                 <div class="input-container">
-                    <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="8" r="4"/>
-                        <path d="M6 21v-2a6 6 0 0 1 12 0v2"/>
-                    </svg>
+
                     <select name="question1" required>
                         <option value="">Select a question</option>
                         <option value="What is your favorite food?">What is your favorite food?</option>
@@ -275,10 +272,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="security-question-group">
                 <div class="question-number">Question 2</div>
                 <div class="input-container">
-                    <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="8" r="4"/>
-                        <path d="M6 21v-2a6 6 0 0 1 12 0v2"/>
-                    </svg>
                     <select name="question2" required>
                         <option value="">Select a question</option>
                         <option value="What city were you born in?">What city were you born in?</option>
@@ -297,10 +290,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="security-question-group">
                 <div class="question-number">Question 3</div>
                 <div class="input-container">
-                    <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="8" r="4"/>
-                        <path d="M6 21v-2a6 6 0 0 1 12 0v2"/>
-                    </svg>
                     <select name="question3" required>
                         <option value="">Select a question</option>
                         <option value="What was the name of your first school?">What was the name of your first school?</option>
