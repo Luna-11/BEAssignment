@@ -47,12 +47,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt = $conn->prepare("INSERT INTO users (first_name, last_name, mail, password, failed_attempts, last_attempt_time) VALUES (?, ?, ?, ?, 0, NULL)");
             $stmt->bind_param("ssss", $first_name, $last_name, $mail, $hashed_password);
 
-            if ($stmt->execute()) {
-                header('Location: logIn.php');
-                exit;
-            } else {
-                $error = "Error saving data: " . $stmt->error;
-            }
+if ($stmt->execute()) {
+    $user_id = $stmt->insert_id; // get new user id
+    header("Location: securityQuestions.php?user_id=" . $user_id);
+    exit;
+} else {
+    $error = "Error saving data: " . $stmt->error;
+}
+
 
             $stmt->close();
         }

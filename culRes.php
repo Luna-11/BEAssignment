@@ -79,8 +79,7 @@
                                 <?php if (!empty($imagePath)): ?>
                                     <img src="<?php echo htmlspecialchars($imagePath); ?>" 
                                          alt="<?php echo htmlspecialchars($row['resourceName']); ?>" 
-                                         class="w-full h-48 object-cover cursor-zoom-in"
-                                         onclick="openImageLightbox('<?php echo htmlspecialchars($imagePath); ?>', '<?php echo htmlspecialchars($row['resourceName']); ?>', <?php echo $row['resourceID']; ?>)">
+                                         class="w-full h-48 object-cover">
                                 <?php else: ?>
                                     <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
                                         <i class="fas fa-utensils text-4xl text-gray-400"></i>
@@ -114,15 +113,15 @@
                             </div>
                             <div class="education-content p-6">
                                 <h3 class="text-xl font-semibold text-text mb-3"><?php echo htmlspecialchars($row['resourceName']); ?></h3>
-                                <p class="text-text/80 mb-4 line-clamp-1"><?php echo htmlspecialchars($row['description']); ?></p>
+                                <p class="text-text/80 mb-4 line-clamp-3"><?php echo htmlspecialchars($row['description']); ?></p>
                                 
                                 <!-- Action Buttons -->
                                 <div class="action-buttons flex justify-between mt-4">
-                                    <!-- View Detail Button -->
-                                    <button class="view-detail-btn bg-light-pink text-text px-4 py-2 rounded-lg font-semibold transition-all duration-300 hover:bg-medium-pink hover:text-white flex items-center"
-                                            onclick="viewResourceDetail(<?php echo $row['resourceID']; ?>)">
+                                    <!-- View Detail Button - Now links to detail page -->
+                                    <a href="culResDetail.php?id=<?php echo $row['resourceID']; ?>" 
+                                       class="view-detail-btn bg-light-pink text-text px-4 py-2 rounded-lg font-semibold transition-all duration-300 hover:bg-medium-pink hover:text-white flex items-center">
                                         <i class="fas fa-eye mr-2"></i> View Detail
-                                    </button>
+                                    </a>
                                     
                                     <!-- Download All Button -->
                                     <button class="download-all-btn bg-primary text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300 hover:bg-medium-pink flex items-center"
@@ -150,80 +149,6 @@
             ?>
         </div>
     </section>
-
-    <!-- Detail Modal -->
-    <div id="resourceModal" class="fixed inset-0 bg-black bg-opacity-50 z-[9999] hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative">
-            <div class="modal-header flex justify-between items-center p-6 border-b border-gray-200 sticky top-0 bg-white z-10 rounded-t-xl">
-                <h2 id="modalTitle" class="text-2xl font-bold text-text"></h2>
-                <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700 text-2xl">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            
-            <div class="modal-content p-6">
-                <!-- Image Section with Download Button -->
-                <div id="imageSection" class="mb-6">
-                    <div class="flex justify-between items-center mb-3">
-                        <h3 class="text-lg font-semibold text-text">Image</h3>
-                        <button id="modalImageDownload" class="bg-primary text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300 hover:bg-medium-pink flex items-center">
-                            <i class="fas fa-download mr-2"></i> Download Image
-                        </button>
-                    </div>
-                    <img id="modalImage" src="" alt="" 
-                         class="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg cursor-zoom-in"
-                         onclick="openImageLightboxFromModal(this.src, this.alt)">
-                </div>
-                
-                <!-- Description Section -->
-                <div class="description-section mb-6">
-                    <h3 class="text-lg font-semibold text-text mb-3">Description</h3>
-                    <p id="modalDescription" class="text-text/80 leading-relaxed whitespace-pre-line"></p>
-                </div>
-                
-                <!-- Video Section with Download Button -->
-                <div id="videoSection" class="mb-6 hidden">
-                    <div class="flex justify-between items-center mb-3">
-                        <h3 class="text-lg font-semibold text-text">Video</h3>
-                        <button id="modalVideoDownload" class="bg-primary text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300 hover:bg-medium-pink flex items-center">
-                            <i class="fas fa-download mr-2"></i> Download Video
-                        </button>
-                    </div>
-                    <video id="modalVideo" controls class="w-full rounded-lg shadow-lg">
-                        Your browser does not support the video tag.
-                    </video>
-                </div>
-
-                <!-- PDF Section with Download Button -->
-                <div id="pdfSection" class="mb-6 hidden">
-                    <div class="flex justify-between items-center mb-3">
-                        <h3 class="text-lg font-semibold text-text">Document</h3>
-                        <button id="modalPdfDownload" class="bg-primary text-white px-4 py-2 rounded-lg font-semibold transition-all duration-300 hover:bg-medium-pink flex items-center">
-                            <i class="fas fa-download mr-2"></i> Download PDF
-                        </button>
-                    </div>
-                    <div class="bg-gray-100 p-4 rounded-lg border-2 border-dashed border-gray-300 text-center">
-                        <i class="fas fa-file-pdf text-4xl text-red-500 mb-2"></i>
-                        <p class="text-text/80">PDF Document Available</p>
-                        <p class="text-text/60 text-sm mt-1">Click the download button to get the PDF file</p>
-                    </div>
-                </div>
-
-                <!-- Download All Section -->
-                <div class="download-all-section mt-6 pt-6 border-t border-gray-200">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h3 class="text-lg font-semibold text-text mb-2">Download All Files</h3>
-                            <p class="text-text/60 text-sm">Get all available files for this resource</p>
-                        </div>
-                        <button id="modalDownloadAll" class="bg-primary text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 hover:bg-medium-pink flex items-center">
-                            <i class="fas fa-download mr-2"></i> Download All
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Image Lightbox Modal - Higher z-index to ensure it's on top -->
     <div id="imageLightbox" class="fixed inset-0 bg-black bg-opacity-90 z-[10000] hidden flex items-center justify-center p-4">
@@ -253,9 +178,6 @@
     <!-- Footer -->
     <?php include('footer.php'); ?>
 
-    <!-- JavaScript Files -->
-    <script src="eduRes.js"></script>
-    
     <script>
         // Store resource data in a JavaScript object
         const resourceData = {
@@ -302,33 +224,6 @@
             document.body.style.overflow = 'hidden';
         }
 
-        // For modal images
-        function openImageLightboxFromModal(imageSrc, imageAlt) {
-            const lightbox = document.getElementById('imageLightbox');
-            const lightboxImage = document.getElementById('lightboxImage');
-            const lightboxDownload = document.getElementById('lightboxDownload');
-            const lightboxTitle = document.getElementById('lightboxTitle');
-            
-            // Set image
-            lightboxImage.src = imageSrc;
-            lightboxImage.alt = imageAlt;
-            lightboxTitle.textContent = imageAlt;
-            
-            // Set download functionality
-            lightboxDownload.onclick = function() {
-                const link = document.createElement('a');
-                link.href = imageSrc;
-                link.download = imageAlt + '_fullsize.jpg';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            };
-            
-            // Show lightbox
-            lightbox.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-
         function closeImageLightbox() {
             const lightbox = document.getElementById('imageLightbox');
             lightbox.classList.add('hidden');
@@ -348,80 +243,6 @@
                 closeImageLightbox();
             }
         });
-
-        // Function to open modal with resource details
-        function viewResourceDetail(resourceId) {
-            const resource = resourceData[resourceId];
-            if (!resource) {
-                console.error('Resource not found:', resourceId);
-                return;
-            }
-
-            const modal = document.getElementById('resourceModal');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalImage = document.getElementById('modalImage');
-            const modalDescription = document.getElementById('modalDescription');
-            const modalVideo = document.getElementById('modalVideo');
-            const videoSection = document.getElementById('videoSection');
-            const imageSection = document.getElementById('imageSection');
-            const pdfSection = document.getElementById('pdfSection');
-            const modalImageDownload = document.getElementById('modalImageDownload');
-            const modalVideoDownload = document.getElementById('modalVideoDownload');
-            const modalPdfDownload = document.getElementById('modalPdfDownload');
-            const modalDownloadAll = document.getElementById('modalDownloadAll');
-            
-            // Set modal content
-            modalTitle.textContent = resource.name;
-            modalDescription.textContent = resource.description;
-            
-            // Set image and download button
-            if (resource.image) {
-                modalImage.src = resource.image;
-                modalImage.alt = resource.name;
-                imageSection.classList.remove('hidden');
-                
-                // Set image download
-                modalImageDownload.onclick = function() {
-                    downloadFile(resource.image, resource.name + '_image.jpg');
-                };
-            } else {
-                imageSection.classList.add('hidden');
-            }
-            
-            // Set video and download button
-            if (resource.video) {
-                modalVideo.src = resource.video;
-                videoSection.classList.remove('hidden');
-                
-                // Set video download
-                modalVideoDownload.onclick = function() {
-                    downloadFile(resource.video, resource.name + '_video.mp4');
-                };
-            } else {
-                videoSection.classList.add('hidden');
-            }
-
-            // Set PDF and download button
-            if (resource.pdf) {
-                pdfSection.classList.remove('hidden');
-                
-                // Set PDF download
-                modalPdfDownload.onclick = function() {
-                    downloadFile(resource.pdf, resource.name + '_document.pdf');
-                };
-            } else {
-                pdfSection.classList.add('hidden');
-            }
-
-            // Set download all button
-            modalDownloadAll.onclick = function() {
-                downloadAllFiles(resourceId);
-            };
-            
-            // Show modal
-            modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
 
         // Helper function to download files
         function downloadFile(url, filename) {
@@ -461,34 +282,6 @@
             }
         }
         
-        // Function to close modal
-        function closeModal() {
-            const modal = document.getElementById('resourceModal');
-            modal.classList.add('hidden');
-            document.body.style.overflow = 'auto';
-            
-            // Reset video
-            const modalVideo = document.getElementById('modalVideo');
-            if (modalVideo) {
-                modalVideo.pause();
-                modalVideo.currentTime = 0;
-            }
-        }
-        
-        // Close modal when clicking outside
-        document.getElementById('resourceModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeModal();
-            }
-        });
-        
-        // Close modal with Escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeModal();
-            }
-        });
-        
         // Optional: Add hover effect to show overlay on image
         document.addEventListener('DOMContentLoaded', function() {
             const educationCards = document.querySelectorAll('.education-card');
@@ -511,32 +304,12 @@
     </script>
 
     <style>
-        /* Custom scrollbar for modal */
-        #resourceModal .bg-white::-webkit-scrollbar {
-                width: 8px;
-        }
-        
-        #resourceModal .bg-white::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        
-        #resourceModal .bg-white::-webkit-scrollbar-thumb {
-            background: #C89091;
-            border-radius: 10px;
-        }
-        
-        #resourceModal .bg-white::-webkit-scrollbar-thumb:hover {
-            background: #ddb2b1;
-        }
-        
         /* Line clamp for description preview */
         .line-clamp-3 {
             display: -webkit-box;
             -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
-            line-height: 5px;
         }
         
         /* Smooth transitions for lightbox */
@@ -546,11 +319,6 @@
         
         #lightboxImage {
             transition: transform 0.3s ease;
-        }
-
-        /* Ensure modal header stays on top of content but lightbox stays on top of everything */
-        .modal-header {
-            z-index: 10;
         }
     </style>
 </body>

@@ -70,6 +70,20 @@ if ($profileResult['success']) {
     $messageType = 'error';
 }
 
+$userRecipeCount = 0;
+if (isset($_SESSION['userID'])) {
+    $countQuery = "SELECT COUNT(*) as recipe_count FROM recipe WHERE userID = ?";
+    $stmt = $conn->prepare($countQuery);
+    if ($stmt) {
+        $stmt->bind_param("i", $userID);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        $userRecipeCount = $row['recipe_count'];
+        $stmt->close();
+    }
+}
+
 // Handle profile image upload
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['profileImage'])) {
     $uploadResult = handleProfileImageUpload($_FILES['profileImage'], $userID);
@@ -201,13 +215,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
             color: #7b4e48;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .notification-unread {
-            background-color: #fef7f7;
-            border-left: 4px solid #C89091;
-        }
-        .notification-read {
-            background-color: #fcfaf2;
-        }
     </style>
 </head>
 <body class="bg-light-yellow text-text-color font-segoe min-h-screen">
@@ -259,14 +266,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
                             <i class="fas fa-heart mr-3 text-primary"></i>
                             <span>Comments</span>
                         </a>
-                    </li>
-                    <li>
-                        <a href="#" class="sidebar-link flex items-center px-6 py-3 text-text-color hover:bg-light-pink transition-colors duration-200" data-tab="notifications">
-                            <i class="fas fa-bell mr-3 text-primary"></i>
-                            <span>Notifications</span>
-                            <span class="ml-auto bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
-                        </a>
-                    </li>
+    </li>
+
                 </ul>
                 
                 <div class="px-6 py-2 mt-6">
@@ -323,15 +324,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
                             <h3 class="text-xl font-bold text-text-color">
                                 <?php echo htmlspecialchars(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? '')); ?>
                             </h3>
-                            
-                            <div class="mt-4 flex space-x-2">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-light-pink text-text-color">
-                                    <i class="fas fa-utensils mr-1"></i> 12 Recipes
-                                </span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-light-pink text-text-color">
-                                    <i class="fas fa-heart mr-1"></i> 45 Likes
-                                </span>
-                            </div>
+                                                    
+                        <div class="mt-4 flex space-x-2">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-light-pink text-text-color">
+                                <i class="fas fa-utensils mr-1"></i> 
+                                <?php echo $userRecipeCount; ?> Recipe<?php echo $userRecipeCount != 1 ? 's' : ''; ?>
+                            </span>
+                        </div>
                         </div>
                         
                         <!-- Profile Form -->
@@ -884,122 +883,6 @@ function confirmDelete(recipeId) {
                         </div>
                     </div>
                 </div>
-
-                <!-- Notifications Tab -->
-                <div id="notifications" class="tab-content">
-                    <div class="bg-lightest rounded-lg shadow-md p-6">
-                        <div class="flex justify-between items-center mb-6">
-                            <h2 class="text-2xl font-bold text-primary flex items-center">
-                                <i class="fas fa-bell mr-2"></i> Notifications
-                            </h2>
-                            <div class="flex space-x-2">
-                                <button class="inline-flex items-center px-3 py-1 border border-primary text-sm font-medium rounded-lg text-primary hover:bg-light-pink transition-colors" id="mark-all-read">
-                                    <i class="fas fa-check-double mr-1"></i> Mark All as Read
-                                </button>
-                                <button class="inline-flex items-center px-3 py-1 border border-primary text-sm font-medium rounded-lg text-primary hover:bg-light-pink transition-colors" id="clear-all">
-                                    <i class="fas fa-trash-alt mr-1"></i> Clear All
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="space-y-4">
-                            <!-- Unread Notification -->
-                            <div class="border border-light-pink rounded-lg p-4 hover:shadow-md transition-shadow notification-unread">
-                                <div class="flex items-start">
-                                    <div class="flex-shrink-0">
-                                        <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white">
-                                            <i class="fas fa-heart"></i>
-                                        </div>
-                                    </div>
-                                    <div class="ml-4 flex-1">
-                                        <div class="flex justify-between items-start">
-                                            <p class="text-text-color font-medium">Someone liked your recipe</p>
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary text-white">
-                                                New
-                                            </span>
-                                        </div>
-                                        <p class="text-sm text-medium-gray mt-1">Maria Rodriguez liked your "Spicy Thai Basil Noodles" recipe</p>
-                                        <p class="text-xs text-medium-gray mt-1">2 hours ago</p>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Unread Notification -->
-                            <div class="border border-light-pink rounded-lg p-4 hover:shadow-md transition-shadow notification-unread">
-                                <div class="flex items-start">
-                                    <div class="flex-shrink-0">
-                                        <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white">
-                                            <i class="fas fa-comment"></i>
-                                        </div>
-                                    </div>
-                                    <div class="ml-4 flex-1">
-                                        <div class="flex justify-between items-start">
-                                            <p class="text-text-color font-medium">New comment on your recipe</p>
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary text-white">
-                                                New
-                                            </span>
-                                        </div>
-                                        <p class="text-sm text-medium-gray mt-1">Chef John commented: "Great recipe! I added some extra chili for more heat."</p>
-                                        <p class="text-xs text-medium-gray mt-1">5 hours ago</p>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Unread Notification -->
-                            <div class="border border-light-pink rounded-lg p-4 hover:shadow-md transition-shadow notification-unread">
-                                <div class="flex items-start">
-                                    <div class="flex-shrink-0">
-                                        <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white">
-                                            <i class="fas fa-user-plus"></i>
-                                        </div>
-                                    </div>
-                                    <div class="ml-4 flex-1">
-                                        <div class="flex justify-between items-start">
-                                            <p class="text-text-color font-medium">New follower</p>
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary text-white">
-                                                New
-                                            </span>
-                                        </div>
-                                        <p class="text-sm text-medium-gray mt-1">FoodieFan123 started following you</p>
-                                        <p class="text-xs text-medium-gray mt-1">Yesterday</p>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Read Notification -->
-                            <div class="border border-light-pink rounded-lg p-4 hover:shadow-md transition-shadow notification-read">
-                                <div class="flex items-start">
-                                    <div class="flex-shrink-0">
-                                        <div class="w-10 h-10 bg-medium-gray rounded-full flex items-center justify-center text-white">
-                                            <i class="fas fa-bookmark"></i>
-                                        </div>
-                                    </div>
-                                    <div class="ml-4 flex-1">
-                                        <p class="text-text-color font-medium">Your recipe was saved</p>
-                                        <p class="text-sm text-medium-gray mt-1">CookingEnthusiast saved your "Mediterranean Breakfast Bowl" recipe</p>
-                                        <p class="text-xs text-medium-gray mt-1">2 days ago</p>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Read Notification -->
-                            <div class="border border-light-pink rounded-lg p-4 hover:shadow-md transition-shadow notification-read">
-                                <div class="flex items-start">
-                                    <div class="flex-shrink-0">
-                                        <div class="w-10 h-10 bg-medium-gray rounded-full flex items-center justify-center text-white">
-                                            <i class="fas fa-award"></i>
-                                        </div>
-                                    </div>
-                                    <div class="ml-4 flex-1">
-                                        <p class="text-text-color font-medium">Achievement unlocked!</p>
-                                        <p class="text-sm text-medium-gray mt-1">You've earned the "Recipe Master" badge for publishing 10 recipes</p>
-                                        <p class="text-xs text-medium-gray mt-1">3 days ago</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -1073,56 +956,6 @@ function confirmDelete(recipeId) {
                 e.preventDefault();
                 if (confirm('Are you sure you want to logout?')) {
                     window.location.href = 'logout.php';
-                }
-            });
-        }
-
-        // Notification functionality
-        const markAllReadBtn = document.getElementById('mark-all-read');
-        const clearAllBtn = document.getElementById('clear-all');
-        
-        if (markAllReadBtn) {
-            markAllReadBtn.addEventListener('click', function() {
-                const unreadNotifications = document.querySelectorAll('.notification-unread');
-                unreadNotifications.forEach(notification => {
-                    notification.classList.remove('notification-unread');
-                    notification.classList.add('notification-read');
-                    
-                    // Remove the "New" badge
-                    const badge = notification.querySelector('.bg-primary');
-                    if (badge) {
-                        badge.remove();
-                    }
-                    
-                    // Change icon background to gray
-                    const iconContainer = notification.querySelector('.bg-primary');
-                    if (iconContainer) {
-                        iconContainer.classList.remove('bg-primary');
-                        iconContainer.classList.add('bg-medium-gray');
-                    }
-                });
-                
-                // Update notification count in sidebar
-                const notificationCount = document.querySelector('.sidebar-link[data-tab="notifications"] .bg-primary');
-                if (notificationCount) {
-                    notificationCount.remove();
-                }
-            });
-        }
-        
-        if (clearAllBtn) {
-            clearAllBtn.addEventListener('click', function() {
-                if (confirm('Are you sure you want to clear all notifications?')) {
-                    const notificationsContainer = document.querySelector('#notifications .space-y-4');
-                    if (notificationsContainer) {
-                        notificationsContainer.innerHTML = '<p class="text-center text-medium-gray py-4">No notifications</p>';
-                    }
-                    
-                    // Update notification count in sidebar
-                    const notificationCount = document.querySelector('.sidebar-link[data-tab="notifications"] .bg-primary');
-                    if (notificationCount) {
-                        notificationCount.remove();
-                    }
                 }
             });
         }
