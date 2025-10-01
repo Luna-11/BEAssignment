@@ -35,6 +35,130 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["mail"])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Forgot Password - FoodFusion</title>
     <link rel="stylesheet" href="login.css">
+    <style>
+        :root {
+            --primary-color: #C89091;
+            --text-color: #7b4e48;
+            --lightest-color: #fcfaf2;
+            --light_pink: #e9d0cb;
+            --medium_pink: #ddb2b1;
+            --light_yellow: #f9f1e5;
+            --white: #fff;
+            --black: #222;
+            --light-gray: #bbb;
+            --medium-gray: #555;
+            --shadow-color: rgba(0,0,0,0.1);
+            --border-color: #ccc;
+            --button-color: #333;
+        }
+        
+        /* Additional styles for better spacing using your exact colors */
+        .form-header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .form-header h1 {
+            margin-bottom: 0.75rem;
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--text-color); /* Your text color */
+        }
+        
+        .form-header p {
+            color: var(--medium-gray); /* Your medium gray */
+            line-height: 1.5;
+            margin: 0;
+        }
+        
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .input-container {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+        
+        .input-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            color: var(--light-gray); /* Your light gray for icon */
+            z-index: 10;
+        }
+        
+        .input-container input {
+            width: 100%;
+            padding: 14px 12px 14px 42px;
+            border: 1px solid var(--border-color); /* Your border color */
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+            background-color: var(--white);
+            color: var(--text-color);
+        }
+        
+        .input-container input:focus {
+            outline: none;
+            border-color: var(--primary-color); /* Your primary color */
+            box-shadow: 0 0 0 2px var(--light_pink); /* Light pink shadow */
+        }
+        
+        .input-container input::placeholder {
+            color: var(--light-gray); /* Your light gray for placeholder */
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary-color); /* Your button color */
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-top: 0.5rem;
+        }
+        
+        .login-btn:hover {
+            background-color: var(--medium_pink);
+        }
+        
+        .signup-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--medium-gray); /* Your medium gray */
+        }
+        
+        .signup-link a {
+            color: var(--primary-color); /* Your primary color */
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .signup-link a:hover {
+            text-decoration: underline;
+            color: var(--text-color); /* Your text color on hover */
+        }
+        
+        .error-message {
+            background-color: var(--light_yellow); /* Your light yellow */
+            border: 1px solid var(--medium_pink); /* Your medium pink */
+            color: var(--text-color); /* Your text color */
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-weight: 500;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -71,7 +195,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["mail"])) {
                 </div>
 
                 <?php if (!empty($error)): ?>
-                    <div class="error-message" style="color: red; text-align: center; margin-bottom: 15px;">
+                    <div class="error-message">
                         <?php echo $error; ?>
                     </div>
                 <?php endif; ?>

@@ -95,6 +95,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["answers"])) {
                 <div class="form-header">
                     <h1>Security Questions</h1>
                     <p>Please answer your security questions to verify your identity</p>
+                    <br>
                 </div>
 
                 <?php if (!empty($error)): ?>
