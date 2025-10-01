@@ -246,9 +246,11 @@
                                 echo htmlspecialchars($description); 
                                 ?>
                             </p>
-                            <button class="w-full p-4 bg-[#C89091] text-white border-none rounded-xl text-base font-semibold cursor-pointer transition-all shadow-lg hover:bg-[#b37d7e] hover:-translate-y-0.5 hover:shadow-xl flex justify-center items-center gap-2">
+
+                            <a href="reDetail.php?id=<?php echo $row['recipeID']; ?>" 
+                            class="w-full p-4 bg-[#C89091] text-white border-none rounded-xl text-base font-semibold cursor-pointer transition-all shadow-lg hover:bg-[#b37d7e] hover:-translate-y-0.5 hover:shadow-xl flex justify-center items-center gap-2">
                                 View Detail
-                            </button>
+                            </a>
                         </div>
                     </div>
                 <?php endwhile; ?>

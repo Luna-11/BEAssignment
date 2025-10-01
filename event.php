@@ -60,7 +60,7 @@ $events = getEvents($conn);
             position: relative;
         }
 
-        /* Popup overlay - HIGHEST z-index */
+        /* Popup overlay - HIGHEST z-index - MATCHING RESOURCE POPUP */
         .popup-overlay {
             z-index: 99999 !important;
         }
@@ -257,8 +257,8 @@ $events = getEvents($conn);
                         </div>
                     </div>
                     
-                    <!-- Event Details Popup - UPDATED with higher z-index -->
-                    <div id="event-popup-<?php echo $event['eventID']; ?>" class="popup-overlay fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4">
+                    <!-- Event Details Popup - UPDATED with SAME HIGH z-index as resource popup -->
+                    <div id="event-popup-<?php echo $event['eventID']; ?>" class="popup-overlay fixed z-[99999] inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4">
                         <div class="popup-content bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative">
                             <button class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl z-10 bg-white bg-opacity-90 rounded-full w-10 h-10 flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110" 
                                     onclick="closeEventDetails(<?php echo $event['eventID']; ?>)">

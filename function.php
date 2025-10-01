@@ -470,8 +470,7 @@ function getTableColumns($conn, $tableName) {
     return $columns;
 }
 
-// Function to update user profile (MySQLi version)
-// Function to update user profile (MySQLi version)
+// Function to update user profile
 function updateUserProfileMySQLi($userID, $data, $conn) {
     try {
         $idColumn = detectUserIdColumn($conn);

@@ -485,11 +485,11 @@ if ($featured_result && $featured_result->num_rows > 0) {
   </section>
 
   <section class="share-hero text-center py-8 relative">
-    <h1 class="text-2xl md:text-4xl font-bold mb-3">Build Your Dream Pizza</h1>
-    <p class="text-sm md:text-base mb-6">Choose your crust, toppings, and sauces to make it just the way you love.</p>
+    <h1 class="text-2xl md:text-4xl font-bold mb-3">Share your cooking tips!</h1>
+    <p class="text-sm md:text-base mb-6">Let's cook together and communicate with food enthusiasts!</p>
     <div class="relative inline-block">
       <img src="./BEpics/panFlying.png" alt="Pizza" class="w-96 mx-auto">
-      <a href="community.php" class="absolute bottom-10 left-1/2 -translate-x-1/2 bg-white text-[#C89091] rounded-full py-2 px-4">Share Yours Now</a>
+      <a href="community.php" class="absolute bottom-10 left-1/2 -translate-x-1/2 bg-white text-[#C89091] rounded-full py-4 px-4">Share Yours Now</a>
     </div>
   </section>
 

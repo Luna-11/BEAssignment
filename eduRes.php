@@ -50,7 +50,7 @@
             <?php
             include('./configMysql.php');
 
-            // Get all Culinary resources (resourceTypeID = 2)
+            // Get all Educational resources (resourceTypeID = 2)
             $sql = "SELECT resourceID, resourceName, description, resourcesImage, PDF_file, Video 
                     FROM Resource 
                     WHERE resourceTypeID = 2
@@ -60,14 +60,24 @@
 
             if ($result && mysqli_num_rows($result) > 0): ?>
                 <div class="education-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <?php while ($row = mysqli_fetch_assoc($result)): ?>
+                    <?php while ($row = mysqli_fetch_assoc($result)): 
+                        // Extract just the filename from the stored path
+                        $imagePath = $row['resourcesImage'];
+                        $pdfPath = $row['PDF_file'];
+                        $videoPath = $row['Video'];
+                        
+                        // Get just the filename (without the directory path)
+                        $imageFile = basename($imagePath);
+                        $pdfFile = $pdfPath ? basename($pdfPath) : null;
+                        $videoFile = $videoPath ? basename($videoPath) : null;
+                    ?>
                         <div class="education-card bg-white rounded-xl shadow-lg overflow-hidden transition-transform duration-300 hover:-translate-y-2 hover:shadow-xl">
                             <div class="education-image relative overflow-hidden">
-                                <?php if (!empty($row['resourcesImage'])): ?>
-                                    <img src="uploads/resources/images/<?php echo htmlspecialchars($row['resourcesImage']); ?>" 
+                                <?php if (!empty($imagePath)): ?>
+                                    <img src="<?php echo htmlspecialchars($imagePath); ?>" 
                                          alt="<?php echo htmlspecialchars($row['resourceName']); ?>" 
                                          class="w-full h-48 object-cover cursor-zoom-in"
-                                         onclick="openImageLightbox('uploads/resources/images/<?php echo htmlspecialchars($row['resourcesImage']); ?>', '<?php echo htmlspecialchars($row['resourceName']); ?>', <?php echo $row['resourceID']; ?>)">
+                                         onclick="openImageLightbox('<?php echo htmlspecialchars($imagePath); ?>', '<?php echo htmlspecialchars($row['resourceName']); ?>', <?php echo $row['resourceID']; ?>)">
                                 <?php else: ?>
                                     <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
                                         <i class="fas fa-book text-4xl text-gray-400"></i>
@@ -75,20 +85,20 @@
                                 <?php endif; ?>
                                 <div class="education-overlay absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center opacity-0 transition-opacity duration-300">
                                     <!-- Download Image Button -->
-                                    <a href="uploads/resources/images/<?php echo htmlspecialchars($row['resourcesImage']); ?>" 
+                                    <a href="<?php echo htmlspecialchars($imagePath); ?>" 
                                        class="download-btn bg-primary text-white px-4 py-2 rounded-full font-semibold transition-all duration-300 hover:bg-medium-pink mr-2" 
                                        download="<?php echo htmlspecialchars($row['resourceName']); ?>_image.jpg">
                                         <i class="fas fa-download mr-2"></i> Image
                                     </a>
-                                    <?php if (!empty($row['Video'])): ?>
-                                        <a href="uploads/resources/videos/<?php echo htmlspecialchars($row['Video']); ?>" 
+                                    <?php if (!empty($videoPath)): ?>
+                                        <a href="<?php echo htmlspecialchars($videoPath); ?>" 
                                            class="download-btn bg-primary text-white px-4 py-2 rounded-full font-semibold transition-all duration-300 hover:bg-medium-pink mr-2" 
                                            download="<?php echo htmlspecialchars($row['resourceName']); ?>_video.mp4">
                                             <i class="fas fa-download mr-2"></i> Video
                                         </a>
                                     <?php endif; ?>
-                                    <?php if (!empty($row['pdfFile'])): ?>
-                                        <a href="uploads/resources/pdfs/<?php echo htmlspecialchars($row['pdfFile']); ?>" 
+                                    <?php if (!empty($pdfPath)): ?>
+                                        <a href="<?php echo htmlspecialchars($pdfPath); ?>" 
                                            class="download-btn bg-primary text-white px-4 py-2 rounded-full font-semibold transition-all duration-300 hover:bg-medium-pink" 
                                            download="<?php echo htmlspecialchars($row['resourceName']); ?>_document.pdf">
                                             <i class="fas fa-download mr-2"></i> PDF
@@ -119,7 +129,7 @@
                     <?php endwhile; ?>
                 </div>
             <?php else: ?>
-                <p class="text-center text-text/80 py-8">No culinary resources found yet.</p>
+                <p class="text-center text-text/80 py-8">No educational resources found yet.</p>
             <?php endif; ?>
         </div>
     </section>
@@ -238,12 +248,18 @@
             while ($row = mysqli_fetch_assoc($result)):
                 if (!$first) echo ",";
                 $first = false;
+                
+                // Extract filenames from paths
+                $imagePath = $row['resourcesImage'];
+                $pdfPath = $row['PDF_file'];
+                $videoPath = $row['Video'];
+                
                 echo $row['resourceID'] . ": {";
                 echo "name: '" . addslashes($row['resourceName']) . "',";
                 echo "description: `" . addslashes($row['description']) . "`,";
-                echo "image: '" . addslashes($row['resourcesImage']) . "',";
-                echo "video: '" . addslashes($row['Video']) . "',";
-                echo "pdf: '" . addslashes($row['pdfFile']) . "'";
+                echo "image: '" . addslashes($imagePath) . "',";
+                echo "video: '" . addslashes($videoPath) . "',";
+                echo "pdf: '" . addslashes($pdfPath) . "'";
                 echo "}";
             endwhile;
             ?>
@@ -350,13 +366,13 @@
             
             // Set image and download button
             if (resource.image) {
-                modalImage.src = 'uploads/resources/images/' + resource.image;
+                modalImage.src = resource.image;
                 modalImage.alt = resource.name;
                 imageSection.classList.remove('hidden');
                 
                 // Set image download
                 modalImageDownload.onclick = function() {
-                    downloadFile('uploads/resources/images/' + resource.image, resource.name + '_image.jpg');
+                    downloadFile(resource.image, resource.name + '_image.jpg');
                 };
             } else {
                 imageSection.classList.add('hidden');
@@ -364,12 +380,12 @@
             
             // Set video and download button
             if (resource.video) {
-                modalVideo.src = 'uploads/resources/videos/' + resource.video;
+                modalVideo.src = resource.video;
                 videoSection.classList.remove('hidden');
                 
                 // Set video download
                 modalVideoDownload.onclick = function() {
-                    downloadFile('uploads/resources/videos/' + resource.video, resource.name + '_video.mp4');
+                    downloadFile(resource.video, resource.name + '_video.mp4');
                 };
             } else {
                 videoSection.classList.add('hidden');
@@ -381,7 +397,7 @@
                 
                 // Set PDF download
                 modalPdfDownload.onclick = function() {
-                    downloadFile('uploads/resources/pdfs/' + resource.pdf, resource.name + '_document.pdf');
+                    downloadFile(resource.pdf, resource.name + '_document.pdf');
                 };
             } else {
                 pdfSection.classList.add('hidden');
@@ -417,20 +433,20 @@
 
             // Download image
             if (resource.image) {
-                downloadFile('uploads/resources/images/' + resource.image, resource.name + '_image.jpg');
+                downloadFile(resource.image, resource.name + '_image.jpg');
             }
 
             // Download video if exists
             if (resource.video) {
                 setTimeout(() => {
-                    downloadFile('uploads/resources/videos/' + resource.video, resource.name + '_video.mp4');
+                    downloadFile(resource.video, resource.name + '_video.mp4');
                 }, 500); // Small delay to avoid browser blocking multiple downloads
             }
 
             // Download PDF if exists
             if (resource.pdf) {
                 setTimeout(() => {
-                    downloadFile('uploads/resources/pdfs/' + resource.pdf, resource.name + '_document.pdf');
+                    downloadFile(resource.pdf, resource.name + '_document.pdf');
                 }, 1000); // Additional delay for third download
             }
         }
