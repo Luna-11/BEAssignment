@@ -96,6 +96,50 @@
     // Debug: Show what ID we're looking for
     echo "<!-- Debug: Looking for recipe ID: $recipeID -->";
     
+    // Initialize variables
+    $recipe = null;
+    $isSaved = false;
+    $message = '';
+    
+    // Handle save/unsave action FIRST (before fetching recipe data)
+    if (isset($_POST['save_action']) && isset($_SESSION['userID'])) {
+        $userID = $_SESSION['userID'];
+        
+        if ($_POST['save_action'] === 'save') {
+            // Save to database
+            $saveSql = "INSERT INTO saved_recipes (user_id, recipe_id) VALUES (?, ?)";
+            $stmt = $conn->prepare($saveSql);
+            if ($stmt) {
+                $stmt->bind_param("ii", $userID, $recipeID);
+                if ($stmt->execute()) {
+                    $isSaved = true;
+                    $message = "Recipe saved successfully!";
+                } else {
+                    $message = "Error saving recipe: " . $stmt->error;
+                }
+                $stmt->close();
+            } else {
+                $message = "Error preparing save statement: " . $conn->error;
+            }
+        } elseif ($_POST['save_action'] === 'unsave') {
+            // Remove from database
+            $unsaveSql = "DELETE FROM saved_recipes WHERE user_id = ? AND recipe_id = ?";
+            $stmt = $conn->prepare($unsaveSql);
+            if ($stmt) {
+                $stmt->bind_param("ii", $userID, $recipeID);
+                if ($stmt->execute()) {
+                    $isSaved = false;
+                    $message = "Recipe removed from saved!";
+                } else {
+                    $message = "Error removing recipe: " . $stmt->error;
+                }
+                $stmt->close();
+            } else {
+                $message = "Error preparing unsave statement: " . $conn->error;
+            }
+        }
+    }
+    
     // Fetch recipe data from database
     $sql = "SELECT r.*, 
                    ft.foodType, 
@@ -123,37 +167,39 @@
             $recipe = $result->fetch_assoc();
             echo "<!-- Debug: Recipe found: " . htmlspecialchars($recipe['recipeName'] ?? 'No name') . " -->";
             
-            // Check if recipe is saved
-            $isSaved = isset($_SESSION['savedRecipe_' . $recipeID]);
-            
-            // Handle save/unsave action
-            if (isset($_POST['save_action'])) {
-                if ($_POST['save_action'] === 'save') {
-                    $_SESSION['savedRecipe_' . $recipeID] = true;
-                    $isSaved = true;
-                } elseif ($_POST['save_action'] === 'unsave') {
-                    unset($_SESSION['savedRecipe_' . $recipeID]);
-                    $isSaved = false;
+            // Check if recipe is saved (only if we haven't already set it from the POST action)
+            if (!isset($_POST['save_action']) && isset($_SESSION['userID'])) {
+                $userID = $_SESSION['userID'];
+                $checkSaved = "SELECT id FROM saved_recipes WHERE user_id = ? AND recipe_id = ?";
+                $stmtCheck = $conn->prepare($checkSaved);
+                if ($stmtCheck) {
+                    $stmtCheck->bind_param("ii", $userID, $recipeID);
+                    $stmtCheck->execute();
+                    $resultCheck = $stmtCheck->get_result();
+                    $isSaved = $resultCheck->num_rows > 0;
+                    $stmtCheck->close();
                 }
             }
+            
         } else {
             $recipe = null;
             echo "<!-- Debug: No recipe found with ID: $recipeID -->";
-            
-            // Debug: Let's check what recipes exist
-            $debug_sql = "SELECT recipeID, recipeName FROM recipe LIMIT 5";
-            $debug_result = $conn->query($debug_sql);
-            if ($debug_result && $debug_result->num_rows > 0) {
-                echo "<!-- Debug: Available recipes: ";
-                while ($debug_row = $debug_result->fetch_assoc()) {
-                    echo "ID: " . $debug_row['recipeID'] . " - " . $debug_row['recipeName'] . " | ";
-                }
-                echo " -->";
-            }
         }
         $stmt->close();
     }
     
+    // Debug: Let's check what recipes exist
+    $debug_sql = "SELECT recipeID, recipeName FROM recipe LIMIT 5";
+    $debug_result = $conn->query($debug_sql);
+    if ($debug_result && $debug_result->num_rows > 0) {
+        echo "<!-- Debug: Available recipes: ";
+        while ($debug_row = $debug_result->fetch_assoc()) {
+            echo "ID: " . $debug_row['recipeID'] . " - " . $debug_row['recipeName'] . " | ";
+        }
+        echo " -->";
+    }
+    
+    // Close connection at the END
     $conn->close();
     ?>
     
@@ -166,6 +212,13 @@
             Recipe Found: <?php echo $recipe ? 'Yes' : 'No'; ?><br>
             Check if you're passing the correct ID in the URL: recipe-detail.php?id=1
         </div>
+        <?php endif; ?>
+
+        <!-- Display success/error messages -->
+        <?php if (!empty($message)): ?>
+            <div class="mb-4 p-4 rounded-lg <?php echo strpos($message, 'Error') === false ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-red-100 text-red-800 border border-red-300'; ?>">
+                <?php echo htmlspecialchars($message); ?>
+            </div>
         <?php endif; ?>
 
         <!-- Header -->
@@ -298,19 +351,25 @@
                             <i class="fas fa-print mr-2"></i> Print Recipe
                         </button>
                         
-                        <form method="POST" class="flex-1">
-                            <?php if ($isSaved): ?>
-                                <input type="hidden" name="save_action" value="unsave">
-                                <button type="submit" class="w-full bg-[#C89091] hover:bg-[#b37f80] text-white py-3 px-4 rounded-lg font-medium transition duration-300 flex items-center justify-center">
-                                    <i class="fas fa-heart mr-2"></i> Saved
-                                </button>
-                            <?php else: ?>
-                                <input type="hidden" name="save_action" value="save">
-                                <button type="submit" class="w-full border border-[#C89091] text-[#C89091] hover:bg-[#f9f1e5] py-3 px-4 rounded-lg font-medium transition duration-300 flex items-center justify-center">
-                                    <i class="far fa-heart mr-2"></i> Save
-                                </button>
-                            <?php endif; ?>
-                        </form>
+                        <?php if (isset($_SESSION['userID'])): ?>
+                            <form method="POST" class="flex-1">
+                                <?php if ($isSaved): ?>
+                                    <input type="hidden" name="save_action" value="unsave">
+                                    <button type="submit" class="w-full bg-[#C89091] hover:bg-[#b37f80] text-white py-3 px-4 rounded-lg font-medium transition duration-300 flex items-center justify-center">
+                                        <i class="fas fa-heart mr-2"></i> Saved
+                                    </button>
+                                <?php else: ?>
+                                    <input type="hidden" name="save_action" value="save">
+                                    <button type="submit" class="w-full border border-[#C89091] text-[#C89091] hover:bg-[#f9f1e5] py-3 px-4 rounded-lg font-medium transition duration-300 flex items-center justify-center">
+                                        <i class="far fa-heart mr-2"></i> Save
+                                    </button>
+                                <?php endif; ?>
+                            </form>
+                        <?php else: ?>
+                            <a href="login.php" class="flex-1 border border-[#C89091] text-[#C89091] hover:bg-[#f9f1e5] py-3 px-4 rounded-lg font-medium transition duration-300 flex items-center justify-center">
+                                <i class="far fa-heart mr-2"></i> Login to Save
+                            </a>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>

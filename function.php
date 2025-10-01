@@ -600,4 +600,59 @@ function handleProfileImageUpload($file, $userID) {
     }
 }
 
+
+
+//function to save recipes 
+
+function isRecipeSaved($userID, $recipeID, $conn) {
+    $sql = "SELECT id FROM saved_recipes WHERE user_id = ? AND recipe_id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ii", $userID, $recipeID);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $isSaved = $result->num_rows > 0;
+    $stmt->close();
+    return $isSaved;
+}
+
+function getSavedRecipes($userID, $conn) {
+    $savedQuery = "
+        SELECT 
+            r.recipeID,
+            r.recipeName,
+            r.image,
+            r.recipeDescription,
+            r.date,
+            d.difficultyName,
+            c.cuisineType,
+            u.first_name,
+            u.last_name,
+            sr.saved_at
+        FROM saved_recipes sr
+        JOIN recipe r ON sr.recipe_id = r.recipeID
+        LEFT JOIN difficultyLev d ON r.difficultID = d.difficultyID
+        LEFT JOIN cuisineType c ON r.cuisineTypeID = c.cuisineTypeID
+        LEFT JOIN users u ON r.userID = u.id
+        WHERE sr.user_id = ?
+        ORDER BY sr.saved_at DESC
+    ";
+    
+    $stmt = $conn->prepare($savedQuery);
+    $savedRecipes = [];
+    
+    if ($stmt) {
+        $stmt->bind_param("i", $userID);
+        if ($stmt->execute()) {
+            $result = $stmt->get_result();
+            while ($row = $result->fetch_assoc()) {
+                $savedRecipes[] = $row;
+            }
+        }
+        $stmt->close();
+    }
+    
+    return $savedRecipes;
+}
+
+
 ?>

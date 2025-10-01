@@ -583,165 +583,304 @@ function confirmDelete(recipeId) {
 </script>
 
                 <!-- Saved Recipes Tab -->
-                <div id="recipes" class="tab-content">
-                    <div class="bg-lightest rounded-lg shadow-md p-6">
-                        <h2 class="text-2xl font-bold text-primary mb-6 flex items-center">
-                            <i class="fas fa-bookmark mr-2"></i> Saved Recipes
-                        </h2>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="border border-light-pink rounded-lg overflow-hidden hover:shadow-md transition-shadow">
-                                <div class="h-48 bg-gradient-to-r from-primary to-medium-pink flex items-center justify-center text-white text-5xl">
-                                    <i class="fas fa-utensils"></i>
-                                </div>
-                                <div class="p-4">
-                                    <div class="flex justify-between items-start">
-                                        <h3 class="text-lg font-medium text-text-color">Vegetable Stir Fry</h3>
-                                        <button class="text-primary hover:text-medium-pink transition-colors">
-                                            <i class="fas fa-bookmark"></i>
-                                        </button>
+<!-- Saved Recipes Tab -->
+<div id="recipes" class="tab-content">
+    <div class="bg-lightest rounded-lg shadow-md p-6">
+        <h2 class="text-2xl font-bold text-primary mb-6 flex items-center">
+            <i class="fas fa-bookmark mr-2"></i> Saved Recipes
+        </h2>
+        
+        <?php
+        // Fetch saved recipes from database
+        $savedRecipes = [];
+        if (isset($_SESSION['userID'])) {
+            $userID = $_SESSION['userID'];
+            
+            $savedQuery = "
+                SELECT 
+                    r.recipeID,
+                    r.recipeName,
+                    r.image,
+                    r.recipeDescription,
+                    r.date,
+                    r.difficultID,
+                    r.userID,
+                    d.difficultyName,
+                    c.cuisineType,
+                    u.first_name,
+                    u.last_name,
+                    sr.saved_at
+                FROM saved_recipes sr
+                JOIN recipe r ON sr.recipe_id = r.recipeID
+                LEFT JOIN difficultyLev d ON r.difficultID = d.difficultyID
+                LEFT JOIN cuisineType c ON r.cuisineTypeID = c.cuisineTypeID
+                LEFT JOIN users u ON r.userID = u.id
+                WHERE sr.user_id = ?
+                ORDER BY sr.saved_at DESC
+            ";
+            
+            $stmt = $conn->prepare($savedQuery);
+            if ($stmt) {
+                $stmt->bind_param("i", $userID);
+                if ($stmt->execute()) {
+                    $result = $stmt->get_result();
+                    while ($row = $result->fetch_assoc()) {
+                        $savedRecipes[] = $row;
+                    }
+                }
+                $stmt->close();
+            }
+        }
+        ?>
+        
+        <div class="mb-4">
+            <p class="text-text-color">
+                <?php echo count($savedRecipes); ?> saved recipe<?php echo count($savedRecipes) != 1 ? 's' : ''; ?>
+            </p>
+        </div>
+        
+        <div class="space-y-6">
+            <?php if (empty($savedRecipes)): ?>
+                <div class="text-center py-12">
+                    <div class="text-6xl text-light-pink mb-4">
+                        <i class="fas fa-bookmark"></i>
+                    </div>
+                    <h3 class="text-xl font-medium text-text-color mb-2">No saved recipes yet</h3>
+                    <p class="text-medium-gray mb-6">Start exploring recipes and save your favorites!</p>
+                    <a href="recipe-collection.php" class="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-base font-medium rounded-lg text-white bg-primary hover:bg-medium-pink focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+                        <i class="fas fa-search mr-2"></i> Browse Recipes
+                    </a>
+                </div>
+            <?php else: ?>
+                <?php foreach ($savedRecipes as $recipe): ?>
+                    <div class="border border-light-pink rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div class="flex flex-col md:flex-row gap-4">
+                            <!-- Recipe Image -->
+                            <div class="md:w-1/4">
+                                <?php if (!empty($recipe['image']) && $recipe['image'] != 'uploads/'): ?>
+                                    <img src="<?php echo htmlspecialchars($recipe['image']); ?>" 
+                                         alt="<?php echo htmlspecialchars($recipe['recipeName']); ?>" 
+                                         class="w-full h-40 object-cover rounded-lg"
+                                         onerror="this.src='https://via.placeholder.com/300x200?text=Recipe+Image'">
+                                <?php else: ?>
+                                    <div class="h-40 bg-gradient-to-r from-primary to-medium-pink rounded-lg flex items-center justify-center text-white text-4xl">
+                                        <i class="fas fa-utensils"></i>
                                     </div>
-                                    <p class="mt-1 text-sm text-medium-gray">By Chef Maria • 30 min</p>
-                                    <p class="mt-2 text-text-color">A quick and healthy vegetable stir fry with a savory sauce that's perfect for busy weeknights.</p>
-                                    <div class="mt-3 flex justify-between items-center">
-                                        <span class="inline-flex items-center text-sm text-medium-gray">
-                                            <i class="fas fa-heart mr-1"></i> 42
-                                        </span>
-                                        <button class="text-sm text-primary hover:text-medium-pink transition-colors">
-                                            View Recipe <i class="fas fa-arrow-right ml-1"></i>
-                                        </button>
-                                    </div>
-                                </div>
+                                <?php endif; ?>
                             </div>
                             
-                            <div class="border border-light-pink rounded-lg overflow-hidden hover:shadow-md transition-shadow">
-                                <div class="h-48 bg-gradient-to-r from-primary to-medium-pink flex items-center justify-center text-white text-5xl">
-                                    <i class="fas fa-cookie"></i>
-                                </div>
-                                <div class="p-4">
-                                    <div class="flex justify-between items-start">
-                                        <h3 class="text-lg font-medium text-text-color">Chocolate Chip Cookies</h3>
-                                        <button class="text-primary hover:text-medium-pink transition-colors">
-                                            <i class="fas fa-bookmark"></i>
-                                        </button>
-                                    </div>
-                                    <p class="mt-1 text-sm text-medium-gray">By Baker John • 45 min</p>
-                                    <p class="mt-2 text-text-color">Classic chocolate chip cookies with a soft center and crispy edges. The perfect treat for any occasion.</p>
-                                    <div class="mt-3 flex justify-between items-center">
-                                        <span class="inline-flex items-center text-sm text-medium-gray">
-                                            <i class="fas fa-heart mr-1"></i> 67
+                            <!-- Recipe Details -->
+                            <div class="md:w-3/4">
+                                <div class="flex justify-between items-start">
+                                    <h3 class="text-lg font-medium text-text-color">
+                                        <?php echo htmlspecialchars($recipe['recipeName']); ?>
+                                    </h3>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-light-pink text-text-color">
+                                            <?php echo htmlspecialchars($recipe['difficultyName'] ?? 'Not specified'); ?>
                                         </span>
-                                        <button class="text-sm text-primary hover:text-medium-pink transition-colors">
-                                            View Recipe <i class="fas fa-arrow-right ml-1"></i>
-                                        </button>
+                                        <form method="POST" action="recipe-detail.php?id=<?php echo $recipe['recipeID']; ?>" class="inline">
+                                            <input type="hidden" name="save_action" value="unsave">
+                                            <button type="submit" class="text-primary hover:text-medium-pink transition-colors" title="Remove from saved">
+                                                <i class="fas fa-bookmark"></i>
+                                            </button>
+                                        </form>
                                     </div>
+                                </div>
+                                
+                                <p class="text-sm text-medium-gray mt-1">
+                                    By <?php echo htmlspecialchars($recipe['first_name'] . ' ' . $recipe['last_name']); ?> • 
+                                    Saved on <?php echo date('F j, Y', strtotime($recipe['saved_at'])); ?>
+                                </p>
+                                
+                                <?php if (!empty($recipe['recipeDescription'])): ?>
+                                    <p class="mt-2 text-text-color">
+                                        <?php echo htmlspecialchars(substr($recipe['recipeDescription'], 0, 150)); ?>
+                                        <?php if (strlen($recipe['recipeDescription']) > 150): ?>...<?php endif; ?>
+                                    </p>
+                                <?php endif; ?>
+                                
+                                <div class="mt-3 flex justify-between items-center">
+                                    <span class="inline-flex items-center text-sm text-medium-gray">
+                                        <i class="fas fa-utensils mr-1"></i> 
+                                        <?php echo htmlspecialchars($recipe['cuisineType'] ?? 'Unknown cuisine'); ?>
+                                    </span>
+                                    <a href="reDetail.php?id=<?php echo $recipe['recipeID']; ?>" 
+                                       class="text-sm text-primary hover:text-medium-pink transition-colors">
+                                        View Recipe <i class="fas fa-arrow-right ml-1"></i>
+                                    </a>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
 
-                <!-- Saved Posts Tab -->
-                <div id="saved-posts" class="tab-content">
-                    <div class="bg-lightest rounded-lg shadow-md p-6">
-                        <h2 class="text-2xl font-bold text-primary mb-6 flex items-center">
-                            <i class="fas fa-save mr-2"></i> Saved Posts
-                        </h2>
-                        
-                        <div class="space-y-6">
-                            <div class="border border-light-pink rounded-lg p-4 hover:shadow-md transition-shadow">
-                                <h3 class="text-lg font-medium text-text-color">10 Tips for Better Meal Planning</h3>
-                                <p class="text-sm text-medium-gray mt-1 flex items-center">
-                                    <i class="fas fa-user mr-2"></i> By Nutrition Expert • September 15, 2025
-                                </p>
-                                <p class="mt-2 text-text-color">Learn how to plan your meals effectively to save time and eat healthier. These practical tips will transform your approach to cooking and nutrition.</p>
-                                <div class="mt-3 flex justify-between items-center">
-                                    <div class="flex space-x-2">
-                                        <span class="inline-flex items-center text-sm text-medium-gray">
-                                            <i class="fas fa-heart mr-1"></i> 128
-                                        </span>
-                                        <span class="inline-flex items-center text-sm text-medium-gray">
-                                            <i class="fas fa-comment mr-1"></i> 24
-                                        </span>
-                                    </div>
-                                    <button class="text-sm text-primary hover:text-medium-pink transition-colors">
-                                        Read More <i class="fas fa-arrow-right ml-1"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <div class="border border-light-pink rounded-lg p-4 hover:shadow-md transition-shadow">
-                                <h3 class="text-lg font-medium text-text-color">The Science of Sourdough</h3>
-                                <p class="text-sm text-medium-gray mt-1 flex items-center">
-                                    <i class="fas fa-user mr-2"></i> By Bread Master • September 10, 2025
-                                </p>
-                                <div class="mt-3 flex justify-between items-center">
-                                    <div class="flex space-x-2">
-                                        <span class="inline-flex items-center text-sm text-medium-gray">
-                                            <i class="fas fa-heart mr-1"></i> 89
-                                        </span>
-                                        <span class="inline-flex items-center text-sm text-medium-gray">
-                                            <i class="fas fa-comment mr-1"></i> 17
-                                        </span>
-                                    </div>
-                                    <button class="text-sm text-primary hover:text-medium-pink transition-colors">
-                                        Read More <i class="fas fa-arrow-right ml-1"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Liked Posts Tab -->
+                <!-- Comments Tab -->
                 <div id="liked-posts" class="tab-content">
                     <div class="bg-lightest rounded-lg shadow-md p-6">
                         <h2 class="text-2xl font-bold text-primary mb-6 flex items-center">
-                            <i class="fas fa-heart mr-2"></i> Liked Posts
+                            <i class="fas fa-comments mr-2"></i> My Comments
                         </h2>
                         
-                        <div class="space-y-6">
-                            <div class="border border-light-pink rounded-lg p-4 hover:shadow-md transition-shadow">
-                                <h3 class="text-lg font-medium text-text-color">Seasonal Fall Recipes</h3>
-                                <p class="text-sm text-medium-gray mt-1 flex items-center">
-                                    <i class="fas fa-user mr-2"></i> By Seasonal Chef • September 22, 2025
-                                </p>
-                                <p class="mt-2 text-text-color">Delicious recipes using autumn's best produce like pumpkins, apples, and squash. Celebrate the flavors of fall with these comforting dishes.</p>
-                                <div class="mt-3 flex justify-between items-center">
-                                    <div class="flex space-x-2">
-                                        <span class="inline-flex items-center text-sm text-medium-gray">
-                                            <i class="fas fa-heart mr-1 text-primary"></i> 156
-                                        </span>
-                                        <span class="inline-flex items-center text-sm text-medium-gray">
-                                            <i class="fas fa-comment mr-1"></i> 32
-                                        </span>
-                                    </div>
-                                    <button class="text-sm text-primary hover:text-medium-pink transition-colors">
-                                        Read More <i class="fas fa-arrow-right ml-1"></i>
-                                    </button>
-                                </div>
-                            </div>
+                        <?php
+                        // Fetch user's comments from the database
+                        $userComments = [];
+                        $commentCount = 0;
+                        
+                        if (isset($_SESSION['userID'])) {
+                            $userID = $_SESSION['userID'];
                             
-                            <div class="border border-light-pink rounded-lg p-4 hover:shadow-md transition-shadow">
-                                <h3 class="text-lg font-medium text-text-color">Kitchen Organization Hacks</h3>
-                                <p class="text-sm text-medium-gray mt-1 flex items-center">
-                                    <i class="fas fa-user mr-2"></i> By Organization Pro • September 18, 2025
-                                </p>
-                                <p class="mt-2 text-text-color">Simple tips to organize your kitchen for maximum efficiency and enjoyment. Transform your cooking space with these clever organization ideas.</p>
-                                <div class="mt-3 flex justify-between items-center">
-                                    <div class="flex space-x-2">
-                                        <span class="inline-flex items-center text-sm text-medium-gray">
-                                            <i class="fas fa-heart mr-1 text-primary"></i> 203
-                                        </span>
-                                        <span class="inline-flex items-center text-sm text-medium-gray">
-                                            <i class="fas fa-comment mr-1"></i> 41
-                                        </span>
+                            // Query to get user's comments with community post information
+                            $commentsQuery = "
+                                SELECT 
+                                    c.commentID,
+                                    c.comment,
+                                    c.commentDate,
+                                    c.communityID,
+                                    co.title as postTitle,
+                                    co.content as postContent,
+                                    co.image as postImage,
+                                    co.date as postDate,
+                                    u.first_name,
+                                    u.last_name
+                                FROM comment c
+                                INNER JOIN community co ON c.communityID = co.communityID
+                                LEFT JOIN users u ON co.userID = u.id
+                                WHERE c.userID = ?
+                                ORDER BY c.commentDate DESC
+                            ";
+                            
+                            $stmt = $conn->prepare($commentsQuery);
+                            if ($stmt) {
+                                $stmt->bind_param("i", $userID);
+                                if ($stmt->execute()) {
+                                    $result = $stmt->get_result();
+                                    
+                                    while ($row = $result->fetch_assoc()) {
+                                        $userComments[] = $row;
+                                    }
+                                    $commentCount = count($userComments);
+                                    
+                                    // DEBUG: Show what we found
+                                    echo "<!-- Debug: User comments array count = $commentCount -->";
+                                    if ($commentCount > 0) {
+                                        echo "<!-- Debug: First comment = " . htmlspecialchars(substr($userComments[0]['comment'], 0, 50)) . " -->";
+                                        echo "<!-- Debug: First post title = " . htmlspecialchars($userComments[0]['postTitle'] ?? 'No title') . " -->";
+                                    }
+                                } else {
+                                    echo "<!-- Debug: Query execution failed: " . $stmt->error . " -->";
+                                    
+                                    // Fallback: Try simple query without joins
+                                    $fallbackQuery = "SELECT * FROM comment WHERE userID = ? ORDER BY commentDate DESC";
+                                    $fallbackStmt = $conn->prepare($fallbackQuery);
+                                    if ($fallbackStmt) {
+                                        $fallbackStmt->bind_param("i", $userID);
+                                        $fallbackStmt->execute();
+                                        $fallbackResult = $fallbackStmt->get_result();
+                                        
+                                        while ($row = $fallbackResult->fetch_assoc()) {
+                                            $userComments[] = $row;
+                                        }
+                                        $commentCount = count($userComments);
+                                        $fallbackStmt->close();
+                                        echo "<!-- Debug: Fallback query found $commentCount comments -->";
+                                    }
+                                }
+                                $stmt->close();
+                            } else {
+                                echo "<!-- Debug: Failed to prepare comments query: " . $conn->error . " -->";
+                                
+                                // Final fallback: Direct query
+                                $directQuery = "SELECT * FROM comment WHERE userID = $userID ORDER BY commentDate DESC";
+                                $directResult = $conn->query($directQuery);
+                                if ($directResult) {
+                                    while ($row = $directResult->fetch_assoc()) {
+                                        $userComments[] = $row;
+                                    }
+                                    $commentCount = count($userComments);
+                                    echo "<!-- Debug: Direct query found $commentCount comments -->";
+                                }
+                            }
+                        }
+                        ?>
+                        
+                        <div class="mb-4">
+                            <p class="text-text-color">
+                                <?php echo $commentCount; ?> comment<?php echo $commentCount != 1 ? 's' : ''; ?> found
+                            </p>
+                        </div>
+                        
+                        <div class="space-y-6">
+                            <?php if (empty($userComments)): ?>
+                                <div class="text-center py-12">
+                                    <div class="text-6xl text-light-pink mb-4">
+                                        <i class="fas fa-comments"></i>
                                     </div>
-                                    <button class="text-sm text-primary hover:text-medium-pink transition-colors">
-                                        Read More <i class="fas fa-arrow-right ml-1"></i>
-                                    </button>
+                                    <h3 class="text-xl font-medium text-text-color mb-2">No comments yet</h3>
+                                    <p class="text-medium-gray mb-6">Start engaging with the community by leaving comments on posts!</p>
+                                    <a href="community.php" class="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-base font-medium rounded-lg text-white bg-primary hover:bg-medium-pink focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+                                        <i class="fas fa-users mr-2"></i> Visit Community
+                                    </a>
                                 </div>
-                            </div>
+                            <?php else: ?>
+                                <?php foreach ($userComments as $comment): ?>
+                                    <div class="border border-light-pink rounded-lg p-4 hover:shadow-md transition-shadow">
+                                        <div class="flex flex-col md:flex-row gap-4">
+                                            <!-- Post Image -->
+                                            <div class="md:w-1/4">
+                                                <?php if (!empty($comment['postImage']) && $comment['postImage'] != 'uploads/post'): ?>
+                                                    <img src="<?php echo htmlspecialchars($comment['postImage']); ?>" 
+                                                        alt="<?php echo htmlspecialchars($comment['postTitle'] ?? 'Community Post'); ?>" 
+                                                        class="w-full h-32 object-cover rounded-lg"
+                                                        onerror="this.src='https://via.placeholder.com/300x200?text=Community+Post'">
+                                                <?php else: ?>
+                                                    <div class="h-32 bg-gradient-to-r from-primary to-medium-pink rounded-lg flex items-center justify-center text-white text-2xl">
+                                                        <i class="fas fa-users"></i>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </div>
+                                            
+                                            <!-- Comment Details -->
+                                            <div class="md:w-3/4">
+                                                <div class="flex justify-between items-start">
+                                                    <div>
+                                                        <h3 class="text-lg font-medium text-text-color">
+                                                            <?php 
+                                                            if (!empty($comment['postTitle'])) {
+                                                                echo htmlspecialchars($comment['postTitle']);
+                                                            } else {
+                                                                echo "Community Post #" . htmlspecialchars($comment['communityID']);
+                                                            }
+                                                            ?>
+                                                        </h3>
+                                                        <p class="text-sm text-medium-gray mt-1">
+                                                            <?php if (!empty($comment['first_name'])): ?>
+                                                                Post by <?php echo htmlspecialchars($comment['first_name'] . ' ' . $comment['last_name']); ?> • 
+                                                            <?php endif; ?>
+                                                            Commented on <?php echo date('F j, Y \a\t g:i A', strtotime($comment['commentDate'])); ?>
+                                                        </p>
+                                                    </div>
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-light-pink text-text-color">
+                                                        Community Post
+                                                    </span>
+                                                </div>
+                                                
+                                                <!-- Comment Content -->
+                                                <div class="mt-3 p-3 bg-white rounded-lg border border-light-pink">
+                                                    <p class="text-text-color">
+                                                        <?php echo htmlspecialchars($comment['comment']); ?>
+                                                    </p>
+                                                </div>
+                                
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
