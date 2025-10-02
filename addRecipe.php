@@ -1,4 +1,13 @@
 <?php
+session_start(); // Add session start at the top
+
+// Check if user is logged in
+if (!isset($_SESSION['userID'])) {
+    $_SESSION['error_message'] = 'Please log in to upload recipes';
+    header("Location: login.php"); // Redirect to your login page
+    exit;
+}
+
 include('./configMysql.php');
 include('./function.php');
 
@@ -78,6 +87,25 @@ $dietPreferences = getDietPref($conn);
             min-height: 200px;
             resize: vertical;
         }
+
+        /* Quill editor custom styles */
+        .ql-editor {
+            min-height: 300px;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .ql-toolbar.ql-snow {
+            border-top: 1px solid #ccc;
+            border-left: 1px solid #ccc;
+            border-right: 1px solid #ccc;
+            border-bottom: none;
+        }
+
+        .ql-container.ql-snow {
+            border: 1px solid #ccc;
+            border-top: none;
+        }
     </style>
 </head>
 <body class="bg-light-yellow text-text-color font-segoe min-h-screen relative">
@@ -105,7 +133,21 @@ $dietPreferences = getDietPref($conn);
                 </div>
             </div>
 
-            <!-- UPDATED FORM: Added method, action, and enctype -->
+            <!-- Display Messages -->
+            <?php if (isset($_SESSION['success_message'])): ?>
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative m-4">
+                    <span class="block sm:inline"><?php echo $_SESSION['success_message']; ?></span>
+                    <?php unset($_SESSION['success_message']); ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if (isset($_SESSION['error_message'])): ?>
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative m-4">
+                    <span class="block sm:inline"><?php echo $_SESSION['error_message']; ?></span>
+                    <?php unset($_SESSION['error_message']); ?>
+                </div>
+            <?php endif; ?>
+
             <form id="uploadRecipeForm" class="p-6 sm:p-8" method="POST" action="process_add_recipe.php" enctype="multipart/form-data">
                 <input type="hidden" name="action" value="addRecipe">
                 
@@ -242,22 +284,25 @@ $dietPreferences = getDietPref($conn);
                     
                     <div class="mb-6">
                         <label for="ingredients" class="block font-semibold mb-2">Ingredients *</label>
-
                         <textarea id="ingredients" name="ingredient" required 
-                        placeholder="Example:&#10;1 cup all-purpose flour&#10;2 large eggs&#10;1/2 teaspoon salt&#10;1 tablespoon olive oil"
-                        class="w-full p-3 border border-border-color rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
-                        </textarea>
+                            placeholder="Example:&#10;1 cup all-purpose flour&#10;2 large eggs&#10;1/2 teaspoon salt&#10;1 tablespoon olive oil"
+                            class="w-full p-3 border border-border-color rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50"></textarea>
                     </div>
 
                     <h2 class="text-primary text-2xl mb-6 flex items-center gap-2"><i class="fas fa-clipboard-list"></i> Cooking Instructions</h2>
                     <p class="text-medium-gray mb-6">Provide detailed step-by-step cooking instructions</p>
                     
                     <div class="mb-6">
-                        <label for="instructions" class="block font-semibold mb-2">Instructions *</label>
-                        <div id="instructionsEditor" class="h-96 mb-2"></div>
-                        <!-- Change from 'instructions' to 'recipeDescription' -->
-                    <input type="hidden" id="instructions" name="recipeDescription" required>
-                        <div class="text-medium-gray text-sm mt-1">Use the rich text editor to format your instructions with bold, italics, lists, and more</div>
+                        <label for="recipeDescription" class="block font-semibold mb-2">Instructions *</label>
+                        <textarea id="recipeDescription" name="recipeDescription" required 
+                            placeholder="Enter step-by-step cooking instructions...
+                    Example:
+                    1. Preheat oven to 350°F
+                    2. Mix dry ingredients
+                    3. Add wet ingredients and mix well
+                    4. Bake for 30 minutes"
+                            class="w-full p-3 border border-border-color rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50 h-96"></textarea>
+                        <div class="text-medium-gray text-sm mt-1">Enter detailed step-by-step cooking instructions</div>
                     </div>
                 </div>
 
@@ -293,35 +338,17 @@ $dietPreferences = getDietPref($conn);
         });
 
         function initializeUploadPage() {
-            console.log("Initializing upload page...");
-
-            try {
-                showStep(1);
-                initializeQuillEditor();
-                setupFormValidation();
-                setupFormSubmission();
-                setupImageUploadHandlers();
-                setupNavigationButtons();
-                console.log("Upload recipe page initialized successfully");
-            } catch (error) {
-                console.error("Error initializing upload page:", error);
-            }
+            showStep(1);
+            initializeQuillEditor();
+            setupFormValidation();
+            setupFormSubmission();
+            setupImageUploadHandlers();
+            setupNavigationButtons();
         }
 
         // Initialize Quill rich text editor
         function initializeQuillEditor() {
             try {
-                const editorElement = document.getElementById("instructionsEditor");
-                if (!editorElement) {
-                    console.error("Instructions editor element not found");
-                    return;
-                }
-
-                if (typeof window.Quill === "undefined") {
-                    console.error("Quill is not loaded");
-                    return;
-                }
-
                 const toolbarOptions = [
                     ["bold", "italic", "underline"],
                     [{ list: "ordered" }, { list: "bullet" }],
@@ -329,7 +356,7 @@ $dietPreferences = getDietPref($conn);
                     ["clean"],
                 ];
 
-                quill = new window.Quill("#instructionsEditor", {
+                quill = new Quill("#instructionsEditor", {
                     theme: "snow",
                     modules: {
                         toolbar: toolbarOptions,
@@ -344,8 +371,6 @@ $dietPreferences = getDietPref($conn);
                         instructionsInput.value = quill.root.innerHTML;
                     }
                 });
-
-                console.log("Quill editor initialized successfully");
             } catch (error) {
                 console.error("Error initializing Quill editor:", error);
             }
@@ -365,8 +390,6 @@ $dietPreferences = getDietPref($conn);
         }
 
         function showStep(step) {
-            console.log(`Showing step ${step}`);
-
             // Hide all steps first
             const allSteps = document.querySelectorAll(".form-step");
             allSteps.forEach(function(stepEl) {
@@ -379,7 +402,6 @@ $dietPreferences = getDietPref($conn);
             if (currentStepEl) {
                 currentStepEl.classList.remove("hidden");
                 currentStepEl.classList.add("active");
-                console.log(`Step ${step} is now visible`);
             }
 
             // Update progress
@@ -610,7 +632,7 @@ $dietPreferences = getDietPref($conn);
             }
         }
 
-        // Form submission - UPDATED: Regular form submission instead of AJAX
+        // Form submission
         function setupFormSubmission() {
             const form = document.getElementById("uploadRecipeForm");
             if (form) {
@@ -627,9 +649,6 @@ $dietPreferences = getDietPref($conn);
                         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
                         submitBtn.disabled = true;
                     }
-                    
-                    // Form will submit normally - PHP will handle the rest
-                    console.log("Form submitted normally");
                 });
             }
         }
@@ -650,7 +669,7 @@ $dietPreferences = getDietPref($conn);
                     });
                     
                     if (!stepValid) {
-                        showStep(step); // Go to the step with errors
+                        showStep(step);
                         showValidationError("Please complete all required fields before submitting.");
                         return false;
                     }

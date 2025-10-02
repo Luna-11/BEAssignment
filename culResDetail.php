@@ -254,15 +254,6 @@
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
                         <div class="text-center">
                             <div class="text-primary mb-1">
-                                <i class="fas fa-hashtag text-2xl"></i>
-                            </div>
-                            <div class="font-bold text-text">
-                                ID: <?php echo htmlspecialchars($resource['resourceID']); ?>
-                            </div>
-                            <div class="text-sm text-text">Resource ID</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-primary mb-1">
                                 <i class="fas fa-tag text-2xl"></i>
                             </div>
                             <div class="font-bold text-text">
@@ -272,21 +263,6 @@
                                 ?>
                             </div>
                             <div class="text-sm text-text">Resource Type</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-primary mb-1">
-                                <i class="fas fa-file text-2xl"></i>
-                            </div>
-                            <div class="font-bold text-text">
-                                <?php 
-                                $fileCount = 0;
-                                if (!empty($resource['resourcesImage'])) $fileCount++;
-                                if (!empty($resource['PDF_file'])) $fileCount++;
-                                if (!empty($resource['Video'])) $fileCount++;
-                                echo $fileCount;
-                                ?>
-                            </div>
-                            <div class="text-sm text-text">Files Available</div>
                         </div>
                     </div>
 

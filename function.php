@@ -131,63 +131,45 @@ function addRecipe($conn, $data) {
         $conn->begin_transaction();
 
         // DEBUG: Log the data being received
-        error_log("Recipe data received: " . print_r($data, true));
+        error_log("Recipe data received in addRecipe: " . print_r($data, true));
 
-        // UPDATED: Corrected the SQL to match your actual columns
-        $stmt = $conn->prepare("INSERT INTO recipe 
-            (recipeName, difficultID, userID, image, text, recipeDescription, date, 
+        // CORRECTED SQL - matches your actual database structure
+        $sql = "INSERT INTO recipe 
+            (recipeName, difficultID, userID, image, recipeDescription, date, 
              cuisineTypeID, foodTypeID, dietaryID, ingredient) 
-            VALUES (?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?)");
+            VALUES (?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?)";
         
+        error_log("SQL: " . $sql);
+        
+        $stmt = $conn->prepare($sql);
         if (!$stmt) {
             throw new Exception("Prepare failed: " . $conn->error);
         }
 
-        // Handle NULLs/defaults - CORRECTED based on your form fields
-        $image         = $data['image'] ?? null;
-        $cuisineTypeID = $data['cuisineTypeID'] ?? null;
-        $foodTypeID    = $data['foodTypeID'] ?? null;
-        $dietaryID     = $data['dietaryID'] ?? null;
-        
-        // CORRECTED: Map form fields to correct database columns
-        $instructions  = $data['recipeDescription'] ?? ''; // This goes to `text` column (instructions)
-        $subtitle      = 'Delicious homemade recipe'; // Default value for recipeDescription column
+        // DEBUG each parameter
+        error_log("Parameters for binding:");
+        error_log("1. recipeName: " . substr($data['recipeName'] ?? 'NULL', 0, 50));
+        error_log("2. difficultID: " . ($data['difficultID'] ?? 'NULL'));
+        error_log("3. userID: " . ($data['userID'] ?? 'NULL'));
+        error_log("4. image: " . ($data['image'] ?? 'NULL'));
+        error_log("5. recipeDescription length: " . strlen($data['recipeDescription'] ?? ''));
+        error_log("6. cuisineTypeID: " . ($data['cuisineTypeID'] ?? 'NULL'));
+        error_log("7. foodTypeID: " . ($data['foodTypeID'] ?? 'NULL'));
+        error_log("8. dietaryID: " . ($data['dietaryID'] ?? 'NULL'));
+        error_log("9. ingredient length: " . strlen($data['ingredient'] ?? ''));
 
-        // DEBUG: Log the values before binding
-        error_log("Binding values: 
-            recipeName: {$data['recipeName']}
-            difficultID: {$data['difficultID']}
-            userID: {$data['userID']}
-            image: $image
-            instructions: " . substr($instructions, 0, 50) . "...
-            subtitle: $subtitle
-            cuisineTypeID: $cuisineTypeID
-            foodTypeID: $foodTypeID
-            dietaryID: $dietaryID
-            ingredient: " . substr($data['ingredient'] ?? '', 0, 50) . "..."
-        );
-
-        // CORRECTED FIX: Count the parameters properly - we have 10 variables for 11 placeholders?
-        // Let's check what we actually need to bind
-        $bindParams = [
+        // CORRECTED: 9 parameters for 9 placeholders (NOW() is not a parameter)
+        $stmt->bind_param("siissiiis", 
             $data['recipeName'],        // string
-            $data['difficultID'],       // int  
+            $data['difficultID'],       // int
             $data['userID'],            // int
-            $image,                     // string
-            $instructions,              // string → text column (instructions)
-            $subtitle,                  // string → recipeDescription column (short description)
-            $cuisineTypeID,             // int
-            $foodTypeID,                // int
-            $dietaryID,                 // int
+            $data['image'],             // string
+            $data['recipeDescription'], // string → goes to recipeDescription column
+            $data['cuisineTypeID'],     // int
+            $data['foodTypeID'],        // int
+            $data['dietaryID'],         // int
             $data['ingredient']         // string
-        ];
-
-        // DEBUG: Count the parameters
-        error_log("Number of parameters to bind: " . count($bindParams));
-        error_log("Parameter types needed: siisssiiis (10 characters for 10 parameters)");
-
-        // FIXED: Correct type definition string - we have 10 parameters, not 11
-        $stmt->bind_param("siisssiiis", ...$bindParams);
+        );
 
         if (!$stmt->execute()) {
             throw new Exception("Failed to insert recipe: " . $stmt->error);
@@ -197,6 +179,7 @@ function addRecipe($conn, $data) {
         $stmt->close();
         $conn->commit();
 
+        error_log("Recipe inserted successfully with ID: " . $recipeId);
         return ['success' => true, 'recipeId' => $recipeId];
         
     } catch (Exception $e) {
@@ -208,6 +191,52 @@ function addRecipe($conn, $data) {
     }
 }
 
+// Add this function to your functions.php
+function handleImageUpload($file) {
+    if (!$file || $file['error'] !== UPLOAD_ERR_OK) {
+        error_log("Image upload: No file or upload error");
+        return null;
+    }
+    
+    $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    $maxSize = 5 * 1024 * 1024; // 5MB
+    
+    // Check file type
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mimeType = finfo_file($finfo, $file['tmp_name']);
+    finfo_close($finfo);
+    
+    if (!in_array($mimeType, $allowedTypes)) {
+        error_log("Invalid file type: " . $mimeType);
+        return null;
+    }
+    
+    // Check file size
+    if ($file['size'] > $maxSize) {
+        error_log("File too large: " . $file['size']);
+        return null;
+    }
+    
+    // Create uploads directory if it doesn't exist
+    $uploadDir = 'uploads/recipes/';
+    if (!file_exists($uploadDir)) {
+        mkdir($uploadDir, 0755, true);
+    }
+    
+    // Generate unique filename
+    $fileExtension = pathinfo($file['name'], PATHINFO_EXTENSION);
+    $fileName = 'recipe_' . time() . '_' . uniqid() . '.' . $fileExtension;
+    $filePath = $uploadDir . $fileName;
+    
+    // Move uploaded file
+    if (move_uploaded_file($file['tmp_name'], $filePath)) {
+        error_log("Image uploaded successfully: " . $filePath);
+        return $filePath;
+    } else {
+        error_log("Failed to move uploaded file");
+        return null;
+    }
+}
 function getCuisineTypeID($conn, $cuisineName) {
     if (empty($cuisineName)) return null;
     

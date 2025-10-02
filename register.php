@@ -54,11 +54,8 @@ if ($stmt->execute()) {
 } else {
     $error = "Error saving data: " . $stmt->error;
 }
-
-
             $stmt->close();
         }
-
         $checkStmt->close();
     }
 }

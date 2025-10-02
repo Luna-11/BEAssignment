@@ -2,11 +2,6 @@
 session_start();
 $show_popup = !isset($_SESSION['userID']); // true if user not logged in
 
-if (isset($_SESSION['success_message'])) {
-    $success_message = $_SESSION['success_message'];
-    unset($_SESSION['success_message']); // clear after displaying
-}
-
 include('configMysql.php');
 
 // Fetch categories regardless of success_message

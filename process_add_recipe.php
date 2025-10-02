@@ -6,11 +6,6 @@ session_start();
 include('./configMysql.php');
 include('./function.php');
 
-// Enable error reporting for debugging
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 // Check if user is logged in
 if (!isset($_SESSION['userID'])) {
     $_SESSION['error_message'] = 'Please log in to upload recipes';
@@ -30,10 +25,7 @@ $action = $_POST['action'] ?? '';
 
 if ($action === 'addRecipe') {
     // Handle image uploads first
-    $imagePath = null;
-    if (isset($_FILES['image1']) && $_FILES['image1']['error'] === UPLOAD_ERR_OK) {
-        $imagePath = uploadImage($_FILES['image1']);
-    }
+    $imagePath = handleImageUpload($_FILES['image1'] ?? null);
     
     // Convert names to IDs using your existing functions
     $cuisineTypeID = getCuisineTypeID($conn, $_POST['country'] ?? '');
@@ -52,13 +44,13 @@ if ($action === 'addRecipe') {
         $dietaryID = getDietPrefID($conn, $dietPrefs[0]);
     }
     
-    // Collect form data - CORRECTED field mapping
+    // Collect form data
     $data = [
         'recipeName' => $_POST['recipeTitle'] ?? '',
         'difficultID' => $_POST['difficulty'] ?? '',
         'userID' => $_SESSION['userID'],
         'image' => $imagePath,
-        'recipeDescription' => $_POST['recipeDescription'] ?? '', // This will go to 'text' column
+        'recipeDescription' => $_POST['recipeDescription'] ?? '',
         'cuisineTypeID' => $cuisineTypeID,
         'foodTypeID' => $foodTypeID,
         'dietaryID' => $dietaryID,
@@ -77,7 +69,7 @@ if ($action === 'addRecipe') {
 
     if ($result['success']) {
         $_SESSION['success_message'] = 'Recipe uploaded successfully!';
-        header("Location: re.php"); // Adjust this to your success page
+        header("Location: re.php");
         exit;
     } else {
         $_SESSION['error_message'] = $result['message'] ?? 'Failed to upload recipe';
