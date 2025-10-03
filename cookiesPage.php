@@ -141,7 +141,8 @@
                 <section class="food-light-yellow-bg rounded-lg p-6 mb-8">
                     <h2 class="text-3xl font-bold food-text mb-4">Privacy Policy</h2>
                     <p class="text-lg">Last updated: December 1, 2024</p>
-                    <p class="mt-4">At FoodFusion, we are committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website or use our services.</p>
+                    <p class="mt-4">At FoodFusion, we are committed to protecting your privacy. This Privacy Policy explains 
+                        how we collect, use, disclose, and safeguard your information when you visit our website or use our services.</p>
                 </section>
 
                 <!-- Table of Contents -->
