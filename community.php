@@ -155,6 +155,78 @@ if (!empty($posts)) {
             </div>
         </section>
 
+        <!-- Create Post Modal -->
+        <div id="createPostModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+                <div class="p-6 border-b border-border">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-bold text-text">Share Your Recipe</h2>
+                        <button id="closePostModal" class="text-light-gray text-2xl hover:text-black">&times;</button>
+                    </div>
+                </div>
+                
+                <form id="createPostForm" method="POST" enctype="multipart/form-data" class="p-6 overflow-y-auto">
+                    <div class="space-y-6">
+                        <!-- Post Content -->
+                        <div>
+                            <label for="post_content" class="block text-sm font-medium text-text mb-2">What's cooking?</label>
+                            <textarea 
+                                id="post_content" 
+                                name="post_content" 
+                                rows="4" 
+                                placeholder="Share your recipe, cooking tips, or food experience..."
+                                required
+                                class="w-full p-3 border-2 border-border rounded focus:border-primary outline-none resize-none"
+                                maxlength="1000"
+                            ></textarea>
+                            <div class="text-sm text-medium-gray mt-1 flex justify-between">
+                                <span>Format: Recipe Title: Description</span>
+                                <span id="postCharCount">0/1000</span>
+                            </div>
+                        </div>
+                        
+                        <!-- File Upload -->
+                        <div>
+                            <label class="block text-sm font-medium text-text mb-2">Add Media (Optional)</label>
+                            <input 
+                                type="file" 
+                                id="media" 
+                                name="media" 
+                                accept="image/*,video/*" 
+                                class="hidden"
+                            >
+                            <label for="media" class="file-upload-label cursor-pointer">
+                                <i class="fas fa-cloud-upload-alt text-3xl text-primary mb-2"></i>
+                                <span class="text-text font-medium">Click to upload image or video</span>
+                                <span class="text-sm text-medium-gray mt-1">Supports JPG, PNG, GIF, MP4, MOV</span>
+                            </label>
+                            
+                            <!-- Preview Container -->
+                            <div id="previewContainer" class="preview-container hidden">
+                                <button type="button" id="removeMedia" class="remove-media-btn">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                <div id="mediaPreview"></div>
+                            </div>
+                            
+                            <!-- Upload Status -->
+                            <div id="uploadStatus" class="upload-status text-sm text-medium-gray"></div>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="flex space-x-4 pt-4">
+                            <button type="button" id="cancelPost" class="flex-1 bg-gray-200 text-gray-700 p-3 rounded hover:bg-gray-300 font-semibold transition-colors">
+                                Cancel
+                            </button>
+                            <button type="submit" name="submit_post" class="flex-1 bg-primary text-white p-3 rounded hover:bg-medium-pink font-semibold transition-colors">
+                                Share Post
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <!-- Community Feed -->
         <section class="py-12 flex-grow">
             <div class="container mx-auto px-4">
@@ -331,6 +403,7 @@ if (!empty($posts)) {
 
     <!-- Include the external JavaScript files -->
     <script src="community_script.js"></script>
+    
     
     <?php if (!empty($success)): ?>
     <script>

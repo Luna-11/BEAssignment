@@ -81,10 +81,12 @@ if (isset($_SESSION['contact_message'])) {
     <?php include('navbar.php'); ?>
 
 <!-- Hero Section -->
-<section class="food-light-yellow-bg py-16">
-  <div class="container mx-auto px-4 text-center">
-    <h1 class="text-4xl md:text-5xl font-bold food-text mb-4">Contact Us</h1>
-    <p class="text-xl max-w-2xl mx-auto">We'd love to hear from you! Reach out with enquiries, recipe requests, or feedback.</p>
+<section class="food-light-yellow-bg py-16 relative">
+  <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('./BEpics/bannerFood.jpg');"></div>
+  <div class="absolute inset-0 bg-black opacity-40"></div>
+  <div class="container mx-auto px-4 text-center relative z-10">
+    <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">Contact Us</h1>
+    <p class="text-xl max-w-2xl mx-auto text-white">We'd love to hear from you! Reach out with enquiries, recipe requests, or feedback.</p>
   </div>
 </section>
 

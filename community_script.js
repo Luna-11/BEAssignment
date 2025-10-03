@@ -1,99 +1,61 @@
-// Modal functionality
-const shareRecipeBtn = document.getElementById('shareRecipeBtn');
-const shareRecipeModal = document.getElementById('shareRecipeModal');
-const closeShareRecipe = document.getElementById('closeShareRecipe');
-const mediaUpload = document.getElementById('mediaUpload');
-const fileUploadLabel = document.getElementById('fileUploadLabel');
-const previewContainer = document.getElementById('previewContainer');
-const fileInfo = document.getElementById('fileInfo');
+// community_script.js - UPDATED VERSION
 
-// Comment functionality
+// Modal functionality
+let shareRecipeBtn, createPostModal, closePostModal, cancelPost, mediaUpload;
+let previewContainer, fileInfo, removeMediaBtn;
 let currentPostID = null;
 let currentPostTitle = '';
 
-// Initialize event listeners when DOM is loaded
+// Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    initializeModalElements();
+    initializeEventListeners();
+    initializeCommentListeners();
+});
+
+function initializeModalElements() {
+    // Get all modal elements
+    shareRecipeBtn = document.getElementById('shareRecipeBtn');
+    createPostModal = document.getElementById('createPostModal');
+    closePostModal = document.getElementById('closePostModal');
+    cancelPost = document.getElementById('cancelPost');
+    mediaUpload = document.getElementById('media');
+    previewContainer = document.getElementById('previewContainer');
+    fileInfo = document.getElementById('uploadStatus');
+    removeMediaBtn = document.getElementById('removeMedia');
+}
+
+function initializeEventListeners() {
     // Modal functionality
-    if (shareRecipeBtn) {
+    if (shareRecipeBtn && createPostModal) {
         shareRecipeBtn.addEventListener('click', () => {
-            shareRecipeModal.classList.remove('hidden');
-            shareRecipeModal.classList.add('flex');
+            createPostModal.classList.remove('hidden');
+            createPostModal.classList.add('flex');
         });
     }
     
-    if (closeShareRecipe) {
-        closeShareRecipe.addEventListener('click', () => {
-            closeModal();
-        });
+    if (closePostModal) {
+        closePostModal.addEventListener('click', closeModal);
     }
 
-    // File upload preview with enhanced feedback
+    if (cancelPost) {
+        cancelPost.addEventListener('click', closeModal);
+    }
+
+    // File upload functionality
     if (mediaUpload) {
-        mediaUpload.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            previewContainer.classList.add('hidden');
-            previewContainer.innerHTML = '';
-            fileInfo.classList.add('hidden');
-            fileInfo.innerHTML = '';
+        mediaUpload.addEventListener('change', handleFileUpload);
+    }
 
-            if (file) {
-                // Show file information
-                const fileSize = (file.size / 1024 / 1024).toFixed(2);
-                fileInfo.innerHTML = `Selected: ${file.name} (${fileSize} MB)`;
-                fileInfo.classList.remove('hidden');
-
-                if (file.size > 10 * 1024 * 1024) {
-                    fileInfo.innerHTML = `<span style="color: red;">File too large: ${fileSize} MB (max 10MB)</span>`;
-                    mediaUpload.value = '';
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    previewContainer.innerHTML = '';
-                    
-                    // Create remove button
-                    const removeBtn = document.createElement('button');
-                    removeBtn.type = 'button';
-                    removeBtn.className = 'remove-media-btn';
-                    removeBtn.innerHTML = '<i class="fas fa-times"></i>';
-                    removeBtn.title = 'Remove file';
-                    removeBtn.addEventListener('click', function() {
-                        mediaUpload.value = '';
-                        previewContainer.classList.add('hidden');
-                        previewContainer.innerHTML = '';
-                        fileInfo.classList.add('hidden');
-                    });
-                    
-                    if (file.type.startsWith('image/')) {
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        img.alt = 'Preview';
-                        img.className = 'w-full h-64 object-cover';
-                        previewContainer.appendChild(img);
-                    } else if (file.type.startsWith('video/')) {
-                        const video = document.createElement('video');
-                        video.src = e.target.result;
-                        video.controls = true;
-                        video.className = 'w-full h-64 object-cover';
-                        previewContainer.appendChild(video);
-                    } else {
-                        fileInfo.innerHTML = `<span style="color: orange;">Unsupported file type: ${file.type}</span>`;
-                        return;
-                    }
-                    
-                    previewContainer.appendChild(removeBtn);
-                    previewContainer.classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+    // Remove media button
+    if (removeMediaBtn) {
+        removeMediaBtn.addEventListener('click', removeMedia);
     }
 
     // Close modal when clicking outside
-    if (shareRecipeModal) {
-        shareRecipeModal.addEventListener('click', function(e) {
-            if (e.target === shareRecipeModal) {
+    if (createPostModal) {
+        createPostModal.addEventListener('click', function(e) {
+            if (e.target === createPostModal) {
                 closeModal();
             }
         });
@@ -101,28 +63,142 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Close modal with Escape key
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && shareRecipeModal && !shareRecipeModal.classList.contains('hidden')) {
+        if (e.key === 'Escape' && createPostModal && !createPostModal.classList.contains('hidden')) {
             closeModal();
         }
     });
 
-    // Form validation
-    const recipeForm = document.getElementById('recipeForm');
-    if (recipeForm) {
-        recipeForm.addEventListener('submit', function(e) {
-            const title = document.querySelector('input[name="title"]').value.trim();
-            const description = document.querySelector('textarea[name="description"]').value.trim();
-            
-            if (!title || !description) {
-                e.preventDefault();
-                alert('Please fill in both title and description fields.');
-            }
-        });
+    // Form validation for create post
+    const createPostForm = document.getElementById('createPostForm');
+    if (createPostForm) {
+        createPostForm.addEventListener('submit', validatePostForm);
     }
 
-    // Initialize comment functionality
-    initializeCommentListeners();
-});
+    // Character counter for post content
+    const postContent = document.getElementById('post_content');
+    const postCharCount = document.getElementById('postCharCount');
+    if (postContent && postCharCount) {
+        postContent.addEventListener('input', function() {
+            updatePostCharCount(this.value.length);
+        });
+    }
+}
+
+function handleFileUpload(e) {
+    const file = e.target.files[0];
+    if (previewContainer) {
+        previewContainer.classList.add('hidden');
+    }
+    
+    if (fileInfo) {
+        fileInfo.textContent = '';
+        fileInfo.classList.remove('text-red-500', 'text-orange-500');
+    }
+
+    if (file) {
+        // Show file information
+        const fileSize = (file.size / 1024 / 1024).toFixed(2);
+        if (fileInfo) {
+            fileInfo.textContent = `Selected: ${file.name} (${fileSize} MB)`;
+        }
+
+        // Check file size (10MB limit)
+        if (file.size > 10 * 1024 * 1024) {
+            if (fileInfo) {
+                fileInfo.textContent = `File too large: ${fileSize} MB (max 10MB)`;
+                fileInfo.classList.add('text-red-500');
+            }
+            mediaUpload.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const mediaPreview = document.getElementById('mediaPreview');
+            if (mediaPreview) {
+                mediaPreview.innerHTML = '';
+                
+                if (file.type.startsWith('image/')) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.alt = 'Preview';
+                    img.className = 'w-full h-64 object-cover rounded-lg';
+                    mediaPreview.appendChild(img);
+                } else if (file.type.startsWith('video/')) {
+                    const video = document.createElement('video');
+                    video.src = e.target.result;
+                    video.controls = true;
+                    video.className = 'w-full h-64 object-cover rounded-lg';
+                    mediaPreview.appendChild(video);
+                } else {
+                    if (fileInfo) {
+                        fileInfo.textContent = `Unsupported file type: ${file.type}`;
+                        fileInfo.classList.add('text-orange-500');
+                    }
+                    return;
+                }
+                
+                if (previewContainer) {
+                    previewContainer.classList.remove('hidden');
+                }
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function removeMedia() {
+    if (mediaUpload) {
+        mediaUpload.value = '';
+    }
+    if (previewContainer) {
+        previewContainer.classList.add('hidden');
+    }
+    const mediaPreview = document.getElementById('mediaPreview');
+    if (mediaPreview) {
+        mediaPreview.innerHTML = '';
+    }
+    if (fileInfo) {
+        fileInfo.textContent = '';
+        fileInfo.classList.remove('text-red-500', 'text-orange-500');
+    }
+}
+
+function validatePostForm(e) {
+    const postContent = document.getElementById('post_content');
+    if (!postContent) return;
+    
+    const content = postContent.value.trim();
+    
+    if (!content) {
+        e.preventDefault();
+        alert('Please write something about your recipe or cooking experience.');
+        return;
+    }
+
+    // Validate title format (Title: Description)
+    if (!content.includes(':')) {
+        if (!confirm('Recommended format: "Recipe Title: Description". Do you want to submit without a title?')) {
+            e.preventDefault();
+            return;
+        }
+    }
+}
+
+function updatePostCharCount(count) {
+    const postCharCount = document.getElementById('postCharCount');
+    if (!postCharCount) return;
+    
+    postCharCount.textContent = `${count}/1000`;
+    
+    if (count > 900) {
+        postCharCount.classList.add('text-red-500');
+        postCharCount.classList.remove('text-medium-gray');
+    } else {
+        postCharCount.classList.remove('text-red-500');
+        postCharCount.classList.add('text-medium-gray');
+    }
+}
 
 // Comment functionality
 function initializeCommentListeners() {
@@ -174,11 +250,19 @@ function openCommentsModal(postID, postTitle) {
     const modal = document.getElementById('commentsModal');
     const titleElement = document.getElementById('commentsPostTitle');
     
-    titleElement.textContent = `Post: "${postTitle}"`;
-    document.getElementById('currentCommunityID').value = postID;
+    if (titleElement) {
+        titleElement.textContent = `Post: "${postTitle}"`;
+    }
     
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
+    const currentCommunityID = document.getElementById('currentCommunityID');
+    if (currentCommunityID) {
+        currentCommunityID.value = postID;
+    }
+    
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
     
     loadComments(postID);
 }
@@ -186,8 +270,10 @@ function openCommentsModal(postID, postTitle) {
 // Close comments modal
 function closeCommentsModal() {
     const modal = document.getElementById('commentsModal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
     currentPostID = null;
     currentPostTitle = '';
 }
@@ -195,29 +281,37 @@ function closeCommentsModal() {
 // Load comments for a post
 function loadComments(postID) {
     const commentsList = document.getElementById('commentsList');
+    if (!commentsList) return;
+
     commentsList.innerHTML = '<div class="text-center text-medium-gray">Loading comments...</div>';
 
     fetch(`comment_handler.php?action=get_comments&communityID=${postID}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 displayComments(data.comments);
-                updateCommentCount(postID); // Update the comment count on the post
+                updateCommentCount(postID);
             } else {
-                commentsList.innerHTML = `<div class="text-red-500 text-center">Error: ${data.error}</div>`;
+                commentsList.innerHTML = `<div class="text-red-500 text-center">Error: ${data.error || 'Unknown error'}</div>`;
             }
         })
         .catch(error => {
             console.error('Error loading comments:', error);
-            commentsList.innerHTML = '<div class="text-red-500 text-center">Error loading comments</div>';
+            commentsList.innerHTML = '<div class="text-red-500 text-center">Error loading comments. Please try again.</div>';
         });
 }
 
 // Display comments in the modal
 function displayComments(comments) {
     const commentsList = document.getElementById('commentsList');
+    if (!commentsList) return;
     
-    if (comments.length === 0) {
+    if (!comments || comments.length === 0) {
         commentsList.innerHTML = '<div class="text-center text-medium-gray py-8">No comments yet. Be the first to comment!</div>';
         return;
     }
@@ -225,8 +319,12 @@ function displayComments(comments) {
     commentsList.innerHTML = comments.map(comment => `
         <div class="mb-4 pb-4 border-b border-border last:border-b-0">
             <div class="flex justify-between items-start mb-2">
-                <div class="font-semibold text-black">${comment.username}</div>
-                <div class="text-sm text-medium-gray">${comment.formattedDate}</div>
+                <div class="font-semibold text-black">
+                    ${comment.username || comment.first_name || 'User'}
+                </div>
+                <div class="text-sm text-medium-gray">
+                    ${comment.formattedDate || comment.commentDate || 'Recently'}
+                </div>
             </div>
             <p class="text-text">${comment.comment}</p>
         </div>
@@ -237,11 +335,24 @@ function displayComments(comments) {
 function handleAddComment(e) {
     e.preventDefault();
     
-    const commentText = document.getElementById('commentText').value.trim();
-    const communityID = document.getElementById('currentCommunityID').value;
+    const commentTextElement = document.getElementById('commentText');
+    const communityIDElement = document.getElementById('currentCommunityID');
+    
+    if (!commentTextElement || !communityIDElement) {
+        alert('Comment system error. Please refresh the page.');
+        return;
+    }
+    
+    const commentText = commentTextElement.value.trim();
+    const communityID = communityIDElement.value;
     
     if (!commentText) {
         alert('Please write a comment before posting.');
+        return;
+    }
+
+    if (!communityID) {
+        alert('Invalid post reference. Please try again.');
         return;
     }
 
@@ -254,26 +365,36 @@ function handleAddComment(e) {
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
-            document.getElementById('commentText').value = '';
+            commentTextElement.value = '';
             updateCharCount(); // Reset character count
             loadComments(communityID); // Reload comments
         } else {
-            alert('Error: ' + data.error);
+            alert('Error: ' + (data.error || 'Failed to add comment'));
         }
     })
     .catch(error => {
         console.error('Error adding comment:', error);
-        alert('Error adding comment. Please try again.');
+        alert('Error adding comment. Please check your connection and try again.');
     });
 }
 
 // Update comment count on post
 function updateCommentCount(postID) {
     fetch(`comment_handler.php?action=get_comment_count&communityID=${postID}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 // Update the comment count in the post
@@ -283,15 +404,14 @@ function updateCommentCount(postID) {
                     if (!countSpan) {
                         countSpan = document.createElement('span');
                         countSpan.className = 'comment-count';
-                        commentBtn.appendChild(countSpan);
+                        commentBtn.querySelector('span').appendChild(countSpan);
                     }
                     countSpan.textContent = data.count;
                     
                     // Update the comment count in the post footer
                     const postFooter = commentBtn.closest('.bg-white').querySelector('.text-sm.text-medium-gray');
                     if (postFooter) {
-                        const likeCount = postFooter.textContent.split('•')[0].trim();
-                        postFooter.textContent = `${likeCount} • ${data.count} comments`;
+                        postFooter.textContent = `${data.count} comments`;
                     }
                 }
             }
@@ -309,32 +429,49 @@ function updateCharCount() {
         
         // Change color if approaching limit
         if (count > 250) {
-            charCount.className = 'text-sm text-red-500';
+            charCount.classList.add('text-red-500');
+            charCount.classList.remove('text-medium-gray');
         } else {
-            charCount.className = 'text-sm text-medium-gray';
+            charCount.classList.remove('text-red-500');
+            charCount.classList.add('text-medium-gray');
         }
     }
 }
 
 function closeModal() {
-    if (shareRecipeModal) {
-        shareRecipeModal.classList.add('hidden');
-        shareRecipeModal.classList.remove('flex');
+    if (createPostModal) {
+        createPostModal.classList.add('hidden');
+        createPostModal.classList.remove('flex');
     }
     
-    const recipeForm = document.getElementById('recipeForm');
-    if (recipeForm) {
-        recipeForm.reset();
+    const createPostForm = document.getElementById('createPostForm');
+    if (createPostForm) {
+        createPostForm.reset();
     }
     
     if (previewContainer) {
         previewContainer.classList.add('hidden');
-        previewContainer.innerHTML = '';
+    }
+    
+    const mediaPreview = document.getElementById('mediaPreview');
+    if (mediaPreview) {
+        mediaPreview.innerHTML = '';
     }
     
     if (fileInfo) {
-        fileInfo.classList.add('hidden');
+        fileInfo.textContent = '';
+        fileInfo.classList.remove('text-red-500', 'text-orange-500');
     }
+    
+    // Reset character counters
+    const postCharCount = document.getElementById('postCharCount');
+    if (postCharCount) {
+        postCharCount.textContent = '0/1000';
+        postCharCount.classList.remove('text-red-500');
+        postCharCount.classList.add('text-medium-gray');
+    }
+    
+    updateCharCount(); // Reset comment character count
 }
 
 // Export functions for potential reuse

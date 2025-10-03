@@ -477,6 +477,31 @@
     </script>
 
     <style>
+        
+        .resources-header {
+            background-image: url('./BEpics/banner.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: relative;
+        }
+        
+        .resources-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to right, var(--primary), var(--medium-pink));
+            opacity: 0.85;
+            z-index: 1;
+        }
+        
+        .resources-hero {
+            position: relative;
+            z-index: 2;
+        }
         /* Custom scrollbar for modal */
         #resourceModal .bg-white::-webkit-scrollbar {
             width: 8px;
@@ -496,7 +521,6 @@
             background: #ddb2b1;
         }
         
-        /* Line clamp for description preview */
         .line-clamp-3 {
             display: -webkit-box;
             -webkit-line-clamp: 3;
