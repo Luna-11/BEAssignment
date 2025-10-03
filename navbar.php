@@ -590,7 +590,7 @@
                     <ul class="dropdown-menu">
                         <li><a href="AddRecipe.php">Recipe Upload</a></li>
                         <li><a href="addEvent.php">Event Upload</a></li>
-                        <li><a href="community_upload.html">Community Post Upload</a></li>
+                        <li><a href="community.php">Community Post Upload</a></li>
                         <li><a href="addRes.php">Resource Upload</a></li>
                     </ul>
                 </div>

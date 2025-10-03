@@ -2,9 +2,6 @@
 session_start();
 include('./configMysql.php');
 
-// Enable error reporting for debugging
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 
 // Check if user is logged in
 if (!isset($_SESSION['userID'])) {

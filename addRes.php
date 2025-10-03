@@ -2,6 +2,13 @@
 session_start();
 include('./configMysql.php');
 
+
+// Check if user is logged in
+if (!isset($_SESSION['userID'])) {
+    header("Location: login.php");
+    exit();
+}
+
 // Initialize variables
 $resourceName = $description = $resourceTypeID = "";
 $errors = [];

@@ -63,13 +63,24 @@
             font-family: monospace;
             font-size: 12px;
         }
-        .full-height-image {
-            height: 100%;
-            min-height: 600px;
+        .image-container {
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+        .recipe-image {
+            width: 100%;
+            max-height: 600px;
+            object-fit: cover;
+            border-radius: 12px;
         }
         @media (max-width: 768px) {
-            .full-height-image {
-                min-height: 400px;
+            .image-container {
+                position: relative;
+                top: 0;
+            }
+            .recipe-image {
+                max-height: 400px;
             }
         }
     </style>
@@ -228,21 +239,21 @@
         <!-- Recipe Card -->
         <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
             <div class="md:flex">
-                <!-- Full Height Image Section -->
-                <div class="md:w-2/5 p-0">
-                    <div class="full-height-image relative bg-[#e9d0cb]">
-                        <div class="w-full h-full flex items-center justify-center overflow-hidden">
+                <!-- Image Section - Fixed size -->
+                <div class="md:w-2/5 p-6">
+                    <div class="image-container">
+                        <div class="bg-[#e9d0cb] rounded-xl overflow-hidden">
                             <?php if (!empty($recipe['image'])): ?>
                                 <img src="<?php echo htmlspecialchars($recipe['image']); ?>" 
                                      alt="<?php echo htmlspecialchars($recipe['recipeName']); ?>" 
-                                     class="w-full h-full object-cover">
+                                     class="recipe-image">
                             <?php else: ?>
-                                <div class="w-full h-full flex items-center justify-center bg-[#ddb2b1]">
+                                <div class="w-full h-96 flex items-center justify-center bg-[#ddb2b1]">
                                     <i class="fas fa-bread-slice text-[#C89091] text-8xl"></i>
                                 </div>
                             <?php endif; ?>
                         </div>
-                        <div class="absolute bottom-4 right-4 bg-[#C89091] text-white px-4 py-2 rounded-full shadow-lg">
+                        <div class="mt-4 bg-[#C89091] text-white px-4 py-2 rounded-full shadow-lg inline-block">
                             <span class="font-bold">
                                 <?php echo htmlspecialchars($recipe['cuisineType'] ?? 'Unknown'); ?>
                             </span>
@@ -250,8 +261,8 @@
                     </div>
                 </div>
 
-                <!-- Content Section -->
-                <div class="md:w-3/5 p-8">
+                <!-- Content Section - Scrollable if needed -->
+                <div class="md:w-3/5 p-6">
                     <!-- Recipe Info -->
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                         <div class="text-center">
@@ -367,7 +378,7 @@
         </div>
 
         <!-- Footer -->
-  <?php include 'footer.php'; ?>
+        <?php include 'footer.php'; ?>
         <?php else: ?>
         <!-- Error Message -->
         <div class="bg-white rounded-2xl shadow-lg p-8 text-center">

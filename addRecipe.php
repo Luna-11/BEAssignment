@@ -193,36 +193,6 @@ $dietPreferences = getDietPref($conn);
                                 </button>
                             </div>
                         </div>
-
-                        <div class="image-upload-slot border-2 border-dashed border-border-color rounded-lg h-48 flex items-center justify-center relative overflow-hidden cursor-pointer hover:border-primary" data-slot="2">
-                            <input type="file" id="image2" name="image2" accept="image/*" class="absolute w-full h-full opacity-0 cursor-pointer">
-                            <div class="upload-placeholder text-center text-medium-gray">
-                                <i class="fas fa-camera text-5xl mb-2 text-light-gray"></i>
-                                <span class="block">Additional Image</span>
-                                <small>Click to upload</small>
-                            </div>
-                            <div class="image-preview hidden absolute inset-0">
-                                <img src="" alt="Preview" class="w-full h-full object-cover">
-                                <button type="button" class="remove-image absolute top-1 right-1 bg-black/70 text-white rounded-full w-8 h-8 flex items-center justify-center">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="image-upload-slot border-2 border-dashed border-border-color rounded-lg h-48 flex items-center justify-center relative overflow-hidden cursor-pointer hover:border-primary" data-slot="3">
-                            <input type="file" id="image3" name="image3" accept="image/*" class="absolute w-full h-full opacity-0 cursor-pointer">
-                            <div class="upload-placeholder text-center text-medium-gray">
-                                <i class="fas fa-camera text-5xl mb-2 text-light-gray"></i>
-                                <span class="block">Additional Image</span>
-                                <small>Click to upload</small>
-                            </div>
-                            <div class="image-preview hidden absolute inset-0">
-                                <img src="" alt="Preview" class="w-full h-full object-cover">
-                                <button type="button" class="remove-image absolute top-1 right-1 bg-black/70 text-white rounded-full w-8 h-8 flex items-center justify-center">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        </div>
                     </div>
                     
                     <div class="bg-light-pink p-4 rounded-lg text-sm text-medium-gray">
