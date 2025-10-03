@@ -43,7 +43,7 @@
         </div>
     </section>
 
-    <!-- Nutrition Education Section - Reduced padding -->
+    <!-- Education Section -->
     <section class="educational-section py-12 md:py-16" id="nutrition-section">
         <div class="section-container max-w-6xl mx-auto px-4">
             
@@ -208,30 +208,6 @@
         </div>
     </div>
 
-    <!-- Fixed Image Lightbox Modal - Higher z-index to ensure it's on top -->
-    <div id="imageLightbox" class="fixed inset-0 bg-black bg-opacity-90 z-[10000] hidden flex items-center justify-center p-4">
-        <div class="relative bg-white rounded-xl shadow-2xl overflow-hidden w-11/12 md:w-3/4 lg:w-2/3 xl:w-1/2" style="height: 70vh;">
-            <!-- Close Button -->
-            <button onclick="closeImageLightbox()" class="absolute top-4 right-4 text-gray-600 hover:text-gray-800 text-2xl z-10 bg-white bg-opacity-90 rounded-full w-10 h-10 flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110">
-                <i class="fas fa-times"></i>
-            </button>
-            
-            <!-- Download Button -->
-            <button id="lightboxDownload" class="absolute top-4 right-16 text-gray-600 hover:text-gray-800 text-xl z-10 bg-white bg-opacity-90 rounded-full w-10 h-10 flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110">
-                <i class="fas fa-download"></i>
-            </button>
-            
-            <!-- Image Container -->
-            <div class="w-full h-full flex items-center justify-center bg-gray-100 p-4" style="height: calc(100% - 80px);">
-                <img id="lightboxImage" src="" alt="" class="max-w-full max-h-full object-contain rounded-lg">
-            </div>
-            
-            <!-- Image Info -->
-            <div class="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
-                <p id="lightboxTitle" class="text-text font-semibold text-lg text-center"></p>
-            </div>
-        </div>
-    </div>
 
     <!-- Footer -->
     <?php include('footer.php'); ?>

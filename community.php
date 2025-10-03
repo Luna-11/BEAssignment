@@ -191,30 +191,30 @@ if (!empty($posts)) {
                             <?php foreach ($posts as $post): ?>
                                 <div class="bg-white rounded-lg shadow-md mb-6 overflow-hidden">
                                     <div class="p-6 pb-0">
-<!-- In the posts display section of community.php -->
-<div class="flex items-center space-x-4 mb-4">
-    <div class="w-11 h-11 bg-primary rounded-full flex items-center justify-center text-white">
-        <i class="fas fa-user"></i>
-    </div>
-    <div>
-        <h4 class="font-semibold text-black">
-            <?php 
-            if (isset($post['first_name'])) {
-                echo htmlspecialchars($post['first_name']);
-            } elseif (isset($post['username'])) {
-                echo htmlspecialchars($post['username']);
-            } elseif (isset($post['userID'])) {
-                echo "User " . htmlspecialchars($post['userID']);
-            } else {
-                echo "User";
-            }
-            ?>
-        </h4>
-        <p class="text-sm text-medium-gray">
-            <?php echo date('F j, Y g:i A', strtotime($post['postDate'])); ?>
-        </p>
-    </div>
-</div>
+                                        <!-- In the posts display section of community.php -->
+                                        <div class="flex items-center space-x-4 mb-4">
+                                            <div class="w-11 h-11 bg-primary rounded-full flex items-center justify-center text-white">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-semibold text-black">
+                                                    <?php 
+                                                    if (isset($post['first_name'])) {
+                                                        echo htmlspecialchars($post['first_name']);
+                                                    } elseif (isset($post['username'])) {
+                                                        echo htmlspecialchars($post['username']);
+                                                    } elseif (isset($post['userID'])) {
+                                                        echo "User " . htmlspecialchars($post['userID']);
+                                                    } else {
+                                                        echo "User";
+                                                    }
+                                                    ?>
+                                                </h4>
+                                                <p class="text-sm text-medium-gray">
+                                                    <?php echo date('F j, Y g:i A', strtotime($post['postDate'])); ?>
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
                                     
                                     <div class="p-6 pt-0">
@@ -260,10 +260,6 @@ if (!empty($posts)) {
                                         
                                         <div class="border-t border-border pt-4 flex justify-between items-center">
                                             <div class="flex space-x-4">
-                                                <button class="like-btn flex items-center space-x-2 text-medium-gray hover:text-primary transition-colors">
-                                                    <i class="far fa-heart"></i>
-                                                    <span>Like</span>
-                                                </button>
                                                 <button class="comment-btn flex items-center space-x-2 text-medium-gray hover:text-primary transition-colors" 
                                                         data-post-id="<?php echo $post['communityID']; ?>">
                                                     <i class="far fa-comment"></i>
@@ -274,7 +270,6 @@ if (!empty($posts)) {
                                                 </button>
                                             </div>
                                             <div class="text-sm text-medium-gray">
-                                                0 likes • 
                                                 <?php echo isset($postCommentCounts[$post['communityID']]) ? $postCommentCounts[$post['communityID']] : 0; ?> 
                                                 comments
                                             </div>
@@ -333,58 +328,6 @@ if (!empty($posts)) {
         </div>
     </div>
 
-    <!-- Share Recipe Modal -->
-    <div id="shareRecipeModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[75vh] overflow-y-auto">
-            <div class="p-6 border-b border-border">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-2xl font-bold text-text">Share Your Creation</h2>
-                    <button id="closeShareRecipe" class="text-light-gray text-2xl hover:text-black">&times;</button>
-                </div>
-            </div>
-            
-            <form id="recipeForm" class="p-6 space-y-4" enctype="multipart/form-data" method="POST">
-                <div>
-                    <label class="block font-semibold text-text mb-2">Post Title *</label>
-                    <input type="text" name="title" required 
-                           class="w-full p-3 border-2 border-border rounded focus:border-primary outline-none" 
-                           placeholder="Give your post a catchy title" 
-                           value="<?php echo isset($title) ? htmlspecialchars($title) : ''; ?>"
-                           maxlength="100">
-                    <div class="text-sm text-medium-gray mt-1">Max 100 characters</div>
-                </div>
-                
-                <div>
-                    <label class="block font-semibold text-text mb-2">Description *</label>
-                    <textarea name="description" rows="3" 
-                              placeholder="Tell us about your culinary creation..." required
-                              class="w-full p-3 border-2 border-border rounded focus:border-primary outline-none"><?php echo isset($description) ? htmlspecialchars($description) : ''; ?></textarea>
-                </div>
-                
-                <div>
-                    <label class="block font-semibold text-text mb-2">Add Media (Image or Video - Optional)</label>
-                    <div class="file-upload">
-                        <input type="file" id="mediaUpload" name="media" accept="image/*,video/*" class="hidden">
-                        <label for="mediaUpload" id="fileUploadLabel" class="file-upload-label">
-                            <i class="fas fa-cloud-upload-alt text-4xl text-primary mb-2"></i>
-                            <span class="font-semibold text-text">Click to upload an image or video</span>
-                            <span class="text-sm text-medium-gray mt-1">Supports JPG, PNG, GIF, WebP, MP4, WebM, OGG (Max 10MB)</span>
-                        </label>
-                    </div>
-                    <div id="fileInfo" class="upload-status hidden"></div>
-                    <div id="previewContainer" class="preview-container hidden">
-                        <!-- Preview will be inserted here -->
-                    </div>
-                </div>
-                
-                <div class="pt-4">
-                    <button type="submit" class="w-full bg-primary text-white p-4 rounded hover:bg-medium-pink font-semibold text-lg transition-colors">
-                        Share Post
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
 
     <!-- Include the external JavaScript files -->
     <script src="community_script.js"></script>

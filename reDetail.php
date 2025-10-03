@@ -204,15 +204,6 @@
     ?>
     
     <div class="container mx-auto px-4 py-8 max-w-6xl">
-        <!-- Debug Info (remove in production) -->
-        <?php if (!$recipe): ?>
-        <div class="debug-info mb-4">
-            <strong>Debug Information:</strong><br>
-            Recipe ID from URL: <?php echo $recipeID; ?><br>
-            Recipe Found: <?php echo $recipe ? 'Yes' : 'No'; ?><br>
-            Check if you're passing the correct ID in the URL: recipe-detail.php?id=1
-        </div>
-        <?php endif; ?>
 
         <!-- Display success/error messages -->
         <?php if (!empty($message)): ?>
@@ -376,12 +367,7 @@
         </div>
 
         <!-- Footer -->
-        <footer class="text-center mt-10 text-[#7b4e48] text-sm">
-            <p>
-                © <?php echo date('Y'); ?> <?php echo htmlspecialchars($recipe['recipeName']); ?> | 
-                Made with <i class="fas fa-heart text-[#C89091]"></i>
-            </p>
-        </footer>
+  <?php include 'footer.php'; ?>
         <?php else: ?>
         <!-- Error Message -->
         <div class="bg-white rounded-2xl shadow-lg p-8 text-center">

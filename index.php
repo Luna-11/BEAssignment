@@ -204,15 +204,6 @@ if ($featured_result && $featured_result->num_rows > 0) {
   
   <?php include 'navbar.php'; ?>
 
-  <!-- show success message if exists -->
-  <?php if (!empty($success_message)): ?>
-    <div class="max-w-2xl mx-auto mt-4 px-4">
-      <div class="bg-green-100 text-green-800 p-3 rounded">
-        <?= htmlspecialchars($success_message) ?>
-      </div>
-    </div>
-  <?php endif; ?>
-
   <!-- Join Us Popup -->
 <?php if ($show_popup): ?>
   <div id="joinUsPopup" class="popup-overlay hidden">
@@ -242,7 +233,7 @@ if ($featured_result && $featured_result->num_rows > 0) {
     <div class="category-grid grid grid-cols-4 gap-6 max-w-2xl mx-auto px-2">
       <?php if ($result && $result->num_rows > 0): ?>
         <?php while ($row = $result->fetch_assoc()): 
-            // choose DB path or default
+           
             $imgPath = !empty($row['imagePath']) ? $row['imagePath'] : 'BEpics/default.png';
             // build server path correctly for file_exists
             $serverPath = (strpos($imgPath, '/') === 0) ? __DIR__ . $imgPath : __DIR__ . '/' . $imgPath;
@@ -266,7 +257,6 @@ if ($featured_result && $featured_result->num_rows > 0) {
   </section>
 
 <?php
-// SIMPLE WORKING VERSION - No JOINs
 $featured_sql = "SELECT 
     recipeID, 
     recipeName, 
@@ -372,7 +362,11 @@ if ($featured_result && $featured_result->num_rows > 0) {
     </div>
 </section>
 
-<!-- Event Slideshow Section - Debug Version -->
+
+
+
+
+<!-- Event Slideshow Section-->
 <section class="events-slideshow py-10">
     <h2 class="text-2xl md:text-3xl mb-8 text-center">Upcoming Food Events</h2>
     
