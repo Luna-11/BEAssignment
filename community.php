@@ -99,6 +99,29 @@ if (!empty($posts)) {
             font-size: 0.75rem;
             margin-left: 0.25rem;
         }
+        .bg-cookbook {
+            /* Replace with your actual image URL */
+            background-image: url('./BEpics/bn1.jpg');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+        
+        .bg-cookbook::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.8;
+            z-index: 1;
+        }
+        
+        .bg-cookbook > * {
+            position: relative;
+            z-index: 2;
+        }
         
         .file-upload-label:hover {
             border-color: #C89091;
@@ -144,16 +167,14 @@ if (!empty($posts)) {
 <body class="bg-light-yellow min-h-screen flex flex-col">
     <!-- Navbar -->    
     <?php include('navbar.php'); ?>
-
-    <!-- Add padding to account for fixed navbar -->
     <div>
         <!-- Community Hero -->
-        <section class="bg-gradient-to-br from-primary to-medium-pink text-white py-14 px-5 text-center">
-            <div class="container mx-auto">
-                <h1 class="text-4xl md:text-5xl font-bold mb-4">Community Cookbook</h1>
-                <p class="text-xl opacity-90 max-w-2xl mx-auto">Share your culinary adventures with fellow food enthusiasts</p>
-            </div>
-        </section>
+    <section class="bg-cookbook text-white py-14 px-5 text-center">
+        <div class="container mx-auto">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">Community Cookbook</h1>
+            <p class="text-xl opacity-90 max-w-2xl mx-auto">Share your culinary adventures with fellow food enthusiasts</p>
+        </div>
+    </section>
 
         <!-- Create Post Modal -->
         <div id="createPostModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">

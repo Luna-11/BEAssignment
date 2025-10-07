@@ -267,10 +267,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   <?php include('navbar.php'); ?>
 
   <div class="pb-12 relative z-10">
-    <header class="bg-primary text-white text-center py-12 sm:py-16 rounded-b-2xl mb-8">
-      <h1 class="font-pacifico text-4xl sm:text-5xl mb-2">Add a Resource</h1>
-      <p class="text-lg sm:text-xl opacity-90">Upload an Educational or Culinary resource with an optional PDF and video.</p>
-    </header>
+      <header 
+        class="bg-primary text-white text-center py-12 sm:py-16 rounded-b-2xl mb-8 bg-cover bg-center relative"
+        style="background-image: url('./BEpics/a1.jpg');"
+      >
+        <div class="absolute inset-0 opacity-80 rounded-b-2xl"></div>
+        <div class="relative z-10">
+          <h1 class=" text-4xl sm:text-5xl mb-2">Add a Resource</h1>
+          <p class="text-lg sm:text-xl opacity-90">Upload an Educational or Culinary resource with an optional PDF and video.</p>
+        </div>
+      </header>
 
     <div class="max-w-2xl mx-auto w-[90%] bg-lightest rounded-2xl shadow-2xl p-6 sm:p-8">
       <!-- Display error messages -->

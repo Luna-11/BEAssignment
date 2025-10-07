@@ -1,4 +1,3 @@
-// community_script.js - UPDATED VERSION
 
 // Modal functionality
 let shareRecipeBtn, createPostModal, closePostModal, cancelPost, mediaUpload;

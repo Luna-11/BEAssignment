@@ -36,12 +36,16 @@
     <?php include('navbar.php'); ?>
 
     <!-- Educational Resources Header -->
-    <section class="resources-header bg-gradient-to-r from-primary to-medium-pink text-white py-12 md:py-16">
-        <div class="resources-hero text-center max-w-4xl mx-auto px-4">
-            <h1 class="text-4xl md:text-5xl font-bold mb-4">Culinary Resources</h1>
-            <p class="text-xl opacity-90">Expand your culinary knowledge with our comprehensive educational materials, infographics, and learning guides</p>
-        </div>
-    </section>
+<section 
+  class="resources-header text-white py-12 md:py-16 bg-cover bg-center relative"
+  style="background-image: url('./BEpics/beBn.jpg');"
+>
+  <div class="absolute inset-0 "></div>
+  <div class="resources-hero text-center max-w-4xl mx-auto px-4 relative z-10">
+    <h1 class="text-4xl md:text-5xl font-bold mb-4">Culinary Resources</h1>
+    <p class="text-xl opacity-90">Expand your culinary knowledge with our comprehensive educational materials, infographics, and learning guides</p>
+  </div>
+</section>
 
     <!--Education Section -->
     <section class="educational-section py-12 md:py-16" id="nutrition-section">
