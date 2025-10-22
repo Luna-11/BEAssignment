@@ -181,14 +181,17 @@
           <div class="input-container">
             <input type="text" id="first_name" name="first_name" placeholder="First Name" required>
           </div>
+          <div id="firstNameError" class="error"></div>
           <div class="input-container">
             <input type="text" id="last_name" name="last_name" placeholder="Last Name" required>
           </div>
+          <div id="lastNameError" class="error"></div>
         </div>
         <div class="input-group">
           <div class="input-container">
             <input type="email" id="email" name="email" placeholder="Email" required>
           </div>
+          <div id="emailError" class="error"></div>
         </div>
         <div class="input-group">
           <div class="input-container">
@@ -231,10 +234,19 @@
       alert('Login functionality would go here');
     }
 
-    // Password Validation
+    // Field Validation Functions
+    function validateNotEmpty(value, fieldName) {
+      return value.trim() !== '';
+    }
+
+    function validateEmail(email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email);
+    }
+
     function validatePassword(password) {
-      const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[a-z]).{8,}$/;
-      return passwordRegex.test(password);
+      // Updated to match PHP validation (minimum 6 characters)
+      return password.length >= 6;
     }
 
     function validatePasswordMatch(password, confirmPassword) {
@@ -270,37 +282,133 @@
       }
     }
 
-    function redirectToSecurityQuestions(userId) {
-      // Redirect to security questions page with user_id parameter
-      window.location.href = `securityQuestions.php?user_id=${userId}`;
+    function validateAllFields() {
+      const firstName = document.getElementById('first_name').value;
+      const lastName = document.getElementById('last_name').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirm_password').value;
+      
+      let isValid = true;
+
+      // Clear previous errors
+      document.getElementById('firstNameError').textContent = '';
+      document.getElementById('lastNameError').textContent = '';
+      document.getElementById('emailError').textContent = '';
+      document.getElementById('passwordError').textContent = '';
+      document.getElementById('confirmPasswordError').textContent = '';
+
+      // Remove error borders
+      document.getElementById('first_name').classList.remove('error-border');
+      document.getElementById('last_name').classList.remove('error-border');
+      document.getElementById('email').classList.remove('error-border');
+      document.getElementById('password').classList.remove('error-border');
+      document.getElementById('confirm_password').classList.remove('error-border');
+
+      // Validate First Name
+      if (!validateNotEmpty(firstName, 'First Name')) {
+        document.getElementById('firstNameError').textContent = 'First name is required';
+        document.getElementById('first_name').classList.add('error-border');
+        isValid = false;
+      }
+
+      // Validate Last Name
+      if (!validateNotEmpty(lastName, 'Last Name')) {
+        document.getElementById('lastNameError').textContent = 'Last name is required';
+        document.getElementById('last_name').classList.add('error-border');
+        isValid = false;
+      }
+
+      // Validate Email
+      if (!validateNotEmpty(email, 'Email')) {
+        document.getElementById('emailError').textContent = 'Email is required';
+        document.getElementById('email').classList.add('error-border');
+        isValid = false;
+      } else if (!validateEmail(email)) {
+        document.getElementById('emailError').textContent = 'Please enter a valid email address';
+        document.getElementById('email').classList.add('error-border');
+        isValid = false;
+      }
+
+      // Validate Password
+      if (!validateNotEmpty(password, 'Password')) {
+        document.getElementById('passwordError').textContent = 'Password is required';
+        document.getElementById('password').classList.add('error-border');
+        isValid = false;
+      } else if (!validatePassword(password)) {
+        document.getElementById('passwordError').textContent = 'Password must be at least 6 characters long';
+        document.getElementById('password').classList.add('error-border');
+        isValid = false;
+      }
+
+      // Validate Password Match
+      if (!validateNotEmpty(confirmPassword, 'Confirm Password')) {
+        document.getElementById('confirmPasswordError').textContent = 'Please confirm your password';
+        document.getElementById('confirm_password').classList.add('error-border');
+        isValid = false;
+      } else if (!validatePasswordMatch(password, confirmPassword)) {
+        document.getElementById('confirmPasswordError').textContent = 'Passwords do not match';
+        document.getElementById('confirm_password').classList.add('error-border');
+        isValid = false;
+      }
+
+      return isValid;
     }
 
-    // Event listeners for real-time password matching
+    function redirectToSecurityQuestions(userId) {
+      if (userId) {
+        window.location.href = `securityQuestions.php?user_id=${userId}`;
+      } else {
+        console.error('No user ID provided for redirect');
+        // Fallback to login page
+        window.location.href = 'logIn.php';
+      }
+    }
+
+    // Event listeners for real-time validation
     document.getElementById('password').addEventListener('input', updatePasswordMatchStatus);
     document.getElementById('confirm_password').addEventListener('input', updatePasswordMatchStatus);
+
+    // Real-time validation for other fields on blur
+    document.getElementById('first_name').addEventListener('blur', function() {
+      if (!validateNotEmpty(this.value, 'First Name')) {
+        document.getElementById('firstNameError').textContent = 'First name is required';
+        this.classList.add('error-border');
+      } else {
+        document.getElementById('firstNameError').textContent = '';
+        this.classList.remove('error-border');
+      }
+    });
+
+    document.getElementById('last_name').addEventListener('blur', function() {
+      if (!validateNotEmpty(this.value, 'Last Name')) {
+        document.getElementById('lastNameError').textContent = 'Last name is required';
+        this.classList.add('error-border');
+      } else {
+        document.getElementById('lastNameError').textContent = '';
+        this.classList.remove('error-border');
+      }
+    });
+
+    document.getElementById('email').addEventListener('blur', function() {
+      if (!validateNotEmpty(this.value, 'Email')) {
+        document.getElementById('emailError').textContent = 'Email is required';
+        this.classList.add('error-border');
+      } else if (!validateEmail(this.value)) {
+        document.getElementById('emailError').textContent = 'Please enter a valid email address';
+        this.classList.add('error-border');
+      } else {
+        document.getElementById('emailError').textContent = '';
+        this.classList.remove('error-border');
+      }
+    });
 
     document.getElementById('registrationForm').addEventListener('submit', function(e) {
       e.preventDefault();
 
-      const password = document.getElementById('password').value;
-      const confirmPassword = document.getElementById('confirm_password').value;
-      const passwordError = document.getElementById('passwordError');
-      const confirmPasswordError = document.getElementById('confirmPasswordError');
-      
-      // Clear previous errors
-      passwordError.textContent = "";
-      confirmPasswordError.textContent = "";
-
-      // Validate password strength
-      if (!validatePassword(password)) {
-        passwordError.textContent = "Password must be at least 8 characters, include one uppercase, one lowercase, and one number.";
-        return;
-      }
-
-      // Validate password match
-      if (!validatePasswordMatch(password, confirmPassword)) {
-        confirmPasswordError.textContent = "Passwords do not match";
-        return;
+      // Validate all fields before submission
+      if (!validateAllFields()) {
+        return; // Stop submission if validation fails
       }
       
       const formData = new FormData(this);
@@ -315,7 +423,12 @@
         method: 'POST',
         body: formData
       })
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
       .then(data => {
         document.getElementById('submitBtn').disabled = false;
         document.getElementById('btnText').style.display = 'block';
@@ -333,9 +446,11 @@
           setTimeout(() => {
             if (data.user_id) {
               redirectToSecurityQuestions(data.user_id);
+            } else if (data.redirect_url) {
+              window.location.href = data.redirect_url;
             } else {
-              // Fallback: redirect to security questions page
-              window.location.href = 'securityQuestions.php';
+              // Fallback: redirect to login page
+              window.location.href = 'logIn.php';
             }
           }, 1500);
         } else {
@@ -351,6 +466,7 @@
         const messageDiv = document.getElementById('message');
         messageDiv.className = 'error';
         messageDiv.innerHTML = 'Network error: ' + error.message;
+        console.error('Registration error:', error);
       });
     });
   </script>

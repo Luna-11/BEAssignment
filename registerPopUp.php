@@ -56,7 +56,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     try {
         // Check if email already exists
         $check_sql = "SELECT id FROM users WHERE mail = ?";
-        $check_stmt = $conn->prepare($check_sql); // Changed $mysqli to $conn
+        $check_stmt = $conn->prepare($check_sql);
         
         if (!$check_stmt) {
             throw new Exception("Prepare failed: " . $conn->error);
@@ -80,7 +80,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         
         // Insert new user
         $insert_sql = "INSERT INTO users (first_name, last_name, mail, password) VALUES (?, ?, ?, ?)";
-        $insert_stmt = $conn->prepare($insert_sql); // Changed $mysqli to $conn
+        $insert_stmt = $conn->prepare($insert_sql);
         
         if (!$insert_stmt) {
             throw new Exception("Prepare failed: " . $conn->error);
@@ -92,8 +92,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $insert_stmt->bind_param("ssss", $first_name, $last_name, $email, $hashed_password);
         
         if ($insert_stmt->execute()) {
+            // Get the newly inserted user ID
+            $user_id = $insert_stmt->insert_id;
+            
             $response['success'] = true;
-            $response['message'] = "Registration successful! You can now login.";
+            $response['message'] = "Registration successful! Redirecting to security questions...";
+            $response['user_id'] = $user_id; // Include user_id in response
+            $response['redirect_url'] = "securityQuestions.php?user_id=" . $user_id;
         } else {
             throw new Exception("Execute failed: " . $insert_stmt->error);
         }
@@ -109,7 +114,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 
 // Close connection
-$conn->close(); // Changed $mysqli to $conn
+$conn->close();
 
 // Return JSON response
 echo json_encode($response);
