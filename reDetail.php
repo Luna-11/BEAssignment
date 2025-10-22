@@ -93,8 +93,7 @@
     // Start session for saving functionality
     session_start();
     
-    // Create connection
-    $conn = new mysqli($servername, $username, $password, $dbname);
+        include('configMysql.php');
     
     // Check connection
     if ($conn->connect_error) {

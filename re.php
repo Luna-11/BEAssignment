@@ -84,14 +84,7 @@
                     <select id="food-type" class="filter-select w-full p-3 rounded-xl border border-[#e9d0cb] bg-white text-[#7b4e48] text-base cursor-pointer transition-all focus:outline-none focus:border-[#C89091]">
                         <option value="all">All Types</option>
                         <?php
-                        // Database connection
-                        $servername = "localhost";
-                        $username = "root";
-                        $password = "";
-                        $dbname = "BEAssignment";
-                        
-                        // Create connection
-                        $conn = new mysqli($servername, $username, $password, $dbname);
+                            include('configMysql.php');
                         
                         // Check connection
                         if ($conn->connect_error) {

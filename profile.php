@@ -16,10 +16,10 @@ if (!isset($_SESSION['userID'])) {
 $userID = $_SESSION['userID'];
 
 // DEBUG: Check the actual table structure
-echo "<!-- Debug: Checking users table structure -->";
+
 $result = $conn->query("DESCRIBE users");
 if ($result) {
-    echo "<!-- Users table columns: -->";
+
     while ($row = $result->fetch_assoc()) {
         echo "<!-- " . $row['Field'] . " (" . $row['Type'] . ") -->";
     }

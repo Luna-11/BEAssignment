@@ -60,7 +60,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['action']) && $_GET['acti
         exit();
     }
     
-    // Try with 'id' column first (since your users table has 'id' not 'userID')
     try {
         $query = "
             SELECT c.*, u.first_name 

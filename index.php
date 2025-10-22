@@ -1,6 +1,6 @@
 <?php
 session_start();
-$show_popup = !isset($_SESSION['userID']); // true if user not logged in
+$show_popup = !isset($_SESSION['userID']);
 
 include('configMysql.php');
 
@@ -11,7 +11,7 @@ $result = $conn->query($sql);
 // Fetch featured recipes (4 most recent by date)
 $featured_sql = "SELECT r.*, u.username, d.difficultLevel 
                  FROM recipe r 
-                 LEFT JOIN users u ON r.userID = u.userID 
+                 LEFT JOIN users u ON r.userID = u.id 
                  LEFT JOIN difficult d ON r.difficultID = d.difficultID 
                  ORDER BY r.date DESC 
                  LIMIT 4";

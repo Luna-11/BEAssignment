@@ -48,7 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->bind_param("ssss", $first_name, $last_name, $mail, $hashed_password);
 
 if ($stmt->execute()) {
-    $user_id = $stmt->insert_id; // get new user id
+    $user_id = $stmt->insert_id; 
     header("Location: securityQuestions.php?user_id=" . $user_id);
     exit;
 } else {

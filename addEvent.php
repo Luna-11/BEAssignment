@@ -1,8 +1,6 @@
 <?php
 session_start();
 
-echo "<!-- DEBUG: Session ID: " . session_id() . " -->";
-echo "<!-- DEBUG: UserID: " . ($_SESSION['userID'] ?? 'NOT SET') . " -->";
 if (!isset($_SESSION['userID'])) {
     header("Location: logIn.php");
     exit;
