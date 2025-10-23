@@ -219,9 +219,26 @@
   </div>
 
   <script>
-    function closePopup() {
-      document.getElementById('registerPopup').style.display = 'none';
+  function closePopup() {
+    const popup = document.getElementById('registerPopup');
+    popup.style.display = 'none';
+
+    // Also hide the overlay container in index.php (joinUsPopup)
+    const overlay = document.getElementById('joinUsPopup');
+    if (overlay) {
+      overlay.classList.add('hidden');
     }
+
+    // Optionally re-enable page scrolling if it was disabled
+    document.body.style.overflow = 'auto';
+  }
+
+  window.onclick = function(event) {
+    const popup = document.getElementById('registerPopup');
+    if (event.target === popup) {
+      closePopup();
+    }
+  }
 
     window.onclick = function(event) {
       const popup = document.getElementById('registerPopup');

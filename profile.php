@@ -15,46 +15,6 @@ if (!isset($_SESSION['userID'])) {
 
 $userID = $_SESSION['userID'];
 
-
-$result = $conn->query("DESCRIBE users");
-if ($result) {
-
-    while ($row = $result->fetch_assoc()) {
-        echo "<!-- " . $row['Field'] . " (" . $row['Type'] . ") -->";
-    }
-} else {
-    echo "<!-- Could not describe users table -->";
-}
-
-// Check if we can find the user with different ID column names
-$possibleIdColumns = ['id', 'userID', 'user_id', 'userId'];
-$userFound = false;
-$actualIdColumn = '';
-
-foreach ($possibleIdColumns as $column) {
-    $checkSql = "SELECT COUNT(*) as count FROM users WHERE $column = ?";
-    if ($stmt = $conn->prepare($checkSql)) {
-        $stmt->bind_param("i", $userID);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $row = $result->fetch_assoc();
-        $stmt->close();
-        
-        if ($row['count'] > 0) {
-            $userFound = true;
-            $actualIdColumn = $column;
-            echo "<!-- Found user using column: $column -->";
-            break;
-        }
-    }
-}
-
-if (!$userFound) {
-    echo "<!-- Could not find user with any ID column -->";
-} else {
-    echo "<!-- Using ID column: $actualIdColumn -->";
-}
-
 // Initialize variables
 $message = '';
 $messageType = '';
@@ -87,7 +47,7 @@ if (isset($_SESSION['userID'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['profileImage'])) {
     $uploadResult = handleProfileImageUpload($_FILES['profileImage'], $userID);
     if ($uploadResult['success']) {
-        // Update user profile with new image path - FIXED: using 'id' instead of 'userID'
+        // Update user profile with new image path
         $updateSql = "UPDATE users SET profileImage = ? WHERE id = ?";
         $stmt = $conn->prepare($updateSql);
         if ($stmt) {
@@ -144,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account Dashboard - FoodFusion</title>
+    <title>My Profile - FoodFusion</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -174,40 +134,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
         }
     </script>
     <style>
-                    /* Ensure smooth transitions */
-            .tab-content {
-                display: none;
-                animation: fadeIn 0.3s ease-in-out;
-            }
-
-            .tab-content.active {
-                display: block;
-            }
-
-            @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(10px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-
-            /* Fix any layout shifting */
-            .sidebar-link {
-                transition: all 0.2s ease;
-            }
-
-            /* Prevent content flash */
-            #tab-content {
-                min-height: 600px;
-            }
         .active-tab {
             background-color: #f9f1e5;
             color: #7b4e48;
             border-left: 4px solid #C89091;
-        }
-        .tab-content {
-            display: none;
-        }
-        .tab-content.active {
-            display: block;
         }
         body {
             background-color: #f9f1e5;
@@ -222,20 +152,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
 
     <div class="flex">
         <!-- Sidebar -->
-            <div class="w-64 bg-lightest h-screen shadow-md fixed">
-                <div class="p-6 border-b border-light-pink">
-                    <div class="flex items-center space-x-3">
-                        <img src="<?php echo htmlspecialchars($user['profileImage'] ?? 'https://via.placeholder.com/50'); ?>" 
-                            alt="Profile" 
-                            class="w-12 h-12 rounded-full border-2 border-medium-pink"
-                            onerror="this.src='https://via.placeholder.com/50'">
-                        <div>
-                            <h2 class="font-bold text-text-color">
-                                <?php echo htmlspecialchars(($user['first_name'] ?? 'User') . ' ' . ($user['last_name'] ?? '')); ?>
-                            </h2>
-                        </div>
+        <div class="w-64 bg-lightest h-screen shadow-md fixed">
+            <div class="p-6 border-b border-light-pink">
+                <div class="flex items-center space-x-3">
+                    <img src="<?php echo htmlspecialchars($user['profileImage'] ?? 'https://via.placeholder.com/50'); ?>" 
+                        alt="Profile" 
+                        class="w-12 h-12 rounded-full border-2 border-medium-pink"
+                        onerror="this.src='https://via.placeholder.com/50'">
+                    <div>
+                        <h2 class="font-bold text-text-color">
+                            <?php echo htmlspecialchars(($user['first_name'] ?? 'User') . ' ' . ($user['last_name'] ?? '')); ?>
+                        </h2>
                     </div>
                 </div>
+            </div>
 
             <nav class="mt-6">
                 <div class="px-6 py-2">
@@ -243,30 +173,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
                 </div>
                 <ul>
                     <li>
-                        <a href="profile.php" class="sidebar-link flex items-center px-6 py-3 text-text-color hover:bg-light-pink transition-colors duration-200" data-tab="profile">
+                        <a href="profile.php" class="sidebar-link flex items-center px-6 py-3 text-text-color bg-light-pink active-tab">
                             <i class="fas fa-user-circle mr-3 text-primary"></i>
                             <span>My Profile</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="sidebar-link flex items-center px-6 py-3 text-text-color hover:bg-light-pink transition-colors duration-200" data-tab="posts">
+                        <a href="my-recipes.php" class="sidebar-link flex items-center px-6 py-3 text-text-color hover:bg-light-pink transition-colors duration-200">
                             <i class="fas fa-utensils mr-3 text-primary"></i>
                             <span>My Recipes</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="sidebar-link flex items-center px-6 py-3 text-text-color hover:bg-light-pink transition-colors duration-200" data-tab="recipes">
+                        <a href="saved-recipes.php" class="sidebar-link flex items-center px-6 py-3 text-text-color hover:bg-light-pink transition-colors duration-200">
                             <i class="fas fa-bookmark mr-3 text-primary"></i>
                             <span>Saved Recipes</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="sidebar-link flex items-center px-6 py-3 text-text-color hover:bg-light-pink transition-colors duration-200" data-tab="liked-posts">
+                        <a href="my-comments.php" class="sidebar-link flex items-center px-6 py-3 text-text-color hover:bg-light-pink transition-colors duration-200">
                             <i class="fas fa-heart mr-3 text-primary"></i>
                             <span>Comments</span>
                         </a>
-    </li>
-
+                    </li>
                 </ul>
                 
                 <div class="px-6 py-2 mt-6">
@@ -285,670 +214,94 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
 
         <!-- Main Content Area -->
         <div class="ml-64 flex-1 p-8">
-            <div id="tab-content">
-                <!-- Profile Tab -->
-
-            <div id="profile" class="tab-content active">
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h2 class="text-2xl font-bold text-text-color mb-6 flex items-center">
-                        <i class="fas fa-user-circle mr-2 text-primary"></i> My Profile
-                    </h2>
-                    
-                    <?php if (!empty($message)): ?>
-                        <div class="mb-4 p-4 border rounded <?php echo $messageType === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700'; ?>">
-                            <?php echo htmlspecialchars($message); ?>
-                        </div>
-                    <?php endif; ?>
-                    
-                    <div class="flex flex-col md:flex-row gap-8">
-                        <!-- Profile Picture + Info -->
-                        <div class="md:w-1/3 flex flex-col items-center">
-                            <div class="relative mb-4">
-                                <img src="<?php echo htmlspecialchars($user['profileImage'] ?? 'https://via.placeholder.com/200'); ?>" 
-                                    alt="Profile Picture" 
-                                    class="w-48 h-48 rounded-full object-cover border-4 border-primary shadow-lg"
-                                    onerror="this.src='https://via.placeholder.com/200'">
-                                
-                                <!-- Profile Image Upload Form -->
-                                <form method="POST" enctype="multipart/form-data" class="absolute bottom-2 right-2">
-                                    <input type="file" id="profileImageInput" name="profileImage" accept="image/*" 
-                                        class="hidden" onchange="this.form.submit()">
-                                    <button type="button" onclick="document.getElementById('profileImageInput').click()" 
-                                            class="bg-primary text-white p-2 rounded-full hover:bg-medium-pink transition-colors">
-                                        <i class="fas fa-camera"></i>
-                                    </button>
-                                </form>
-                            </div>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold text-text-color mb-6 flex items-center">
+                    <i class="fas fa-user-circle mr-2 text-primary"></i> My Profile
+                </h2>
+                
+                <?php if (!empty($message)): ?>
+                    <div class="mb-4 p-4 border rounded <?php echo $messageType === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700'; ?>">
+                        <?php echo htmlspecialchars($message); ?>
+                    </div>
+                <?php endif; ?>
+                
+                <div class="flex flex-col md:flex-row gap-8">
+                    <!-- Profile Picture + Info -->
+                    <div class="md:w-1/3 flex flex-col items-center">
+                        <div class="relative mb-4">
+                            <img src="<?php echo htmlspecialchars($user['profileImage'] ?? 'https://via.placeholder.com/200'); ?>" 
+                                alt="Profile Picture" 
+                                class="w-48 h-48 rounded-full object-cover border-4 border-primary shadow-lg"
+                                onerror="this.src='https://via.placeholder.com/200'">
                             
-                            <h3 class="text-xl font-bold text-text-color">
-                                <?php echo htmlspecialchars(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? '')); ?>
-                            </h3>
-                                                    
-                        <div class="mt-4 flex space-x-2">
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-light-pink text-text-color">
-                                <i class="fas fa-utensils mr-1"></i> 
-                                <?php echo $userRecipeCount; ?> Recipe<?php echo $userRecipeCount != 1 ? 's' : ''; ?>
-                            </span>
-                        </div>
+                            <!-- Profile Image Upload Form -->
+                            <form method="POST" enctype="multipart/form-data" class="absolute bottom-2 right-2">
+                                <input type="file" id="profileImageInput" name="profileImage" accept="image/*" 
+                                    class="hidden" onchange="this.form.submit()">
+                                <button type="button" onclick="document.getElementById('profileImageInput').click()" 
+                                        class="bg-primary text-white p-2 rounded-full hover:bg-medium-pink transition-colors">
+                                    <i class="fas fa-camera"></i>
+                                </button>
+                            </form>
                         </div>
                         
-                        <!-- Profile Form -->
-                        <div class="md:w-2/3">
-                            <form method="POST" class="space-y-4">
-                                <input type="hidden" name="update_profile" value="1">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="firstName" class="block text-sm font-medium text-text-color">First Name</label>
-                                        <input type="text" id="firstName" name="firstName" 
-                                            value="<?php echo htmlspecialchars($user['first_name'] ?? ''); ?>"
-                                            class="mt-1 block w-full px-3 py-2 border border-light-pink rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-light-pink"
-                                            required>
-                                    </div>
-                                    <div>
-                                        <label for="lastName" class="block text-sm font-medium text-text-color">Last Name</label>
-                                        <input type="text" id="lastName" name="lastName" 
-                                            value="<?php echo htmlspecialchars($user['last_name'] ?? ''); ?>"
-                                            class="mt-1 block w-full px-3 py-2 border border-light-pink rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-light-pink"
-                                            required>
-                                    </div>
-                                </div>
-                                
+                        <h3 class="text-xl font-bold text-text-color">
+                            <?php echo htmlspecialchars(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? '')); ?>
+                        </h3>
+                                                
+                    <div class="mt-4 flex space-x-2">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-light-pink text-text-color">
+                            <i class="fas fa-utensils mr-1"></i> 
+                            <?php echo $userRecipeCount; ?> Recipe<?php echo $userRecipeCount != 1 ? 's' : ''; ?>
+                        </span>
+                    </div>
+                    </div>
+                    
+                    <!-- Profile Form -->
+                    <div class="md:w-2/3">
+                        <form method="POST" class="space-y-4">
+                            <input type="hidden" name="update_profile" value="1">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label for="email" class="block text-sm font-medium text-text-color">Email Address</label>
-                                    <input type="email" id="email" name="email" 
-                                        value="<?php echo htmlspecialchars($user['mail'] ?? ''); ?>"
+                                    <label for="firstName" class="block text-sm font-medium text-text-color">First Name</label>
+                                    <input type="text" id="firstName" name="firstName" 
+                                        value="<?php echo htmlspecialchars($user['first_name'] ?? ''); ?>"
                                         class="mt-1 block w-full px-3 py-2 border border-light-pink rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-light-pink"
                                         required>
                                 </div>
-                                
-                                <div class="pt-4">
-                                    <button type="submit" 
-                                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-primary hover:bg-medium-pink focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
-                                        <i class="fas fa-save mr-2"></i> Update Profile
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-<!-- My Recipes Tab -->
-<div id="posts" class="tab-content">
-    <div class="bg-lightest rounded-lg shadow-md p-6">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-primary flex items-center">
-                <i class="fas fa-utensils mr-2"></i> My Recipes
-            </h2>
-        </div>
-        
-        <?php
-        // Fetch user's recipes from the database
-        $userRecipes = [];
-        $recipeCount = 0;
-        
-        if (isset($_SESSION['userID'])) {
-            $userID = $_SESSION['userID'];
-            
-            // SIMPLIFIED QUERY - Let's start with basic recipe data first
-            $recipeQuery = "
-                SELECT 
-                    r.recipeID,
-                    r.recipeName,
-                    r.difficultID,
-                    r.userID,
-                    r.image,
-                    r.text,
-                    r.recipeDescription,
-                    r.date,
-                    r.cuisineTypeID,
-                    r.foodTypeID,
-                    r.dietaryID,
-                    r.ingredient,
-                    d.difficultyName,
-                    c.cuisineType,
-                    f.foodType,
-                    dp.dietName,
-                    (SELECT COUNT(*) FROM likes WHERE recipeID = r.recipeID) as likeCount
-                FROM recipe r
-                LEFT JOIN difficultyLev d ON r.difficultID = d.difficultyID
-                LEFT JOIN cuisineType c ON r.cuisineTypeID = c.cuisineTypeID
-                LEFT JOIN foodType f ON r.foodTypeID = f.foodTypeID
-                LEFT JOIN dietPreferences dp ON r.dietaryID = dp.dietID
-                WHERE r.userID = ?
-                ORDER BY r.date DESC
-            ";
-            
-            $stmt = $conn->prepare($recipeQuery);
-            if ($stmt) {
-                $stmt->bind_param("i", $userID);
-                if ($stmt->execute()) {
-                    $result = $stmt->get_result();
-                    
-                    while ($row = $result->fetch_assoc()) {
-                        $userRecipes[] = $row;
-                    }
-                    $recipeCount = count($userRecipes);
-                    
-                    // DEBUG: Show what we found
-                    echo "<!-- Debug: User recipes array count = $recipeCount -->";
-                    if ($recipeCount > 0) {
-                        echo "<!-- Debug: First recipe name = " . htmlspecialchars($userRecipes[0]['recipeName']) . " -->";
-                        echo "<!-- Debug: First recipe userID = " . ($userRecipes[0]['userID'] ?? 'NULL') . " -->";
-                    }
-                } else {
-                    echo "<!-- Debug: Query execution failed: " . $stmt->error . " -->";
-                    
-                    // Fallback: Try simple query without joins
-                    $fallbackQuery = "SELECT * FROM recipe WHERE userID = ? ORDER BY date DESC";
-                    $fallbackStmt = $conn->prepare($fallbackQuery);
-                    if ($fallbackStmt) {
-                        $fallbackStmt->bind_param("i", $userID);
-                        $fallbackStmt->execute();
-                        $fallbackResult = $fallbackStmt->get_result();
-                        
-                        while ($row = $fallbackResult->fetch_assoc()) {
-                            $userRecipes[] = $row;
-                        }
-                        $recipeCount = count($userRecipes);
-                        $fallbackStmt->close();
-                        echo "<!-- Debug: Fallback query found $recipeCount recipes -->";
-                    }
-                }
-                $stmt->close();
-            } else {
-                echo "<!-- Debug: Failed to prepare recipe query: " . $conn->error . " -->";
-                
-                // Final fallback: Direct query
-                $directQuery = "SELECT * FROM recipe WHERE userID = $userID ORDER BY date DESC";
-                $directResult = $conn->query($directQuery);
-                if ($directResult) {
-                    while ($row = $directResult->fetch_assoc()) {
-                        $userRecipes[] = $row;
-                    }
-                    $recipeCount = count($userRecipes);
-                    echo "<!-- Debug: Direct query found $recipeCount recipes -->";
-                }
-            }
-        }
-        ?>
-        
-        <div class="mb-4">
-            <p class="text-text-color">
-                <?php echo $recipeCount; ?> recipe<?php echo $recipeCount != 1 ? 's' : ''; ?> found
-            </p>
-        </div>
-        
-        <div class="space-y-6">
-            <?php if (empty($userRecipes)): ?>
-                <div class="text-center py-12">
-                    <div class="text-6xl text-light-pink mb-4">
-                        <i class="fas fa-utensils"></i>
-                    </div>
-                    <h3 class="text-xl font-medium text-text-color mb-2">No recipes yet</h3>
-                    <p class="text-medium-gray mb-6">Start sharing your culinary creations with the community!</p>
-                    <a href="upload-recipe.php" class="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-base font-medium rounded-lg text-white bg-primary hover:bg-medium-pink focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
-                        <i class="fas fa-plus mr-2"></i> Create Your First Recipe
-                    </a>
-                </div>
-            <?php else: ?>
-                <?php foreach ($userRecipes as $recipe): ?>
-                    <div class="border border-light-pink rounded-lg p-4 hover:shadow-md transition-shadow">
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <!-- Recipe Image -->
-                            <div class="md:w-1/4">
-                                <?php if (!empty($recipe['image']) && $recipe['image'] != 'uploads/'): ?>
-                                    <img src="<?php echo htmlspecialchars($recipe['image']); ?>" 
-                                         alt="<?php echo htmlspecialchars($recipe['recipeName']); ?>" 
-                                         class="w-full h-40 object-cover rounded-lg"
-                                         onerror="this.src='https://via.placeholder.com/300x200?text=Recipe+Image'">
-                                <?php else: ?>
-                                    <div class="h-40 bg-gradient-to-r from-primary to-medium-pink rounded-lg flex items-center justify-center text-white text-4xl">
-                                        <i class="fas fa-utensils"></i>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-                            
-                            <!-- Recipe Details -->
-                            <div class="md:w-3/4">
-                                <div class="flex justify-between items-start">
-                                    <h3 class="text-lg font-medium text-text-color">
-                                        <?php echo htmlspecialchars($recipe['recipeName']); ?>
-                                    </h3>
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-light-pink text-text-color">
-                                        <?php 
-                                        if (!empty($recipe['difficultyName'])) {
-                                            echo htmlspecialchars($recipe['difficultyName']);
-                                        } elseif (!empty($recipe['difficultID'])) {
-                                            echo "Level " . htmlspecialchars($recipe['difficultID']);
-                                        } else {
-                                            echo "Not specified";
-                                        }
-                                        ?>
-                                    </span>
-                                </div>
-                                
-                                <p class="text-sm text-medium-gray mt-1">
-                                    Posted on <?php echo date('F j, Y', strtotime($recipe['date'])); ?>
-                                </p>
-                                
-                                <?php if (!empty($recipe['recipeDescription'])): ?>
-                                    <p class="mt-2 text-text-color">
-                                        <?php echo htmlspecialchars(substr($recipe['recipeDescription'], 0, 150)); ?>
-                                        <?php if (strlen($recipe['recipeDescription']) > 150): ?>...<?php endif; ?>
-                                    </p>
-                                <?php elseif (!empty($recipe['text'])): ?>
-                                    <p class="mt-2 text-text-color">
-                                        <?php echo htmlspecialchars(substr($recipe['text'], 0, 150)); ?>
-                                        <?php if (strlen($recipe['text']) > 150): ?>...<?php endif; ?>
-                                    </p>
-                                <?php endif; ?>                               
-                            </div>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
-        </div>
-    </div>
-</div>
-
-<script>
-function confirmDelete(recipeId) {
-    if (confirm('Are you sure you want to delete this recipe? This action cannot be undone.')) {
-        // Send AJAX request to delete the recipe
-        fetch('delete-recipe.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: 'recipe_id=' + recipeId
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Reload the page to show updated list
-                location.reload();
-            } else {
-                alert('Error deleting recipe: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error deleting recipe');
-        });
-    }
-}
-</script>
-
-                <!-- Saved Recipes Tab -->
-<!-- Saved Recipes Tab -->
-<div id="recipes" class="tab-content">
-    <div class="bg-lightest rounded-lg shadow-md p-6">
-        <h2 class="text-2xl font-bold text-primary mb-6 flex items-center">
-            <i class="fas fa-bookmark mr-2"></i> Saved Recipes
-        </h2>
-        
-        <?php
-        // Fetch saved recipes from database
-        $savedRecipes = [];
-        if (isset($_SESSION['userID'])) {
-            $userID = $_SESSION['userID'];
-            
-            $savedQuery = "
-                SELECT 
-                    r.recipeID,
-                    r.recipeName,
-                    r.image,
-                    r.recipeDescription,
-                    r.date,
-                    r.difficultID,
-                    r.userID,
-                    d.difficultyName,
-                    c.cuisineType,
-                    u.first_name,
-                    u.last_name,
-                    sr.saved_at
-                FROM saved_recipes sr
-                JOIN recipe r ON sr.recipe_id = r.recipeID
-                LEFT JOIN difficultyLev d ON r.difficultID = d.difficultyID
-                LEFT JOIN cuisineType c ON r.cuisineTypeID = c.cuisineTypeID
-                LEFT JOIN users u ON r.userID = u.id
-                WHERE sr.user_id = ?
-                ORDER BY sr.saved_at DESC
-            ";
-            
-            $stmt = $conn->prepare($savedQuery);
-            if ($stmt) {
-                $stmt->bind_param("i", $userID);
-                if ($stmt->execute()) {
-                    $result = $stmt->get_result();
-                    while ($row = $result->fetch_assoc()) {
-                        $savedRecipes[] = $row;
-                    }
-                }
-                $stmt->close();
-            }
-        }
-        ?>
-        
-        <div class="mb-4">
-            <p class="text-text-color">
-                <?php echo count($savedRecipes); ?> saved recipe<?php echo count($savedRecipes) != 1 ? 's' : ''; ?>
-            </p>
-        </div>
-        
-        <div class="space-y-6">
-            <?php if (empty($savedRecipes)): ?>
-                <div class="text-center py-12">
-                    <div class="text-6xl text-light-pink mb-4">
-                        <i class="fas fa-bookmark"></i>
-                    </div>
-                    <h3 class="text-xl font-medium text-text-color mb-2">No saved recipes yet</h3>
-                    <p class="text-medium-gray mb-6">Start exploring recipes and save your favorites!</p>
-                    <a href="recipe-collection.php" class="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-base font-medium rounded-lg text-white bg-primary hover:bg-medium-pink focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
-                        <i class="fas fa-search mr-2"></i> Browse Recipes
-                    </a>
-                </div>
-            <?php else: ?>
-                <?php foreach ($savedRecipes as $recipe): ?>
-                    <div class="border border-light-pink rounded-lg p-4 hover:shadow-md transition-shadow">
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <!-- Recipe Image -->
-                            <div class="md:w-1/4">
-                                <?php if (!empty($recipe['image']) && $recipe['image'] != 'uploads/'): ?>
-                                    <img src="<?php echo htmlspecialchars($recipe['image']); ?>" 
-                                         alt="<?php echo htmlspecialchars($recipe['recipeName']); ?>" 
-                                         class="w-full h-40 object-cover rounded-lg"
-                                         onerror="this.src='https://via.placeholder.com/300x200?text=Recipe+Image'">
-                                <?php else: ?>
-                                    <div class="h-40 bg-gradient-to-r from-primary to-medium-pink rounded-lg flex items-center justify-center text-white text-4xl">
-                                        <i class="fas fa-utensils"></i>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-                            
-                            <!-- Recipe Details -->
-                            <div class="md:w-3/4">
-                                <div class="flex justify-between items-start">
-                                    <h3 class="text-lg font-medium text-text-color">
-                                        <?php echo htmlspecialchars($recipe['recipeName']); ?>
-                                    </h3>
-                                    <div class="flex items-center space-x-2">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-light-pink text-text-color">
-                                            <?php echo htmlspecialchars($recipe['difficultyName'] ?? 'Not specified'); ?>
-                                        </span>
-                                        <form method="POST" action="recipe-detail.php?id=<?php echo $recipe['recipeID']; ?>" class="inline">
-                                            <input type="hidden" name="save_action" value="unsave">
-                                            <button type="submit" class="text-primary hover:text-medium-pink transition-colors" title="Remove from saved">
-                                                <i class="fas fa-bookmark"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                                
-                                <p class="text-sm text-medium-gray mt-1">
-                                    By <?php echo htmlspecialchars($recipe['first_name'] . ' ' . $recipe['last_name']); ?> • 
-                                    Saved on <?php echo date('F j, Y', strtotime($recipe['saved_at'])); ?>
-                                </p>
-                                
-                                <?php if (!empty($recipe['recipeDescription'])): ?>
-                                    <p class="mt-2 text-text-color">
-                                        <?php echo htmlspecialchars(substr($recipe['recipeDescription'], 0, 150)); ?>
-                                        <?php if (strlen($recipe['recipeDescription']) > 150): ?>...<?php endif; ?>
-                                    </p>
-                                <?php endif; ?>
-                                
-                                <div class="mt-3 flex justify-between items-center">
-                                    <span class="inline-flex items-center text-sm text-medium-gray">
-                                        <i class="fas fa-utensils mr-1"></i> 
-                                        <?php echo htmlspecialchars($recipe['cuisineType'] ?? 'Unknown cuisine'); ?>
-                                    </span>
-                                    <a href="reDetail.php?id=<?php echo $recipe['recipeID']; ?>" 
-                                       class="text-sm text-primary hover:text-medium-pink transition-colors">
-                                        View Recipe <i class="fas fa-arrow-right ml-1"></i>
-                                    </a>
+                                <div>
+                                    <label for="lastName" class="block text-sm font-medium text-text-color">Last Name</label>
+                                    <input type="text" id="lastName" name="lastName" 
+                                        value="<?php echo htmlspecialchars($user['last_name'] ?? ''); ?>"
+                                        class="mt-1 block w-full px-3 py-2 border border-light-pink rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-light-pink"
+                                        required>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
-        </div>
-    </div>
-</div>
-
-                <!-- Comments Tab -->
-                <div id="liked-posts" class="tab-content">
-                    <div class="bg-lightest rounded-lg shadow-md p-6">
-                        <h2 class="text-2xl font-bold text-primary mb-6 flex items-center">
-                            <i class="fas fa-comments mr-2"></i> My Comments
-                        </h2>
-                        
-                        <?php
-                        // Fetch user's comments from the database
-                        $userComments = [];
-                        $commentCount = 0;
-                        
-                        if (isset($_SESSION['userID'])) {
-                            $userID = $_SESSION['userID'];
                             
-                            // Query to get user's comments with community post information
-                            $commentsQuery = "
-                                SELECT 
-                                    c.commentID,
-                                    c.comment,
-                                    c.commentDate,
-                                    c.communityID,
-                                    co.title as postTitle,
-                                    co.content as postContent,
-                                    co.image as postImage,
-                                    co.date as postDate,
-                                    u.first_name,
-                                    u.last_name
-                                FROM comment c
-                                INNER JOIN community co ON c.communityID = co.communityID
-                                LEFT JOIN users u ON co.userID = u.id
-                                WHERE c.userID = ?
-                                ORDER BY c.commentDate DESC
-                            ";
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-text-color">Email Address</label>
+                                <input type="email" id="email" name="email" 
+                                    value="<?php echo htmlspecialchars($user['mail'] ?? ''); ?>"
+                                    class="mt-1 block w-full px-3 py-2 border border-light-pink rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-light-pink"
+                                    required>
+                            </div>
                             
-                            $stmt = $conn->prepare($commentsQuery);
-                            if ($stmt) {
-                                $stmt->bind_param("i", $userID);
-                                if ($stmt->execute()) {
-                                    $result = $stmt->get_result();
-                                    
-                                    while ($row = $result->fetch_assoc()) {
-                                        $userComments[] = $row;
-                                    }
-                                    $commentCount = count($userComments);
-                                    
-                                    // DEBUG: Show what we found
-                                    echo "<!-- Debug: User comments array count = $commentCount -->";
-                                    if ($commentCount > 0) {
-                                        echo "<!-- Debug: First comment = " . htmlspecialchars(substr($userComments[0]['comment'], 0, 50)) . " -->";
-                                        echo "<!-- Debug: First post title = " . htmlspecialchars($userComments[0]['postTitle'] ?? 'No title') . " -->";
-                                    }
-                                } else {
-                                    echo "<!-- Debug: Query execution failed: " . $stmt->error . " -->";
-                                    
-                                    // Fallback: Try simple query without joins
-                                    $fallbackQuery = "SELECT * FROM comment WHERE userID = ? ORDER BY commentDate DESC";
-                                    $fallbackStmt = $conn->prepare($fallbackQuery);
-                                    if ($fallbackStmt) {
-                                        $fallbackStmt->bind_param("i", $userID);
-                                        $fallbackStmt->execute();
-                                        $fallbackResult = $fallbackStmt->get_result();
-                                        
-                                        while ($row = $fallbackResult->fetch_assoc()) {
-                                            $userComments[] = $row;
-                                        }
-                                        $commentCount = count($userComments);
-                                        $fallbackStmt->close();
-                                        echo "<!-- Debug: Fallback query found $commentCount comments -->";
-                                    }
-                                }
-                                $stmt->close();
-                            } else {
-                                echo "<!-- Debug: Failed to prepare comments query: " . $conn->error . " -->";
-                                
-                                // Final fallback: Direct query
-                                $directQuery = "SELECT * FROM comment WHERE userID = $userID ORDER BY commentDate DESC";
-                                $directResult = $conn->query($directQuery);
-                                if ($directResult) {
-                                    while ($row = $directResult->fetch_assoc()) {
-                                        $userComments[] = $row;
-                                    }
-                                    $commentCount = count($userComments);
-                                    echo "<!-- Debug: Direct query found $commentCount comments -->";
-                                }
-                            }
-                        }
-                        ?>
-                        
-                        <div class="mb-4">
-                            <p class="text-text-color">
-                                <?php echo $commentCount; ?> comment<?php echo $commentCount != 1 ? 's' : ''; ?> found
-                            </p>
-                        </div>
-                        
-                        <div class="space-y-6">
-                            <?php if (empty($userComments)): ?>
-                                <div class="text-center py-12">
-                                    <div class="text-6xl text-light-pink mb-4">
-                                        <i class="fas fa-comments"></i>
-                                    </div>
-                                    <h3 class="text-xl font-medium text-text-color mb-2">No comments yet</h3>
-                                    <p class="text-medium-gray mb-6">Start engaging with the community by leaving comments on posts!</p>
-                                    <a href="community.php" class="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-base font-medium rounded-lg text-white bg-primary hover:bg-medium-pink focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
-                                        <i class="fas fa-users mr-2"></i> Visit Community
-                                    </a>
-                                </div>
-                            <?php else: ?>
-                                <?php foreach ($userComments as $comment): ?>
-                                    <div class="border border-light-pink rounded-lg p-4 hover:shadow-md transition-shadow">
-                                        <div class="flex flex-col md:flex-row gap-4">
-                                            <!-- Post Image -->
-                                            <div class="md:w-1/4">
-                                                <?php if (!empty($comment['postImage']) && $comment['postImage'] != 'uploads/post'): ?>
-                                                    <img src="<?php echo htmlspecialchars($comment['postImage']); ?>" 
-                                                        alt="<?php echo htmlspecialchars($comment['postTitle'] ?? 'Community Post'); ?>" 
-                                                        class="w-full h-32 object-cover rounded-lg"
-                                                        onerror="this.src='https://via.placeholder.com/300x200?text=Community+Post'">
-                                                <?php else: ?>
-                                                    <div class="h-32 bg-gradient-to-r from-primary to-medium-pink rounded-lg flex items-center justify-center text-white text-2xl">
-                                                        <i class="fas fa-users"></i>
-                                                    </div>
-                                                <?php endif; ?>
-                                            </div>
-                                            
-                                            <!-- Comment Details -->
-                                            <div class="md:w-3/4">
-                                                <div class="flex justify-between items-start">
-                                                    <div>
-                                                        <h3 class="text-lg font-medium text-text-color">
-                                                            <?php 
-                                                            if (!empty($comment['postTitle'])) {
-                                                                echo htmlspecialchars($comment['postTitle']);
-                                                            } else {
-                                                                echo "Community Post #" . htmlspecialchars($comment['communityID']);
-                                                            }
-                                                            ?>
-                                                        </h3>
-                                                        <p class="text-sm text-medium-gray mt-1">
-                                                            <?php if (!empty($comment['first_name'])): ?>
-                                                                Post by <?php echo htmlspecialchars($comment['first_name'] . ' ' . $comment['last_name']); ?> • 
-                                                            <?php endif; ?>
-                                                            Commented on <?php echo date('F j, Y \a\t g:i A', strtotime($comment['commentDate'])); ?>
-                                                        </p>
-                                                    </div>
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-light-pink text-text-color">
-                                                        Community Post
-                                                    </span>
-                                                </div>
-                                                
-                                                <!-- Comment Content -->
-                                                <div class="mt-3 p-3 bg-white rounded-lg border border-light-pink">
-                                                    <p class="text-text-color">
-                                                        <?php echo htmlspecialchars($comment['comment']); ?>
-                                                    </p>
-                                                </div>
-                                
-                                            </div>
-                                        </div>
-                                    </div>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </div>
+                            <div class="pt-4">
+                                <button type="submit" 
+                                        class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-primary hover:bg-medium-pink focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+                                    <i class="fas fa-save mr-2"></i> Update Profile
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-<script>
+    <script>
+    // Logout button functionality
     document.addEventListener('DOMContentLoaded', function() {
-        // Get all sidebar links
-        const sidebarLinks = document.querySelectorAll('.sidebar-link');
-        const tabContents = document.querySelectorAll('.tab-content');
-        
-        // Function to switch tabs
-        function switchTab(targetTab) {
-            // Remove active class from all links and contents
-            sidebarLinks.forEach(link => {
-                link.classList.remove('active-tab');
-            });
-            
-            tabContents.forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Add active class to clicked link
-            const activeLink = document.querySelector(`.sidebar-link[data-tab="${targetTab}"]`);
-            if (activeLink) {
-                activeLink.classList.add('active-tab');
-            }
-            
-            // Show the target tab content
-            const targetContent = document.getElementById(targetTab);
-            if (targetContent) {
-                targetContent.classList.add('active');
-            }
-        }
-        
-        // Add click event listeners to sidebar links
-        sidebarLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                const targetTab = this.getAttribute('data-tab');
-                switchTab(targetTab);
-                
-                // Update URL without page reload
-                history.pushState(null, null, `#${targetTab}`);
-            });
-        });
-        
-        // Handle browser back/forward buttons
-        window.addEventListener('popstate', function() {
-            const hash = window.location.hash.substring(1);
-            if (hash) {
-                switchTab(hash);
-            }
-        });
-        
-        // Check URL hash on page load
-        const initialHash = window.location.hash.substring(1);
-        if (initialHash && document.getElementById(initialHash)) {
-            switchTab(initialHash);
-        } else {
-            // Set the first tab as active by default
-            if (sidebarLinks.length > 0) {
-                const firstTab = sidebarLinks[0].getAttribute('data-tab');
-                switchTab(firstTab);
-            }
-        }
-        
-        // Logout button functionality
         const logoutBtn = document.getElementById('logout-btn');
         if (logoutBtn) {
             logoutBtn.addEventListener('click', function(e) {
@@ -959,6 +312,6 @@ function confirmDelete(recipeId) {
             });
         }
     });
-</script>
+    </script>
 </body>
 </html>

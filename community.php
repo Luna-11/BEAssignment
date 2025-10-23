@@ -383,43 +383,55 @@ if (!empty($posts)) {
         </section>
     </div>
 
-    <!-- Comments Modal -->
-    <div id="commentsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] overflow-hidden">
-            <div class="p-6 border-b border-border">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-2xl font-bold text-text">Comments</h2>
-                    <button id="closeComments" class="text-light-gray text-2xl hover:text-black">&times;</button>
-                </div>
-                <div id="commentsPostTitle" class="text-sm text-medium-gray mt-2"></div>
-            </div>
-            
-            <!-- Comments List -->
-            <div id="commentsList" class="p-6 overflow-y-auto max-h-96">
-                <div class="text-center text-medium-gray">Loading comments...</div>
-            </div>
-            
-            <!-- Add Comment Form -->
-            <div class="p-6 border-t border-border">
-                <form id="addCommentForm" class="space-y-4">
-                    <input type="hidden" id="currentCommunityID" name="communityID">
-                    <div>
-                        <textarea id="commentText" name="comment" rows="3" 
-                                  placeholder="Write your comment..." required
-                                  class="w-full p-3 border-2 border-border rounded focus:border-primary outline-none"
-                                  maxlength="300"></textarea>
-                        <div class="text-sm text-medium-gray mt-1 flex justify-between">
-                            <span>Max 300 characters</span>
-                            <span id="charCount">0/300</span>
-                        </div>
-                    </div>
-                    <button type="submit" class="w-full bg-primary text-white p-3 rounded hover:bg-medium-pink font-semibold transition-colors">
-                        Post Comment
-                    </button>
-                </form>
-            </div>
-        </div>
+<!-- Comments Modal -->
+<div id="commentsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+  <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden">
+    
+    <!-- Header -->
+    <div class="p-6 border-b border-border flex justify-between items-center">
+      <div>
+        <h2 class="text-2xl font-bold text-text">Comments</h2>
+        <div id="commentsPostTitle" class="text-sm text-medium-gray mt-2"></div>
+      </div>
+      <button id="closeComments" class="text-light-gray text-2xl hover:text-black">&times;</button>
     </div>
+
+    <!-- Scrollable Comments List -->
+    <div id="commentsList" class="flex-1 p-6 overflow-y-auto bg-light-yellow">
+      <div class="text-center text-medium-gray">Loading comments...</div>
+    </div>
+
+    <!-- Add Comment Form -->
+    <div class="p-6 border-t border-border bg-white">
+      <form id="addCommentForm" class="space-y-4">
+        <input type="hidden" id="currentCommunityID" name="communityID">
+
+        <div>
+          <textarea 
+            id="commentText" 
+            name="comment" 
+            rows="3" 
+            placeholder="Write your comment..." 
+            required
+            class="w-full p-3 border-2 border-border rounded focus:border-primary outline-none resize-none"
+            maxlength="300"></textarea>
+
+          <div class="text-sm text-medium-gray mt-1 flex justify-between">
+            <span>Max 300 characters</span>
+            <span id="charCount">0/300</span>
+          </div>
+        </div>
+
+        <button 
+          type="submit" 
+          class="w-full bg-primary text-white p-3 rounded hover:bg-medium-pink font-semibold transition-colors">
+          Post Comment
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
 
 
     <!-- Include the external JavaScript files -->

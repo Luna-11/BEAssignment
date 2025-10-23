@@ -105,10 +105,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 if ($ext !== 'pdf') {
                     $errors[] = "Only PDF files are allowed";
                 } else {
-                    // Check file size (10MB max)
-                    $maxSize = 10 * 1024 * 1024;
+                    // Check file size (30MB max) - CHANGED FROM 10MB TO 30MB
+                    $maxSize = 30 * 1024 * 1024;
                     if ($pdfFile["size"] > $maxSize) {
-                        $errors[] = "PDF file must be less than 10MB";
+                        $errors[] = "PDF file must be less than 30MB";
                     } else {
                         $uniquePdfName = uniqid() . "_" . time() . ".pdf";
                         $pdfDest = $pdfUploadPath . $uniquePdfName;
@@ -320,7 +320,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="mb-6">
           <label for="PDFfile" class="block font-semibold text-text-color mb-2">PDF (optional)</label>
           <input class="w-full p-3 border border-border-color rounded-lg bg-white text-text-color file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-light-pink file:text-text-color" type="file" id="PDFfile" name="PDFfile" accept=".pdf,application/pdf">
-          <div class="text-medium-gray opacity-90 text-sm mt-1">Only PDF up to 10MB.</div>
+          <div class="text-medium-gray opacity-90 text-sm mt-1">Only PDF up to 30MB.</div> <!-- Updated text -->
         </div>
 
         <div class="mb-6">

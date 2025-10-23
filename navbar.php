@@ -568,10 +568,10 @@
                     </a>
                     <ul class="dropdown-menu">
                         <li><a href="profile.php">My Profile</a></li>
-                        <li><a href="my_recipes.php">My Recipes</a></li>
-                        <li><a href="saved_recipes.php">Saved Recipes</a></li>
-                        <li><a href="settings.php">Settings</a></li>
-                        <li><a href="logIn.php">Log Out</a></li>
+                        <li><a href="my-recipes.php">My Recipes</a></li>
+                        <li><a href="saved-recipes.php">Saved Recipes</a></li>
+                        <li><a href="my-comments.php">Comments</a></li>
+                        <li><a href="logout.php">Log Out</a></li>
                     </ul>
                 </li>
             </ul>
@@ -587,12 +587,14 @@
                             <i class="fa-solid fa-caret-down dropdown-indicator"></i>
                         </div>
                     </a>
+
                     <ul class="dropdown-menu">
                         <li><a href="AddRecipe.php">Recipe Upload</a></li>
-                        <li><a href="addEvent.php">Event Upload</a></li>
-                        <li><a href="community.php">Community Post Upload</a></li>
-                        <li><a href="addRes.php">Resource Upload</a></li>
+                        <li><a href="event_upload.html">Event Upload</a></li>
+                        <li><a href="community_upload.html">Community Post Upload</a></li>
+                          <li><a href="addRes.php">Resource upload</a></li>
                     </ul>
+
                 </div>
                 <div class="dropdown profile-dropdown" id="desktopProfileDropdown">
                     <a href="#">
@@ -606,9 +608,9 @@
                     </a>
                     <ul class="dropdown-menu">
                         <li><a href="profile.php">My Profile</a></li>
-                        <li><a href="my_recipes.php">My Recipes</a></li>
-                        <li><a href="saved_recipes.php">Saved Recipes</a></li>
-                        <li><a href="settings.php">Settings</a></li>
+                        <li><a href="my-recipes.php">My Recipes</a></li>
+                        <li><a href="saved-recipes.php">Saved Recipes</a></li>
+                        <li><a href="my-comments.php">Comments</a></li>
                         <li><a href="logout.php">Log Out</a></li>
                     </ul>
                 </div>
