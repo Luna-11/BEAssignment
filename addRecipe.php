@@ -76,12 +76,6 @@ $dietPreferences = getDietPref($conn);
             pointer-events: none;
         }
         
-        /* Style for multiple select */
-        select[multiple] {
-            height: auto;
-            min-height: 120px;
-        }
-        
         /* Style for ingredients textarea */
         #ingredients {
             min-height: 200px;
@@ -222,28 +216,26 @@ $dietPreferences = getDietPref($conn);
 
                     <div class="mb-6">
                         <label for="foodType" class="block font-semibold mb-2">Food Type *</label>
-                        <select id="foodType" name="foodType[]" required multiple class="w-full p-3 border border-border-color rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
-                            <option value="">Select food type(s)</option>
+                        <select id="foodType" name="foodType" required class="w-full p-3 border border-border-color rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
+                            <option value="">Select food type</option>
                             <?php foreach ($foodTypes as $foodType): ?>
                                 <option value="<?php echo htmlspecialchars($foodType); ?>">
                                     <?php echo htmlspecialchars($foodType); ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
-                        <div class="text-medium-gray text-sm mt-1">Hold Ctrl/Cmd to select multiple types</div>
                     </div>
 
                     <div class="mb-6">
-                        <label for="dietPref" class="block font-semibold mb-2">Diet Preferences</label>
-                        <select id="dietPref" name="dietPref[]" multiple class="w-full p-3 border border-border-color rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
-                            <option value="">Select diet preference(s)</option>
+                        <label for="dietPref" class="block font-semibold mb-2">Diet Preferences *</label>
+                        <select id="dietPref" name="dietPref" required class="w-full p-3 border border-border-color rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
+                            <option value="">Select diet preference</option>
                             <?php foreach ($dietPreferences as $diet): ?>
                                 <option value="<?php echo htmlspecialchars($diet); ?>">
                                     <?php echo htmlspecialchars($diet); ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
-                        <div class="text-medium-gray text-sm mt-1">Hold Ctrl/Cmd to select multiple preferences (optional)</div>
                     </div>
                 </div>
 

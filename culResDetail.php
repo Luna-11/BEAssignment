@@ -212,7 +212,7 @@
                 <h1 class="title-font text-4xl md:text-5xl font-bold text-text mb-4">
                     <?php echo htmlspecialchars($resource['resourceName'] ?? 'Untitled Resource'); ?>
                 </h1>
-                <p class="text-text text-lg">Educational Resource</p>
+                <p class="text-text text-lg">Culinary Resource</p>
             <?php else: ?>
                 <h1 class="title-font text-4xl md:text-5xl font-bold text-text mb-4">Resource Not Found</h1>
                 <p class="text-text text-lg">The requested resource could not be found.</p>
@@ -347,13 +347,6 @@
             </div>
         </div>
 
-        <!-- Footer -->
-        <footer class="text-center mt-10 text-text text-sm">
-            <p>
-                © <?php echo date('Y'); ?> <?php echo htmlspecialchars($resource['resourceName']); ?> | 
-                Made with <i class="fas fa-heart text-primary"></i>
-            </p>
-        </footer>
         <?php else: ?>
         <!-- Error Message -->
         <div class="bg-white rounded-2xl shadow-lg p-8 text-center">

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recipe Cards with Floating Leaves</title>
+    <title>Recipe Cards</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -18,23 +18,6 @@
             --black: #222;
             --light-gray: #bbb;
             --medium-gray: #555;
-        }
-
-        /* Floating animation */
-        @keyframes float {
-            0% {
-                transform: translateY(0) rotate(0deg);
-            }
-            50% {
-                transform: translateY(-15px) rotate(5deg);
-            }
-            100% {
-                transform: translateY(0) rotate(0deg);
-            }
-        }
-
-        .floating-leaf {
-            animation: float 6s ease-in-out infinite;
         }
         
         /* Custom styles for better visual feedback */
@@ -72,9 +55,8 @@
 </head>
 <body class="bg-[#f9f1e5] text-[#7b4e48]">
     <?php include 'navbar.php'; ?>
-    <canvas id="leavesCanvas" class="fixed top-2/5 left-0 w-1/2 h-full z-10 pointer-events-none"></canvas>
     
-    <div class="mx-auto w-full relative z-20">
+    <div class="mx-auto w-full">
         <!-- Filter Section -->
         <section class="filter-section rounded-2xl p-6 my-5 mx-4 shadow-lg">
             <h2 class="text-2xl font-bold text-[#7b4e48] mb-5 text-center">Filter Recipes</h2>
@@ -159,28 +141,9 @@
                 Reset Filters
             </button>
         </section>
-        <!-- Floating leaves over cards -->
-        <div class="floating-leaf absolute z-30 pointer-events-none w-24 h-24 opacity-85 filter drop-shadow-[2px_3px_2px_rgba(0,0,0,0.2)] top-[90%] left-0">
-            <img src="./BEpics/leaf.png" alt="Leaf decoration" class="w-full h-full object-contain">
-        </div>
-        <div class="floating-leaf absolute z-30 pointer-events-none w-24 h-24 opacity-85 filter drop-shadow-[2px_3px_2px_rgba(0,0,0,0.2)] top-[65%] right-[20%] rotate-40" style="animation-delay: 0.6s;">
-            <img src="./BEpics/leaf.png" alt="Leaf decoration" class="w-full h-full object-contain">
-        </div>
-        <div class="floating-leaf absolute z-30 pointer-events-none w-24 h-24 opacity-85 filter drop-shadow-[2px_3px_2px_rgba(0,0,0,0.2)] top-[40%] left-[29%] -rotate-20" style="animation-delay: 0.8s;">
-            <img src="./BEpics/leaf.png" alt="Leaf decoration" class="w-full h-full object-contain">
-        </div>
-        <div class="floating-leaf absolute z-30 pointer-events-none w-24 h-24 opacity-85 filter drop-shadow-[2px_3px_2px_rgba(0,0,0,0.2)] top-[35%] right-0 rotate-30" style="animation-delay: 1s;">
-            <img src="./BEpics/leaf.png" alt="Leaf decoration" class="w-full h-full object-contain">
-        </div>
-        <div class="floating-leaf absolute z-30 pointer-events-none w-24 h-24 opacity-85 filter drop-shadow-[2px_3px_2px_rgba(0,0,0,0.2)] top-[50%] left-[65%] -rotate-15" style="animation-delay: 1s;">
-            <img src="./BEpics/leaf.png" alt="Leaf decoration" class="w-full h-full object-contain">
-        </div>
-        <div class="floating-leaf absolute z-30 pointer-events-none w-24 h-24 opacity-85 filter drop-shadow-[2px_3px_2px_rgba(0,0,0,0.2)] top-[95%] left-[85%] rotate-60" style="animation-delay: 0.6s;">
-            <img src="./BEpics/leaf.png" alt="Leaf decoration" class="w-full h-full object-contain">
-        </div>
 
         <!-- Recipe Cards Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-10 relative">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-10">
             <?php
             // Fetch recipes from database
             $sql = "SELECT r.*, 
@@ -202,7 +165,7 @@
 
             if ($result && $result->num_rows > 0): ?>
                 <?php while ($row = $result->fetch_assoc()): ?>
-                    <div class="recipe-card bg-white/85 rounded-2xl p-6 shadow-lg relative overflow-hidden border border-white/50 transition-all duration-300 z-20" 
+                    <div class="recipe-card bg-white/85 rounded-2xl p-6 shadow-lg relative overflow-hidden border border-white/50 transition-all duration-300" 
                          data-food-type="<?php echo htmlspecialchars($row["foodType"] ?? ''); ?>" 
                          data-cuisine-type="<?php echo htmlspecialchars($row["cuisineType"] ?? ''); ?>" 
                          data-difficulty="<?php echo htmlspecialchars($row["difficultyName"] ?? ''); ?>" 
@@ -263,7 +226,8 @@
             <h3 class="text-xl font-bold mb-2">No recipes found</h3>
             <p>Try adjusting your filters to see more results.</p>
         </div>
-                    <?php include 'footer.php'; ?>
+        
+        <?php include 'footer.php'; ?>
     </div>
 
     <script>
@@ -331,74 +295,6 @@
             // Apply filters on page load
             filterRecipes();
         });
-
-        // Floating Leaves Animation
-        const canvas = document.getElementById('leavesCanvas');
-        const ctx = canvas.getContext('2d');
-
-        // Set canvas size
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-
-        // Leaf object
-        class Leaf {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * -canvas.height;
-                this.size = Math.random() * 30 + 20;
-                this.speed = Math.random() * 1 + 0.5;
-                this.angle = Math.random() * Math.PI * 2;
-                this.spin = (Math.random() - 0.5) * 0.05;
-                this.color = Math.random() > 0.5 ? '#A8D5BA' : '#4A7043';
-            }
-
-            update() {
-                this.y += this.speed;
-                this.x += Math.sin(this.angle) * 0.5;
-                this.angle += this.spin;
-
-                if (this.y > canvas.height + this.size) {
-                    this.y = -this.size;
-                    this.x = Math.random() * canvas.width;
-                    this.speed = Math.random() * 1 + 0.5;
-                    this.angle = Math.random() * Math.PI * 2;
-                    this.size = Math.random() * 30 + 20;
-                }
-            }
-
-            draw() {
-                ctx.save();
-                ctx.translate(this.x, this.y);
-                ctx.rotate(this.angle);
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.ellipse(0, 0, this.size / 2, this.size / 4, 0, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
-            }
-        }
-
-        // Create leaves
-        const leaves = [];
-        for (let i = 0; i < 40; i++) {
-            leaves.push(new Leaf());
-        }
-
-        // Animation loop
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            leaves.forEach(leaf => {
-                leaf.update();
-                leaf.draw();
-            });
-            requestAnimationFrame(animate);
-        }
-
-        animate();
     </script>
 </body>
 </html>

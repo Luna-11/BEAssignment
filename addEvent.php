@@ -142,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     $_SESSION['success_message'] = "Event created successfully!";
     
                                     // Redirect to home page
-                                    header("Location: index.php");
+                                    header("Location: event.php");
                                     exit();
                                 } else {
                                     $error = "Error: Failed to create event. Database error: " . $stmt->error;

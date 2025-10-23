@@ -330,10 +330,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
 
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <button type="submit" class="bg-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-medium-pink transition-colors">Submit</button>
-          <a href="educational.php" class="border border-border-color text-text-color px-8 py-3 rounded-lg font-medium hover:bg-light-pink transition-colors text-center">Back to Educational</a>
-          <a href="culinary.php" class="border border-border-color text-text-color px-8 py-3 rounded-lg font-medium hover:bg-light-pink transition-colors text-center">Back to Culinary</a>
-        </div>
+      <button type="submit" class="bg-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-medium-pink transition-colors">Submit</button>
+          <a href="eduRes.php" class="border border-border-color text-text-color px-8 py-3 rounded-lg font-medium hover:bg-light-pink transition-colors text-center">Back to Educational</a>
+          <a href="culRes.php" class="border border-border-color text-text-color px-8 py-3 rounded-lg font-medium hover:bg-light-pink transition-colors text-center">Back to Culinary</a>        </div>
       </form>
     </div>
   </div>

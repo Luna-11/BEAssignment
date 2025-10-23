@@ -609,7 +609,7 @@
                         <li><a href="my_recipes.php">My Recipes</a></li>
                         <li><a href="saved_recipes.php">Saved Recipes</a></li>
                         <li><a href="settings.php">Settings</a></li>
-                        <li><a href="logIn.php">Log Out</a></li>
+                        <li><a href="logout.php">Log Out</a></li>
                     </ul>
                 </div>
             </div>

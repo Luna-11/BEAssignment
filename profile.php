@@ -15,7 +15,6 @@ if (!isset($_SESSION['userID'])) {
 
 $userID = $_SESSION['userID'];
 
-// DEBUG: Check the actual table structure
 
 $result = $conn->query("DESCRIBE users");
 if ($result) {
@@ -244,7 +243,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
                 </div>
                 <ul>
                     <li>
-                        <a href="#" class="sidebar-link flex items-center px-6 py-3 text-text-color hover:bg-light-pink transition-colors duration-200" data-tab="profile">
+                        <a href="profile.php" class="sidebar-link flex items-center px-6 py-3 text-text-color hover:bg-light-pink transition-colors duration-200" data-tab="profile">
                             <i class="fas fa-user-circle mr-3 text-primary"></i>
                             <span>My Profile</span>
                         </a>
