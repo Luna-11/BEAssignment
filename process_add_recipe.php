@@ -25,7 +25,40 @@ $action = $_POST['action'] ?? '';
 
 if ($action === 'addRecipe') {
     // Handle image uploads first
-    $imagePath = handleImageUpload($_FILES['image1'] ?? null);
+// Handle image upload with original filename
+$imagePath = null;
+if (isset($_FILES['image1']) && $_FILES['image1']['error'] === UPLOAD_ERR_OK) {
+    $uploadDir = __DIR__ . "/uploads/recipes/";
+    
+    // Create directory if needed
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0755, true);
+    }
+    
+    $imageFile = $_FILES['image1'];
+    $originalName = $imageFile['name'];
+    
+    // Sanitize filename
+    $sanitizedName = preg_replace("/[^a-zA-Z0-9\._-]/", "_", $originalName);
+    $sanitizedName = substr($sanitizedName, 0, 100);
+    $targetFile = $uploadDir . $sanitizedName;
+    
+    // Handle duplicates
+    $counter = 1;
+    $nameWithoutExt = pathinfo($sanitizedName, PATHINFO_FILENAME);
+    $fileExtension = pathinfo($sanitizedName, PATHINFO_EXTENSION);
+    
+    while (file_exists($targetFile)) {
+        $sanitizedName = $nameWithoutExt . '_' . $counter . '.' . $fileExtension;
+        $targetFile = $uploadDir . $sanitizedName;
+        $counter++;
+    }
+    
+    // Upload file
+    if (move_uploaded_file($imageFile['tmp_name'], $targetFile)) {
+        $imagePath = "uploads/recipes/" . $sanitizedName;
+    }
+}
     
     // Convert names to IDs using your existing functions
     $cuisineTypeID = getCuisineTypeID($conn, $_POST['country'] ?? '');

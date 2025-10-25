@@ -99,6 +99,7 @@ if (!empty($posts)) {
             font-size: 0.75rem;
             margin-left: 0.25rem;
         }
+        
         .bg-cookbook {
             /* Replace with your actual image URL */
             background-image: url('./BEpics/bn1.jpg');
@@ -162,6 +163,77 @@ if (!empty($posts)) {
             margin-top: 0.5rem;
             font-size: 0.875rem;
         }
+        
+        /* Enhanced Scrollbar Styling for Create Post Modal */
+        .modal-scroll-area {
+            overflow-y: auto;
+            max-height: 400px;
+            padding-right: 8px;
+            scrollbar-width: thin;
+            scrollbar-color: #C89091 #f9f1e5;
+        }
+        
+        .modal-scroll-area::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .modal-scroll-area::-webkit-scrollbar-track {
+            background: #f9f1e5;
+            border-radius: 4px;
+            margin: 4px 0;
+        }
+        
+        .modal-scroll-area::-webkit-scrollbar-thumb {
+            background-color: #C89091;
+            border-radius: 4px;
+            border: 2px solid #f9f1e5;
+        }
+        
+        .modal-scroll-area::-webkit-scrollbar-thumb:hover {
+            background-color: #ddb2b1;
+        }
+        
+        /* Always show scrollbar for Webkit browsers */
+        .modal-scroll-area::-webkit-scrollbar-thumb {
+            visibility: visible;
+        }
+        
+        /* Scrollbar for Comments Modal */
+        #commentsList {
+            scrollbar-width: thin;
+            scrollbar-color: #C89091 #f9f1e5;
+        }
+        
+        #commentsList::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        #commentsList::-webkit-scrollbar-track {
+            background: #f9f1e5;
+            border-radius: 4px;
+        }
+        
+        #commentsList::-webkit-scrollbar-thumb {
+            background-color: #C89091;
+            border-radius: 4px;
+        }
+        
+        #commentsList::-webkit-scrollbar-thumb:hover {
+            background-color: #ddb2b1;
+        }
+        
+        /* Custom styling to match your design */
+        .recipe-format {
+            font-size: 0.8rem;
+            color: #555;
+            margin-bottom: 0.1rem;
+        }
+        
+        .char-count {
+            font-size: 0.8rem;
+            color: #555;
+            text-align: right;
+        }
     </style>
 </head>
 <body class="bg-light-yellow min-h-screen flex flex-col">
@@ -176,77 +248,80 @@ if (!empty($posts)) {
         </div>
     </section>
 
-        <!-- Create Post Modal -->
-        <div id="createPostModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
-            <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
-                <div class="p-6 border-b border-border">
-                    <div class="flex justify-between items-center">
-                        <h2 class="text-2xl font-bold text-text">Share Your Recipe</h2>
-                        <button id="closePostModal" class="text-light-gray text-2xl hover:text-black">&times;</button>
-                    </div>
-                </div>
-                
-                <form id="createPostForm" method="POST" enctype="multipart/form-data" class="p-6 overflow-y-auto">
-                    <div class="space-y-6">
-                        <!-- Post Content -->
-                        <div>
-                            <label for="post_content" class="block text-sm font-medium text-text mb-2">What's cooking?</label>
-                            <textarea 
-                                id="post_content" 
-                                name="post_content" 
-                                rows="4" 
-                                placeholder="Share your recipe, cooking tips, or food experience..."
-                                required
-                                class="w-full p-3 border-2 border-border rounded focus:border-primary outline-none resize-none"
-                                maxlength="1000"
-                            ></textarea>
-                            <div class="text-sm text-medium-gray mt-1 flex justify-between">
-                                <span>Format: Recipe Title: Description</span>
-                                <span id="postCharCount">0/1000</span>
-                            </div>
-                        </div>
-                        
-                        <!-- File Upload -->
-                        <div>
-                            <label class="block text-sm font-medium text-text mb-2">Add Media (Optional)</label>
-                            <input 
-                                type="file" 
-                                id="media" 
-                                name="media" 
-                                accept="image/*,video/*" 
-                                class="hidden"
-                            >
-                            <label for="media" class="file-upload-label cursor-pointer">
-                                <i class="fas fa-cloud-upload-alt text-3xl text-primary mb-2"></i>
-                                <span class="text-text font-medium">Click to upload image or video</span>
-                                <span class="text-sm text-medium-gray mt-1">Supports JPG, PNG, GIF, MP4, MOV</span>
-                            </label>
-                            
-                            <!-- Preview Container -->
-                            <div id="previewContainer" class="preview-container hidden">
-                                <button type="button" id="removeMedia" class="remove-media-btn">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                                <div id="mediaPreview"></div>
-                            </div>
-                            
-                            <!-- Upload Status -->
-                            <div id="uploadStatus" class="upload-status text-sm text-medium-gray"></div>
-                        </div>
-                        
-                        <!-- Submit Button -->
-                        <div class="flex space-x-4 pt-4">
-                            <button type="button" id="cancelPost" class="flex-1 bg-gray-200 text-gray-700 p-3 rounded hover:bg-gray-300 font-semibold transition-colors">
-                                Cancel
-                            </button>
-                            <button type="submit" name="submit_post" class="flex-1 bg-primary text-white p-3 rounded hover:bg-medium-pink font-semibold transition-colors">
-                                Share Post
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
+<!-- Create Post Modal -->
+<div id="createPostModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+  <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+
+    <!-- Header (fixed) -->
+    <div class="p-4 border-b border-border flex justify-between items-center shrink-0">
+      <h2 class="text-xl font-bold text-text">Share Your Recipe</h2>
+      <button id="closePostModal" class="text-light-gray text-xl hover:text-black">&times;</button>
+    </div>
+
+    <!-- Scrollable Form Area - UPDATED -->
+    <form id="createPostForm" method="POST" enctype="multipart/form-data" 
+          class="flex-1 p-6 flex flex-col">
+      
+      <div class="modal-scroll-area flex-1 space-y-4">
+        <!-- Post Content -->
+        <div>
+          <label for="post_content" class="block text-sm font-medium text-text mb-2">What's cooking?</label>
+          <textarea 
+            id="post_content" 
+            name="post_content" 
+            rows="2" 
+            placeholder="Share your recipe, cooking tips, or food experience..."
+            required
+            class="w-full p-1 border-2 border-border rounded focus:border-primary outline-none resize-none"
+            maxlength="1000"></textarea>
+          <div class="recipe-format">
+            <strong>Format: Recipe Title. Description</strong>
+          </div>
+          <div class="char-count">
+            <span id="postCharCount">0/1000</span>
+          </div>
         </div>
+
+        <!-- File Upload -->
+        <div>
+          <label class="block text-sm font-medium text-text mb-2">Add Media (Optional)</label>
+          <input type="file" id="media" name="media" accept="image/*,video/*" class="hidden">
+          <label for="media" class="file-upload-label cursor-pointer">
+            <i class="fas fa-cloud-upload-alt text-xl text-primary mb-2"></i>
+            <span class="text-text font-medium">Click to upload image or video</span>
+            <span class="text-sm text-medium-gray mt-1">Supports JPG, PNG, GIF, MP4, MOV</span>
+          </label>
+
+          <!-- Preview Container -->
+          <div id="previewContainer" class="preview-container hidden">
+            <button type="button" id="removeMedia" class="remove-media-btn">
+              <i class="fas fa-times"></i>
+            </button>
+            <div id="mediaPreview"></div>
+          </div>
+
+          <!-- Upload Status -->
+          <div id="uploadStatus" class="upload-status text-sm text-medium-gray"></div>
+        </div>
+      </div>
+
+    </form>
+
+    <!-- Footer Buttons (fixed) -->
+    <div class="p-6 border-t border-border bg-white shrink-0 flex space-x-4">
+      <button type="button" id="cancelPost" 
+              class="flex-1 bg-gray-200 text-gray-700 p-3 rounded hover:bg-gray-300 font-semibold transition-colors">
+        Cancel
+      </button>
+      <button type="submit" form="createPostForm" name="submit_post"
+              class="flex-1 bg-primary text-white p-3 rounded hover:bg-medium-pink font-semibold transition-colors">
+        Share Post
+      </button>
+    </div>
+
+  </div>
+</div>
+
 
         <!-- Community Feed -->
         <section class="py-12 flex-grow">
@@ -437,6 +512,149 @@ if (!empty($posts)) {
     <!-- Include the external JavaScript files -->
     <script src="community_script.js"></script>
     
+    <!-- JavaScript for Modal Functionality and Scroll Bars -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create Post Modal Elements
+            const createPostModal = document.getElementById('createPostModal');
+            const shareRecipeBtn = document.getElementById('shareRecipeBtn');
+            const closePostModal = document.getElementById('closePostModal');
+            const cancelPost = document.getElementById('cancelPost');
+            const mediaInput = document.getElementById('media');
+            const previewContainer = document.getElementById('previewContainer');
+            const mediaPreview = document.getElementById('mediaPreview');
+            const removeMediaBtn = document.getElementById('removeMedia');
+            const uploadStatus = document.getElementById('uploadStatus');
+            const postContent = document.getElementById('post_content');
+            const postCharCount = document.getElementById('postCharCount');
+            const commentText = document.getElementById('commentText');
+            const charCount = document.getElementById('charCount');
+
+            // Comments Modal Elements
+            const commentsModal = document.getElementById('commentsModal');
+            const closeComments = document.getElementById('closeComments');
+            const commentBtns = document.querySelectorAll('.comment-btn');
+
+            // Open Create Post Modal
+            if (shareRecipeBtn) {
+                shareRecipeBtn.addEventListener('click', function() {
+                    createPostModal.classList.remove('hidden');
+                    createPostModal.classList.add('flex');
+                    document.body.style.overflow = 'hidden';
+                });
+            }
+
+            // Close Create Post Modal
+            function closeCreatePostModal() {
+                createPostModal.classList.remove('flex');
+                createPostModal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+                // Reset form
+                document.getElementById('createPostForm').reset();
+                previewContainer.classList.add('hidden');
+                uploadStatus.textContent = '';
+                postCharCount.textContent = '0/1000';
+            }
+
+            if (closePostModal) {
+                closePostModal.addEventListener('click', closeCreatePostModal);
+            }
+
+            if (cancelPost) {
+                cancelPost.addEventListener('click', closeCreatePostModal);
+            }
+
+            // Character count for post content
+            if (postContent) {
+                postContent.addEventListener('input', function() {
+                    const count = this.value.length;
+                    postCharCount.textContent = `${count}/1000`;
+                });
+            }
+
+            // Character count for comment
+            if (commentText) {
+                commentText.addEventListener('input', function() {
+                    const count = this.value.length;
+                    charCount.textContent = `${count}/300`;
+                });
+            }
+
+            // Media upload preview
+            if (mediaInput) {
+                mediaInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const fileType = file.type.split('/')[0];
+                        const reader = new FileReader();
+                        
+                        reader.onload = function(e) {
+                            mediaPreview.innerHTML = '';
+                            
+                            if (fileType === 'image') {
+                                const img = document.createElement('img');
+                                img.src = e.target.result;
+                                img.alt = 'Preview';
+                                mediaPreview.appendChild(img);
+                            } else if (fileType === 'video') {
+                                const video = document.createElement('video');
+                                video.src = e.target.result;
+                                video.controls = true;
+                                mediaPreview.appendChild(video);
+                            }
+                            
+                            previewContainer.classList.remove('hidden');
+                            uploadStatus.textContent = `Selected: ${file.name}`;
+                        };
+                        
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+
+            // Remove media
+            if (removeMediaBtn) {
+                removeMediaBtn.addEventListener('click', function() {
+                    mediaInput.value = '';
+                    previewContainer.classList.add('hidden');
+                    uploadStatus.textContent = '';
+                });
+            }
+
+            // Comments Modal functionality
+            if (commentBtns) {
+                commentBtns.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const postId = this.getAttribute('data-post-id');
+                        // You would typically load comments for this post ID here
+                        commentsModal.classList.remove('hidden');
+                        commentsModal.classList.add('flex');
+                        document.body.style.overflow = 'hidden';
+                    });
+                });
+            }
+
+            if (closeComments) {
+                closeComments.addEventListener('click', function() {
+                    commentsModal.classList.remove('flex');
+                    commentsModal.classList.add('hidden');
+                    document.body.style.overflow = 'auto';
+                });
+            }
+
+            // Close modals when clicking outside
+            window.addEventListener('click', function(e) {
+                if (e.target === createPostModal) {
+                    closeCreatePostModal();
+                }
+                if (e.target === commentsModal) {
+                    commentsModal.classList.remove('flex');
+                    commentsModal.classList.add('hidden');
+                    document.body.style.overflow = 'auto';
+                }
+            });
+        });
+    </script>
     
     <?php if (!empty($success)): ?>
     <script>

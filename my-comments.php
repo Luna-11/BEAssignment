@@ -45,17 +45,15 @@ $commentCount = 0;
 if (isset($_SESSION['userID'])) {
     $userID = $_SESSION['userID'];
     
-    // Query to get user's comments with community post information
+    // CORRECTED Query to get user's comments with community post information 
     $commentsQuery = "
         SELECT 
             c.commentID,
             c.comment,
             c.commentDate,
             c.communityID,
-            co.title as postTitle,
-            co.content as postContent,
-            co.image as postImage,
-            co.date as postDate,
+            co.post as postContent,
+            co.postDate,
             u.first_name,
             u.last_name
         FROM comment c
@@ -112,33 +110,9 @@ if (isset($_SESSION['userID'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Comments - FoodFusion</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <!-- Fixed Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'primary': '#C89091',
-                        'text-color': '#7b4e48',
-                        'lightest': '#fcfaf2',
-                        'light-pink': '#e9d0cb',
-                        'medium-pink': '#ddb2b1',
-                        'light-yellow': '#f9f1e5',
-                        'white': '#fff',
-                        'black': '#222',
-                        'light-gray': '#bbb',
-                        'medium-gray': '#555',
-                        'shadow-color': 'rgba(0,0,0,0.1)',
-                        'border-color': '#ccc',
-                        'button-color': '#333'
-                    },
-                    fontFamily: {
-                        'segoe': ['Segoe UI', 'Tahoma', 'Geneva', 'Verdana', 'sans-serif']
-                    }
-                }
-            }
-        }
-    </script>
     <style>
         .active-tab {
             background-color: #f9f1e5;
@@ -150,6 +124,24 @@ if (isset($_SESSION['userID'])) {
             color: #7b4e48;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+        
+        /* Custom colors to replace Tailwind config */
+        .bg-light-yellow { background-color: #f9f1e5; }
+        .bg-lightest { background-color: #fcfaf2; }
+        .bg-light-pink { background-color: #e9d0cb; }
+        .bg-medium-pink { background-color: #ddb2b1; }
+        .bg-primary { background-color: #C89091; }
+        .text-text-color { color: #7b4e48; }
+        .text-primary { color: #C89091; }
+        .text-medium-gray { color: #555; }
+        .border-light-pink { border-color: #e9d0cb; }
+        .border-medium-pink { border-color: #ddb2b1; }
+        
+        /* Custom utility classes */
+        .hover\:bg-light-pink:hover { background-color: #e9d0cb; }
+        .hover\:bg-medium-pink:hover { background-color: #ddb2b1; }
+        .hover\:text-medium-pink:hover { color: #ddb2b1; }
+        .focus\:ring-primary:focus { ring-color: #C89091; }
     </style>
 </head>
 <body class="bg-light-yellow text-text-color font-segoe min-h-screen">
@@ -161,10 +153,10 @@ if (isset($_SESSION['userID'])) {
         <div class="w-64 bg-lightest h-screen shadow-md fixed">
             <div class="p-6 border-b border-light-pink">
                 <div class="flex items-center space-x-3">
-                    <img src="<?php echo htmlspecialchars($user['profileImage'] ?? 'https://via.placeholder.com/50'); ?>" 
-                        alt="Profile" 
-                        class="w-12 h-12 rounded-full border-2 border-medium-pink"
-                        onerror="this.src='https://via.placeholder.com/50'">
+                    <!-- Profile icon -->
+                    <div class="w-12 h-12 rounded-full border-2 border-medium-pink bg-primary flex items-center justify-center">
+                        <i class="fas fa-user text-white text-xl"></i>
+                    </div>
                     <div>
                         <h2 class="font-bold text-text-color">
                             <?php echo htmlspecialchars(($user['first_name'] ?? 'User') . ' ' . ($user['last_name'] ?? '')); ?>
@@ -198,7 +190,7 @@ if (isset($_SESSION['userID'])) {
                     </li>
                     <li>
                         <a href="my-comments.php" class="sidebar-link flex items-center px-6 py-3 text-text-color bg-light-pink active-tab">
-                            <i class="fas fa-heart mr-3 text-primary"></i>
+                            <i class="fas fa-comments mr-3 text-primary"></i>
                             <span>Comments</span>
                         </a>
                     </li>
@@ -247,60 +239,52 @@ if (isset($_SESSION['userID'])) {
                         <?php else: ?>
                             <?php foreach ($userComments as $comment): ?>
                                 <div class="border border-light-pink rounded-lg p-4 hover:shadow-md transition-shadow">
-                                    <div class="flex flex-col md:flex-row gap-4">
-                                        <!-- Post Image -->
-                                        <div class="md:w-1/4">
-                                            <?php if (!empty($comment['postImage']) && $comment['postImage'] != 'uploads/post'): ?>
-                                                <img src="<?php echo htmlspecialchars($comment['postImage']); ?>" 
-                                                    alt="<?php echo htmlspecialchars($comment['postTitle'] ?? 'Community Post'); ?>" 
-                                                    class="w-full h-32 object-cover rounded-lg"
-                                                    onerror="this.src='https://via.placeholder.com/300x200?text=Community+Post'">
-                                            <?php else: ?>
-                                                <div class="h-32 bg-gradient-to-r from-primary to-medium-pink rounded-lg flex items-center justify-center text-white text-2xl">
-                                                    <i class="fas fa-users"></i>
-                                                </div>
-                                            <?php endif; ?>
+                                    <div class="flex justify-between items-start mb-3">
+                                        <div>
+                                            <h3 class="text-lg font-medium text-text-color">
+                                                <?php 
+                                                if (!empty($comment['postContent'])) {
+                                                    // Show first 80 characters of the post content as title
+                                                    echo htmlspecialchars(substr($comment['postContent'], 0, 80)) . (strlen($comment['postContent']) > 80 ? '...' : '');
+                                                } else {
+                                                    echo "Community Post #" . htmlspecialchars($comment['communityID']);
+                                                }
+                                                ?>
+                                            </h3>
+                                            <p class="text-sm text-medium-gray mt-1">
+                                                <?php if (!empty($comment['first_name'])): ?>
+                                                    Post by <?php echo htmlspecialchars($comment['first_name'] . ' ' . $comment['last_name']); ?> • 
+                                                <?php endif; ?>
+                                                Posted on <?php echo date('F j, Y', strtotime($comment['postDate'])); ?> • 
+                                                Commented on <?php echo date('F j, Y \a\t g:i A', strtotime($comment['commentDate'])); ?>
+                                            </p>
                                         </div>
-                                        
-                                        <!-- Comment Details -->
-                                        <div class="md:w-3/4">
-                                            <div class="flex justify-between items-start">
-                                                <div>
-                                                    <h3 class="text-lg font-medium text-text-color">
-                                                        <?php 
-                                                        if (!empty($comment['postTitle'])) {
-                                                            echo htmlspecialchars($comment['postTitle']);
-                                                        } else {
-                                                            echo "Community Post #" . htmlspecialchars($comment['communityID']);
-                                                        }
-                                                        ?>
-                                                    </h3>
-                                                    <p class="text-sm text-medium-gray mt-1">
-                                                        <?php if (!empty($comment['first_name'])): ?>
-                                                            Post by <?php echo htmlspecialchars($comment['first_name'] . ' ' . $comment['last_name']); ?> • 
-                                                        <?php endif; ?>
-                                                        Commented on <?php echo date('F j, Y \a\t g:i A', strtotime($comment['commentDate'])); ?>
-                                                    </p>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-light-pink text-text-color">
+                                            <i class="fas fa-users mr-1"></i> Community
+                                        </span>
+                                    </div>
+                                    
+                                    <!-- Comment Content -->
+                                    <div class="p-4 bg-white rounded-lg border border-light-pink">
+                                        <div class="flex items-start">
+                                            <div class="flex-shrink-0 mr-3">
+                                                <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+                                                    <i class="fas fa-comment text-white text-sm"></i>
                                                 </div>
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-light-pink text-text-color">
-                                                    Community Post
-                                                </span>
                                             </div>
-                                            
-                                            <!-- Comment Content -->
-                                            <div class="mt-3 p-3 bg-white rounded-lg border border-light-pink">
+                                            <div class="flex-1">
                                                 <p class="text-text-color">
                                                     <?php echo htmlspecialchars($comment['comment']); ?>
                                                 </p>
                                             </div>
-                                            
-                                            <div class="mt-3 flex justify-end">
-                                                <a href="community.php#post-<?php echo $comment['communityID']; ?>" 
-                                                   class="text-sm text-primary hover:text-medium-pink transition-colors">
-                                                    View Post <i class="fas fa-arrow-right ml-1"></i>
-                                                </a>
-                                            </div>
                                         </div>
+                                    </div>
+                                    
+                                    <div class="mt-3 flex justify-end">
+                                        <a href="community.php#post-<?php echo $comment['communityID']; ?>" 
+                                           class="text-sm text-primary hover:text-medium-pink transition-colors flex items-center">
+                                            View Post <i class="fas fa-arrow-right ml-1"></i>
+                                        </a>
                                     </div>
                                 </div>
                             <?php endforeach; ?>

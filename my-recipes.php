@@ -63,8 +63,7 @@ if (isset($_SESSION['userID'])) {
             d.difficultyName,
             c.cuisineType,
             f.foodType,
-            dp.dietName,
-            (SELECT COUNT(*) FROM likes WHERE recipeID = r.recipeID) as likeCount
+            dp.dietName
         FROM recipe r
         LEFT JOIN difficultyLev d ON r.difficultID = d.difficultyID
         LEFT JOIN cuisineType c ON r.cuisineTypeID = c.cuisineTypeID
@@ -310,10 +309,6 @@ if (isset($_SESSION['userID'])) {
                                             
                                             <div class="mt-3 flex justify-between items-center">
                                                 <div class="flex space-x-2">
-                                                    <span class="inline-flex items-center text-sm text-medium-gray">
-                                                        <i class="fas fa-heart mr-1"></i> 
-                                                        <?php echo $recipe['likeCount'] ?? 0; ?> likes
-                                                    </span>
                                                     <?php if (!empty($recipe['cuisineType'])): ?>
                                                         <span class="inline-flex items-center text-sm text-medium-gray">
                                                             <i class="fas fa-globe mr-1"></i> 
@@ -326,10 +321,6 @@ if (isset($_SESSION['userID'])) {
                                                        class="text-sm text-primary hover:text-medium-pink transition-colors">
                                                         View Recipe <i class="fas fa-arrow-right ml-1"></i>
                                                     </a>
-                                                    <button onclick="confirmDelete(<?php echo $recipe['recipeID']; ?>)" 
-                                                            class="text-sm text-red-500 hover:text-red-700 transition-colors">
-                                                        <i class="fas fa-trash mr-1"></i> Delete
-                                                    </button>
                                                 </div>
                                             </div>
                                         </div>

@@ -66,11 +66,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($error)) {
             $eventImage = $_FILES['eventImage'];
             
-            // DEBUG: Show file upload info
-            echo "<!-- DEBUG: File upload error code: " . $eventImage['error'] . " -->\n";
-            echo "<!-- DEBUG: File temp location: " . $eventImage['tmp_name'] . " -->\n";
-            echo "<!-- DEBUG: File size: " . $eventImage['size'] . " -->\n";
-            
             // Check if file was uploaded
             if ($eventImage['error'] !== UPLOAD_ERR_OK) {
                 $uploadErrors = [
@@ -98,14 +93,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $error = "Error: File size must be less than 5MB.";
                 }
                 else {
-                    // Generate unique filename to prevent conflicts
-                    $fileExtension = pathinfo($eventImage['name'], PATHINFO_EXTENSION);
-                    $uniqueName = uniqid() . '_' . time() . '.' . $fileExtension;
-                    $targetFile = $uploadDir . $uniqueName;
+                    // Use the original filename but sanitize it
+                    $originalName = $eventImage['name'];
+                    
+                    // Sanitize the filename: remove special characters and limit length
+                    $sanitizedName = preg_replace("/[^a-zA-Z0-9\._-]/", "_", $originalName);
+                    $sanitizedName = substr($sanitizedName, 0, 100); // Limit filename length
+                    
+                    $targetFile = $uploadDir . $sanitizedName;
+
+                    // Handle duplicate filenames by adding a number
+                    $counter = 1;
+                    $nameWithoutExt = pathinfo($sanitizedName, PATHINFO_FILENAME);
+                    $fileExtension = pathinfo($sanitizedName, PATHINFO_EXTENSION);
+
+                    while (file_exists($targetFile)) {
+                        $sanitizedName = $nameWithoutExt . '_' . $counter . '.' . $fileExtension;
+                        $targetFile = $uploadDir . $sanitizedName;
+                        $counter++;
+                    }
 
                     // DEBUG: Check directory permissions
                     echo "<!-- DEBUG: Directory writable: " . (is_writable($uploadDir) ? 'Yes' : 'No') . " -->\n";
                     echo "<!-- DEBUG: Target file path: " . $targetFile . " -->\n";
+                    echo "<!-- DEBUG: Original filename: " . $originalName . " -->\n";
+                    echo "<!-- DEBUG: Sanitized filename: " . $sanitizedName . " -->\n";
                     
                     if (!is_writable($uploadDir)) {
                         $error = "Error: Upload directory is not writable. Please check folder permissions.";
@@ -115,8 +127,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         if (move_uploaded_file($eventImage['tmp_name'], $targetFile)) {
                             echo "<!-- DEBUG: File moved successfully -->\n";
                             
-                            // FIX: Store the relative path in database instead of just filename
-                            $imagePath = "uploads/events/" . $uniqueName;
+                            // Store the relative path with original (sanitized) filename
+                            $imagePath = "uploads/events/" . $sanitizedName;
                             
                             // Prepare SQL - matches your database schema exactly
                             $sql = "INSERT INTO event (title, eventDate, location, description, eventImage, userID) 
@@ -127,7 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $error = "Error preparing statement: " . $conn->error;
                             }
                             else {
-                                // Use $imagePath instead of $uniqueName
+                                // Use $imagePath instead of unique name
                                 $stmt->bind_param("sssssi", $title, $eventDate, $location, $description, $imagePath, $userID);
 
                                 if ($stmt->execute()) {
