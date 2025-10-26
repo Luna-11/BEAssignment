@@ -2,7 +2,6 @@
 session_start();
 include('./configMysql.php');
 
-
 // Check if user is logged in
 if (!isset($_SESSION['userID'])) {
     header("Location: login.php");
@@ -87,12 +86,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 if (!in_array($ext, $allowedImageTypes)) {
                     $errors[] = "Only JPG, JPEG, PNG, GIF, and WebP images are allowed";
                 } else {
-                    $uniqueImageName = uniqid() . "_" . time() . "." . $ext;
-                    $imageDest = $imageUploadPath . $uniqueImageName;
-                    if (!move_uploaded_file($imageFile["tmp_name"], $imageDest)) {
+                    // USE ORIGINAL FILENAME (sanitized)
+                    $originalName = $imageFile['name'];
+                    $sanitizedName = preg_replace("/[^a-zA-Z0-9\._-]/", "_", $originalName);
+                    $sanitizedName = substr($sanitizedName, 0, 100);
+                    $targetFile = $imageUploadPath . $sanitizedName;
+                    
+                    // Handle duplicates
+                    $counter = 1;
+                    $nameWithoutExt = pathinfo($sanitizedName, PATHINFO_FILENAME);
+                    $fileExtension = pathinfo($sanitizedName, PATHINFO_EXTENSION);
+                    
+                    while (file_exists($targetFile)) {
+                        $sanitizedName = $nameWithoutExt . '_' . $counter . '.' . $fileExtension;
+                        $targetFile = $imageUploadPath . $sanitizedName;
+                        $counter++;
+                    }
+                    
+                    if (!move_uploaded_file($imageFile["tmp_name"], $targetFile)) {
                         $errors[] = "Failed to upload image file. Check directory permissions.";
                     } else {
-                        $imageFileName = $imageUploadPath . $uniqueImageName;
+                        $imageFileName = $imageUploadPath . $sanitizedName;
                     }
                 }
             }
@@ -110,12 +124,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     if ($pdfFile["size"] > $maxSize) {
                         $errors[] = "PDF file must be less than 30MB";
                     } else {
-                        $uniquePdfName = uniqid() . "_" . time() . ".pdf";
-                        $pdfDest = $pdfUploadPath . $uniquePdfName;
-                        if (!move_uploaded_file($pdfFile["tmp_name"], $pdfDest)) {
+                        // USE ORIGINAL FILENAME (sanitized)
+                        $originalName = $pdfFile['name'];
+                        $sanitizedName = preg_replace("/[^a-zA-Z0-9\._-]/", "_", $originalName);
+                        $sanitizedName = substr($sanitizedName, 0, 100);
+                        $targetFile = $pdfUploadPath . $sanitizedName;
+                        
+                        // Handle duplicates
+                        $counter = 1;
+                        $nameWithoutExt = pathinfo($sanitizedName, PATHINFO_FILENAME);
+                        $fileExtension = pathinfo($sanitizedName, PATHINFO_EXTENSION);
+                        
+                        while (file_exists($targetFile)) {
+                            $sanitizedName = $nameWithoutExt . '_' . $counter . '.' . $fileExtension;
+                            $targetFile = $pdfUploadPath . $sanitizedName;
+                            $counter++;
+                        }
+                        
+                        if (!move_uploaded_file($pdfFile["tmp_name"], $targetFile)) {
                             $errors[] = "Failed to upload PDF file. Check directory permissions.";
                         } else {
-                            $pdfFileName = $pdfUploadPath . $uniquePdfName;
+                            $pdfFileName = $pdfUploadPath . $sanitizedName;
                         }
                     }
                 }
@@ -130,12 +159,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 if (!in_array($ext, $allowedVideoTypes)) {
                     $errors[] = "Only MP4, WebM, and OGG videos are allowed";
                 } else {
-                    $uniqueVideoName = uniqid() . "_" . time() . "." . $ext;
-                    $videoDest = $videoUploadPath . $uniqueVideoName;
-                    if (!move_uploaded_file($videoFile["tmp_name"], $videoDest)) {
+                    // USE ORIGINAL FILENAME (sanitized)
+                    $originalName = $videoFile['name'];
+                    $sanitizedName = preg_replace("/[^a-zA-Z0-9\._-]/", "_", $originalName);
+                    $sanitizedName = substr($sanitizedName, 0, 100);
+                    $targetFile = $videoUploadPath . $sanitizedName;
+                    
+                    // Handle duplicates
+                    $counter = 1;
+                    $nameWithoutExt = pathinfo($sanitizedName, PATHINFO_FILENAME);
+                    $fileExtension = pathinfo($sanitizedName, PATHINFO_EXTENSION);
+                    
+                    while (file_exists($targetFile)) {
+                        $sanitizedName = $nameWithoutExt . '_' . $counter . '.' . $fileExtension;
+                        $targetFile = $videoUploadPath . $sanitizedName;
+                        $counter++;
+                    }
+                    
+                    if (!move_uploaded_file($videoFile["tmp_name"], $targetFile)) {
                         $errors[] = "Failed to upload video file. Check directory permissions.";
                     } else {
-                        $videoFileName = $videoUploadPath . $uniqueVideoName;
+                        $videoFileName = $videoUploadPath . $sanitizedName;
                     }
                 }
             }
