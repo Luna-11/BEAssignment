@@ -100,6 +100,12 @@ $dietPreferences = getDietPref($conn);
             border: 1px solid #ccc;
             border-top: none;
         }
+
+        /* Required field styling */
+        .required-field::after {
+            content: " *";
+            color: #ef4444;
+        }
     </style>
 </head>
 <body class="bg-light-yellow text-text-color font-segoe min-h-screen relative">
@@ -150,14 +156,14 @@ $dietPreferences = getDietPref($conn);
                     <h2 class="text-primary text-2xl mb-6 flex items-center gap-2"><i class="fas fa-info-circle"></i> Recipe Details</h2>
                     
                     <div class="mb-6">
-                        <label for="recipeTitle" class="block font-semibold mb-2">Recipe Title *</label>
+                        <label for="recipeTitle" class="block font-semibold mb-2 required-field">Recipe Title</label>
                         <input type="text" id="recipeTitle" name="recipeTitle" required 
                                placeholder="Enter your recipe title" class="w-full p-3 border border-border-color rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
                         <div class="text-medium-gray text-sm mt-1">Give your recipe a catchy and descriptive title</div>
                     </div>
 
                     <div class="mb-6">
-                        <label for="difficulty" class="block font-semibold mb-2">Difficulty Level *</label>
+                        <label for="difficulty" class="block font-semibold mb-2 required-field">Difficulty Level</label>
                         <select id="difficulty" name="difficulty" required class="w-full p-3 border border-border-color rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
                             <option value="">Select difficulty</option>
                             <?php foreach ($difficultyLevels as $level): ?>
@@ -170,14 +176,14 @@ $dietPreferences = getDietPref($conn);
 
                     <!-- Image Upload Section -->
                     <h2 class="text-primary text-2xl mb-6 flex items-center gap-2"><i class="fas fa-images"></i> Recipe Images</h2>
-                    <p class="text-medium-gray mb-6">Upload up to 3 high-quality images of your recipe</p>
+                    <p class="text-medium-gray mb-6">Upload high-quality image of your recipe</p>
                     
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-6">
                         <div class="image-upload-slot border-2 border-dashed border-border-color rounded-lg h-48 flex items-center justify-center relative overflow-hidden cursor-pointer hover:border-primary" data-slot="1">
-                            <input type="file" id="image1" name="image1" accept="image/*" class="absolute w-full h-full opacity-0 cursor-pointer">
+                            <input type="file" id="image1" name="image1" accept="image/*" required class="absolute w-full h-full opacity-0 cursor-pointer">
                             <div class="upload-placeholder text-center text-medium-gray">
                                 <i class="fas fa-camera text-5xl mb-2 text-light-gray"></i>
-                                <span class="block">Main Image</span>
+                                <span class="block required-field">Main Image</span>
                                 <small>Click to upload</small>
                             </div>
                             <div class="image-preview hidden absolute inset-0">
@@ -195,48 +201,51 @@ $dietPreferences = getDietPref($conn);
                             <li>Maximum file size: 5MB per image</li>
                             <li>Supported formats: JPG, PNG, WebP</li>
                             <li>Recommended resolution: 1200x800 pixels</li>
-                            <li>First image will be used as the main recipe photo</li>
+                            <li>All three images are required</li>
                         </ul>
                     </div>
 
                     <!-- Categories Section -->
                     <h2 class="text-primary text-2xl my-6 flex items-center gap-2"><i class="fas fa-tags"></i> Categories & Tags</h2>
                     
-                    <div class="mb-6">
-                        <label for="country" class="block font-semibold mb-2">Country/Cuisine *</label>
-                        <select id="country" name="country" required class="w-full p-3 border border-border-color rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
-                            <option value="">Select country/cuisine</option>
-                            <?php foreach ($cuisineTypes as $cuisine): ?>
-                                <option value="<?php echo htmlspecialchars($cuisine); ?>">
-                                    <?php echo htmlspecialchars($cuisine); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
+<div class="mb-6">
+    <label for="country" class="block font-semibold mb-2 required-field">Country/Cuisine</label>
+    <select id="country" name="country" required class="w-full p-3 border border-border-color rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
+        <option value="">Select country/cuisine</option>
+        <?php foreach ($cuisineTypes as $cuisine): ?>
+            <!-- FIX: Use cuisineTypeID instead of cuisineType -->
+            <option value="<?php echo htmlspecialchars($cuisine['cuisineTypeID']); ?>">
+                <?php echo htmlspecialchars($cuisine['cuisineType']); ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+</div>  
 
-                    <div class="mb-6">
-                        <label for="foodType" class="block font-semibold mb-2">Food Type *</label>
-                        <select id="foodType" name="foodType" required class="w-full p-3 border border-border-color rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
-                            <option value="">Select food type</option>
-                            <?php foreach ($foodTypes as $foodType): ?>
-                                <option value="<?php echo htmlspecialchars($foodType); ?>">
-                                    <?php echo htmlspecialchars($foodType); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
+<div class="mb-6">
+    <label for="foodType" class="block font-semibold mb-2 required-field">Food Type</label>
+    <select id="foodType" name="foodType" required class="w-full p-3 border border-border-color rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
+        <option value="">Select food type</option>
+        <?php foreach ($foodTypes as $foodType): ?>
+            <!-- Change this line to use ID instead of name -->
+            <option value="<?php echo htmlspecialchars($foodType['foodTypeID']); ?>">
+                <?php echo htmlspecialchars($foodType['foodType']); ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+</div>
 
-                    <div class="mb-6">
-                        <label for="dietPref" class="block font-semibold mb-2">Diet Preferences *</label>
-                        <select id="dietPref" name="dietPref" required class="w-full p-3 border border-border-color rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
-                            <option value="">Select diet preference</option>
-                            <?php foreach ($dietPreferences as $diet): ?>
-                                <option value="<?php echo htmlspecialchars($diet); ?>">
-                                    <?php echo htmlspecialchars($diet); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
+<div class="mb-6">
+    <label for="dietPref" class="block font-semibold mb-2 required-field">Diet Preferences</label>
+    <select id="dietPref" name="dietPref" required class="w-full p-3 border border-border-color rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50">
+        <option value="">Select diet preference</option>
+        <?php foreach ($dietPreferences as $diet): ?>
+            <!-- Change this line to use ID instead of name -->
+            <option value="<?php echo htmlspecialchars($diet['dietID']); ?>">
+                <?php echo htmlspecialchars($diet['dietName']); ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+</div>
                 </div>
 
                 <!-- Step 2: Ingredients & Instructions -->
@@ -245,7 +254,7 @@ $dietPreferences = getDietPref($conn);
                     <p class="text-medium-gray mb-6">List all ingredients with quantities and measurements (one ingredient per line)</p>
                     
                     <div class="mb-6">
-                        <label for="ingredients" class="block font-semibold mb-2">Ingredients *</label>
+                        <label for="ingredients" class="block font-semibold mb-2 required-field">Ingredients</label>
                         <textarea id="ingredients" name="ingredient" required 
                             placeholder="Example:&#10;1 cup all-purpose flour&#10;2 large eggs&#10;1/2 teaspoon salt&#10;1 tablespoon olive oil"
                             class="w-full p-3 border border-border-color rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50"></textarea>
@@ -255,7 +264,7 @@ $dietPreferences = getDietPref($conn);
                     <p class="text-medium-gray mb-6">Provide detailed step-by-step cooking instructions</p>
                     
                     <div class="mb-6">
-                        <label for="recipeDescription" class="block font-semibold mb-2">Instructions *</label>
+                        <label for="recipeDescription" class="block font-semibold mb-2 required-field">Instructions</label>
                         <textarea id="recipeDescription" name="recipeDescription" required 
                             placeholder="Enter step-by-step cooking instructions...
                     Example:
@@ -266,6 +275,8 @@ $dietPreferences = getDietPref($conn);
                             class="w-full p-3 border border-border-color rounded-lg bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50 h-96"></textarea>
                         <div class="text-medium-gray text-sm mt-1">Enter detailed step-by-step cooking instructions</div>
                     </div>
+
+
                 </div>
 
                 <!-- Form Navigation -->
@@ -441,30 +452,44 @@ $dietPreferences = getDietPref($conn);
             let isValid = true;
 
             requiredFields.forEach(function(field) {
-                if (!field.value.trim()) {
-                    field.classList.add("border-red-500", "ring-2", "ring-red-500");
+                if (field.type === 'file') {
+                    // File input validation
+                    if (!field.files || field.files.length === 0) {
+                        markFieldAsInvalid(field);
+                        isValid = false;
+                    } else {
+                        markFieldAsValid(field);
+                    }
+                } else if (!field.value.trim()) {
+                    markFieldAsInvalid(field);
                     isValid = false;
                 } else {
-                    field.classList.remove("border-red-500", "ring-2", "ring-red-500");
+                    markFieldAsValid(field);
                 }
             });
 
             // Additional validation for specific steps
             switch (currentStep) {
+                case 1:
+                    // Additional validation for step 1 if needed
+                    break;
                 case 2:
                     // Validate ingredients textarea
                     const ingredientsTextarea = document.getElementById("ingredients");
                     if (ingredientsTextarea && !ingredientsTextarea.value.trim()) {
-                        ingredientsTextarea.classList.add("border-red-500", "ring-2", "ring-red-500");
+                        markFieldAsInvalid(ingredientsTextarea);
                         isValid = false;
                     } else if (ingredientsTextarea) {
-                        ingredientsTextarea.classList.remove("border-red-500", "ring-2", "ring-red-500");
+                        markFieldAsValid(ingredientsTextarea);
                     }
                     
                     // Validate Quill content
+                    const instructionsInput = document.getElementById("instructions");
                     if (quill && quill.getText().trim().length === 0) {
-                        showValidationError("Please add cooking instructions.");
+                        showValidationError("Please add cooking instructions in the rich text editor.");
                         isValid = false;
+                    } else if (instructionsInput) {
+                        markFieldAsValid(instructionsInput);
                     }
                     break;
             }
@@ -474,6 +499,22 @@ $dietPreferences = getDietPref($conn);
             }
 
             return isValid;
+        }
+
+        function markFieldAsInvalid(field) {
+            field.classList.add("border-red-500", "ring-2", "ring-red-500");
+            // For file inputs, also mark the parent container
+            if (field.type === 'file') {
+                field.closest('.image-upload-slot').classList.add("border-red-500", "ring-2", "ring-red-500");
+            }
+        }
+
+        function markFieldAsValid(field) {
+            field.classList.remove("border-red-500", "ring-2", "ring-red-500");
+            // For file inputs, also mark the parent container
+            if (field.type === 'file') {
+                field.closest('.image-upload-slot').classList.remove("border-red-500", "ring-2", "ring-red-500");
+            }
         }
 
         function showValidationError(message) {
@@ -504,8 +545,17 @@ $dietPreferences = getDietPref($conn);
         function setupFormValidation() {
             // Remove error styling on input
             document.addEventListener("input", function(e) {
-                if (e.target.classList.contains("border-red-500")) {
-                    e.target.classList.remove("border-red-500", "ring-2", "ring-red-500");
+                if (e.target.hasAttribute('required')) {
+                    markFieldAsValid(e.target);
+                }
+            });
+
+            // Remove error styling on file change
+            document.addEventListener("change", function(e) {
+                if (e.target.type === 'file' && e.target.hasAttribute('required')) {
+                    if (e.target.files && e.target.files.length > 0) {
+                        markFieldAsValid(e.target);
+                    }
                 }
             });
         }
@@ -538,12 +588,14 @@ $dietPreferences = getDietPref($conn);
 
             if (!validateImageFile(file)) {
                 input.value = "";
+                markFieldAsInvalid(input);
                 return;
             }
 
             const reader = new FileReader();
             reader.onload = function(e) {
                 showImagePreview(slotNumber, e.target.result);
+                markFieldAsValid(input);
             };
             reader.readAsDataURL(file);
         }
@@ -591,6 +643,7 @@ $dietPreferences = getDietPref($conn);
                 input.value = "";
                 preview.classList.add("hidden");
                 placeholder.classList.remove("hidden");
+                markFieldAsInvalid(input);
             }
         }
 
@@ -624,8 +677,13 @@ $dietPreferences = getDietPref($conn);
                     let stepValid = true;
                     
                     requiredFields.forEach(function(field) {
-                        if (!field.value.trim()) {
-                            field.classList.add("border-red-500", "ring-2", "ring-red-500");
+                        if (field.type === 'file') {
+                            if (!field.files || field.files.length === 0) {
+                                markFieldAsInvalid(field);
+                                stepValid = false;
+                            }
+                        } else if (!field.value.trim()) {
+                            markFieldAsInvalid(field);
                             stepValid = false;
                         }
                     });
@@ -646,9 +704,10 @@ $dietPreferences = getDietPref($conn);
                 return false;
             }
             
+            // Final validation for Quill editor
             if (quill && quill.getText().trim().length === 0) {
                 showStep(2);
-                showValidationError("Please add cooking instructions.");
+                showValidationError("Please add cooking instructions in the rich text editor.");
                 return false;
             }
             
@@ -673,69 +732,6 @@ $dietPreferences = getDietPref($conn);
             }
         }
 
-        // Floating Leaves Animation
-        const canvas = document.getElementById('leavesCanvas');
-        const ctx = canvas.getContext('2d');
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-
-        class Leaf {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * -canvas.height;
-                this.size = Math.random() * 30 + 20;
-                this.speed = Math.random() * 1 + 0.5;
-                this.angle = Math.random() * Math.PI * 2;
-                this.spin = (Math.random() - 0.5) * 0.05;
-                this.color = Math.random() > 0.5 ? '#A8D5BA' : '#4A7043';
-            }
-
-            update() {
-                this.y += this.speed;
-                this.x += Math.sin(this.angle) * 0.5;
-                this.angle += this.spin;
-
-                if (this.y > canvas.height + this.size) {
-                    this.y = -this.size;
-                    this.x = Math.random() * canvas.width;
-                    this.speed = Math.random() * 1 + 0.5;
-                    this.angle = Math.random() * Math.PI * 2;
-                    this.size = Math.random() * 30 + 20;
-                }
-            }
-
-            draw() {
-                ctx.save();
-                ctx.translate(this.x, this.y);
-                ctx.rotate(this.angle);
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.ellipse(0, 0, this.size / 2, this.size / 4, 0, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
-            }
-        }
-
-        const leaves = [];
-        for (let i = 0; i < 20; i++) {
-            leaves.push(new Leaf());
-        }
-
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            leaves.forEach(leaf => {
-                leaf.update();
-                leaf.draw();
-            });
-            requestAnimationFrame(animate);
-        }
-
-        animate();
     </script>
 </body>
 </html>

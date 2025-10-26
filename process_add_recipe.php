@@ -25,56 +25,64 @@ $action = $_POST['action'] ?? '';
 
 if ($action === 'addRecipe') {
     // Handle image uploads first
-// Handle image upload with original filename
-$imagePath = null;
-if (isset($_FILES['image1']) && $_FILES['image1']['error'] === UPLOAD_ERR_OK) {
-    $uploadDir = __DIR__ . "/uploads/recipes/";
-    
-    // Create directory if needed
-    if (!is_dir($uploadDir)) {
-        mkdir($uploadDir, 0755, true);
-    }
-    
-    $imageFile = $_FILES['image1'];
-    $originalName = $imageFile['name'];
-    
-    // Sanitize filename
-    $sanitizedName = preg_replace("/[^a-zA-Z0-9\._-]/", "_", $originalName);
-    $sanitizedName = substr($sanitizedName, 0, 100);
-    $targetFile = $uploadDir . $sanitizedName;
-    
-    // Handle duplicates
-    $counter = 1;
-    $nameWithoutExt = pathinfo($sanitizedName, PATHINFO_FILENAME);
-    $fileExtension = pathinfo($sanitizedName, PATHINFO_EXTENSION);
-    
-    while (file_exists($targetFile)) {
-        $sanitizedName = $nameWithoutExt . '_' . $counter . '.' . $fileExtension;
+    $imagePath = null;
+    if (isset($_FILES['image1']) && $_FILES['image1']['error'] === UPLOAD_ERR_OK) {
+        $uploadDir = __DIR__ . "/uploads/recipes/";
+        
+        // Create directory if needed
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+        
+        $imageFile = $_FILES['image1'];
+        $originalName = $imageFile['name'];
+        
+        // Sanitize filename
+        $sanitizedName = preg_replace("/[^a-zA-Z0-9\._-]/", "_", $originalName);
+        $sanitizedName = substr($sanitizedName, 0, 100);
         $targetFile = $uploadDir . $sanitizedName;
-        $counter++;
+        
+        // Handle duplicates
+        $counter = 1;
+        $nameWithoutExt = pathinfo($sanitizedName, PATHINFO_FILENAME);
+        $fileExtension = pathinfo($sanitizedName, PATHINFO_EXTENSION);
+        
+        while (file_exists($targetFile)) {
+            $sanitizedName = $nameWithoutExt . '_' . $counter . '.' . $fileExtension;
+            $targetFile = $uploadDir . $sanitizedName;
+            $counter++;
+        }
+        
+        // Upload file
+        if (move_uploaded_file($imageFile['tmp_name'], $targetFile)) {
+            $imagePath = "uploads/recipes/" . $sanitizedName;
+        }
     }
     
-    // Upload file
-    if (move_uploaded_file($imageFile['tmp_name'], $targetFile)) {
-        $imagePath = "uploads/recipes/" . $sanitizedName;
+    // DEBUG: Log all POST data
+    error_log("POST data received: " . print_r($_POST, true));
+    
+    // Get the IDs directly from the form (they're already IDs from the dropdown)
+    $cuisineTypeID = $_POST['country'] ?? null;
+    $foodTypeID = $_POST['foodType'] ?? null; // This is already an ID
+    $dietaryID = $_POST['dietPref'] ?? null; // This is already an ID
+    
+    // DEBUG: Log the IDs
+    error_log("Cuisine Type ID: " . $cuisineTypeID);
+    error_log("Food Type ID: " . $foodTypeID);
+    error_log("Dietary ID: " . $dietaryID);
+    
+    // Validate that we have valid IDs
+    if (empty($foodTypeID) || $foodTypeID === '') {
+        $_SESSION['error_message'] = 'Please select a valid food type';
+        header("Location: addRecipe.php");
+        exit;
     }
-}
     
-    // Convert names to IDs using your existing functions
-    $cuisineTypeID = getCuisineTypeID($conn, $_POST['country'] ?? '');
-    
-    // Handle multiple selections - take the first one
-    $foodTypes = $_POST['foodType'] ?? [];
-    $dietPrefs = $_POST['dietPref'] ?? [];
-    
-    $foodTypeID = null;
-    if (!empty($foodTypes) && is_array($foodTypes)) {
-        $foodTypeID = getFoodTypeID($conn, $foodTypes[0]);
-    }
-    
-    $dietaryID = null;
-    if (!empty($dietPrefs) && is_array($dietPrefs)) {
-        $dietaryID = getDietPrefID($conn, $dietPrefs[0]);
+    if (empty($dietaryID) || $dietaryID === '') {
+        $_SESSION['error_message'] = 'Please select a valid diet preference';
+        header("Location: addRecipe.php");
+        exit;
     }
     
     // Collect form data
@@ -85,8 +93,8 @@ if (isset($_FILES['image1']) && $_FILES['image1']['error'] === UPLOAD_ERR_OK) {
         'image' => $imagePath,
         'recipeDescription' => $_POST['recipeDescription'] ?? '',
         'cuisineTypeID' => $cuisineTypeID,
-        'foodTypeID' => $foodTypeID,
-        'dietaryID' => $dietaryID,
+        'foodTypeID' => $foodTypeID, // Use the ID directly
+        'dietaryID' => $dietaryID, // Use the ID directly
         'ingredient' => $_POST['ingredient'] ?? ''
     ];
 

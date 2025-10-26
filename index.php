@@ -257,34 +257,66 @@ if ($featured_result && $featured_result->num_rows > 0) {
     </div>
   </header>
 
-  <!-- Category Section -->
-  <section class="categories text-center py-6">
-    <h2 class="text-2xl md:text-3xl mb-6">Explore By Category</h2>
-    <div class="category-grid grid grid-cols-4 gap-6 max-w-2xl mx-auto px-2">
-      <?php if ($result && $result->num_rows > 0): ?>
-        <?php while ($row = $result->fetch_assoc()): 
-           
-            $imgPath = !empty($row['imagePath']) ? $row['imagePath'] : 'BEpics/default.png';
-            
-            $serverPath = (strpos($imgPath, '/') === 0) ? __DIR__ . $imgPath : __DIR__ . '/' . $imgPath;
-            if (!file_exists($serverPath)) {
-                $imgPath = 'BEpics/default.png';
+<!-- Category Section -->
+<section class="categories text-center py-6">
+  <h2 class="text-2xl md:text-3xl mb-6">Explore By Category</h2>
+  <div class="category-grid grid grid-cols-4 gap-6 max-w-2xl mx-auto px-2">
+    <?php 
+    // Re-fetch categories with proper image handling
+    $category_sql = "SELECT foodType, imagePath FROM foodType";
+    $category_result = $conn->query($category_sql);
+    
+    if ($category_result && $category_result->num_rows > 0): ?>
+      <?php while ($row = $category_result->fetch_assoc()): 
+        // Handle image path properly
+        $imgPath = 'BEpics/default.png'; // Default fallback
+        
+        if (!empty($row['imagePath'])) {
+          $imagePath = $row['imagePath'];
+          
+          // Remove any leading slashes or dots for consistency
+          $imagePath = ltrim($imagePath, './');
+          
+          // Check if file exists in common locations
+          $possiblePaths = [
+            $imagePath,
+            'BEpics/' . $imagePath,
+            'uploads/' . $imagePath,
+            'images/' . $imagePath
+          ];
+          
+          foreach ($possiblePaths as $path) {
+            if (file_exists($path)) {
+              $imgPath = $path;
+              break;
             }
-        ?>
-          <div class="flex flex-col items-center">
-            <a href="re.php?category=<?= urlencode($row['foodType']) ?>" class="flex flex-col items-center">
-              <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gray-100 flex items-center justify-center transition-all duration-300">
-                <img src="<?= htmlspecialchars($imgPath) ?>" alt="<?= htmlspecialchars($row['foodType']) ?>" class="w-8 md:w-12">
-              </div>
-              <p class="mt-2"><?= htmlspecialchars($row['foodType']) ?></p>
-            </a>
-          </div>
-        <?php endwhile; ?>
-      <?php else: ?>
+          }
+          
+          // If no file found, use default
+          if ($imgPath === 'BEpics/default.png') {
+            error_log("Category image not found: " . $imagePath);
+          }
+        }
+      ?>
+        <div class="flex flex-col items-center">
+          <a href="re.php?category=<?= urlencode($row['foodType']) ?>" class="flex flex-col items-center group">
+            <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gray-100 flex items-center justify-center transition-all duration-300 group-hover:bg-[#e9d0cb] group-hover:shadow-lg">
+              <img src="<?= htmlspecialchars($imgPath) ?>" 
+                   alt="<?= htmlspecialchars($row['foodType']) ?>" 
+                   class="w-8 h-8 md:w-12 md:h-12 object-contain"
+                   onerror="this.src='BEpics/default.png'">
+            </div>
+            <p class="mt-2 text-sm group-hover:text-[#C89091] transition-colors"><?= htmlspecialchars($row['foodType']) ?></p>
+          </a>
+        </div>
+      <?php endwhile; ?>
+    <?php else: ?>
+      <div class="col-span-4">
         <p class="text-sm text-gray-500">No categories found.</p>
-      <?php endif; ?>
-    </div>
-  </section>
+      </div>
+    <?php endif; ?>
+  </div>
+</section>
 
   <?php
   $featured_sql = "SELECT 

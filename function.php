@@ -15,7 +15,7 @@ function getEvents($conn) {
     return $events;
 }
 
-function getDifficultyLevels($conn) {
+function getDifficultyLevels($conn) {   
     $levels = [];
     if (!$conn) {
         error_log("Database connection failed in getDifficultyLevels");
@@ -50,36 +50,29 @@ function getDifficultyLevels($conn) {
     }
 }
 
-// ADD THIS MISSING FUNCTION
+
+function getFoodType($conn) {
+    $sql = "SELECT foodTypeID, foodType FROM foodType";
+    $result = $conn->query($sql);
+    $foodTypes = [];
+    if ($result->num_rows > 0) {
+        while($row = $result->fetch_assoc()) {
+            $foodTypes[] = $row;
+        }
+    }
+    return $foodTypes;
+}
+
 function getDietPref($conn) {
-    if (!$conn) {
-        error_log("Database connection failed in getDietPref");
-        return [];
-    }
-    
-    try {
-        $sql = "SELECT dietName FROM dietPreferences ORDER BY dietID";
-        $stmt = $conn->prepare($sql);
-        if (!$stmt) {
-            error_log("Prepare failed: " . $conn->error);
-            return [];
+    $sql = "SELECT dietID, dietName FROM dietPreferences";
+    $result = $conn->query($sql);
+    $dietPreferences = [];
+    if ($result->num_rows > 0) {
+        while($row = $result->fetch_assoc()) {
+            $dietPreferences[] = $row;
         }
-        
-        $stmt->execute();
-        
-        $dietPreferences = [];
-        $result = $stmt->get_result();
-        
-        while ($row = $result->fetch_assoc()) {
-            $dietPreferences[] = $row['dietName']; // Changed from dietaryName to dietName
-        }
-        
-        $stmt->close();
-        return $dietPreferences;
-    } catch (Exception $e) {
-        error_log("Error in getDietPref: " . $e->getMessage());
-        return [];
     }
+    return $dietPreferences;
 }
 
 function getCuisineType($conn) {
@@ -89,7 +82,8 @@ function getCuisineType($conn) {
     }
     
     try {
-        $sql = "SELECT cuisineType FROM cuisineType ORDER BY cuisineTypeID";
+        // FIX: Select both ID and name
+        $sql = "SELECT cuisineTypeID, cuisineType FROM cuisineType ORDER BY cuisineTypeID";
         $stmt = $conn->prepare($sql);
         if (!$stmt) {
             error_log("Prepare failed: " . $conn->error);
@@ -102,7 +96,8 @@ function getCuisineType($conn) {
         $result = $stmt->get_result();
         
         while ($row = $result->fetch_assoc()) {
-            $cuisineTypes[] = $row['cuisineType'];
+            // Return both ID and name as an array
+            $cuisineTypes[] = $row;
         }
         
         $stmt->close();
@@ -113,18 +108,7 @@ function getCuisineType($conn) {
     }
 }
 
-function getFoodType($conn) {
-    $foodTypes = array();
-    $sql = "SELECT foodType FROM foodType ORDER BY foodType";
-    $result = $conn->query($sql);
-    
-    if ($result && $result->num_rows > 0) {
-        while($row = $result->fetch_assoc()) {
-            $foodTypes[] = $row['foodType'];
-        }
-    }
-    return $foodTypes;
-}
+
 
 function addRecipe($conn, $data) {
     try {
@@ -237,81 +221,8 @@ function handleImageUpload($file) {
         return null;
     }
 }
-function getCuisineTypeID($conn, $cuisineName) {
-    if (empty($cuisineName)) return null;
-    
-    try {
-        $stmt = $conn->prepare("SELECT cuisineTypeID FROM cuisineType WHERE cuisineType = ?");
-        if (!$stmt) {
-            error_log("Prepare failed in getCuisineTypeID: " . $conn->error);
-            return null;
-        }
-        
-        $stmt->bind_param("s", $cuisineName);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $row = $result->fetch_assoc();
-        $stmt->close();
-        
-        return $row ? $row['cuisineTypeID'] : null;
-    } catch (Exception $e) {
-        error_log("Error in getCuisineTypeID: " . $e->getMessage());
-        return null;
-    }
-}
-
-function getFoodTypeID($conn, $foodTypeName) {
-    if (empty($foodTypeName)) return null;
-    
-    try {
-        $stmt = $conn->prepare("SELECT foodTypeID FROM foodType WHERE foodType = ?");
-        if (!$stmt) {
-            error_log("Prepare failed in getFoodTypeID: " . $conn->error);
-            return null;
-        }
-        
-        $stmt->bind_param("s", $foodTypeName);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $row = $result->fetch_assoc();
-        $stmt->close();
-        
-        return $row ? $row['foodTypeID'] : null;
-    } catch (Exception $e) {
-        error_log("Error in getFoodTypeID: " . $e->getMessage());
-        return null;
-    }
-}
-
-function getDietPrefID($conn, $dietName) {
-    if (empty($dietName)) return null;
-    
-    try {
-        // FIXED: Corrected column name from dietaryID to dietID
-        $stmt = $conn->prepare("SELECT dietID FROM dietPreferences WHERE dietName = ?");
-        if (!$stmt) {
-            error_log("Prepare failed in getDietPrefID: " . $conn->error);
-            return null;
-        }
-        
-        $stmt->bind_param("s", $dietName);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $row = $result->fetch_assoc();
-        $stmt->close();
-        
-        // FIXED: Changed from dietaryID to dietID
-        return $row ? $row['dietID'] : null;
-    } catch (Exception $e) {
-        error_log("Error in getDietPrefID: " . $e->getMessage());
-        return null;
-    }
-}
 
 
-/**
- * Function to store comment from user
- */
 function storeComment($conn, $userID, $comment, $communityID, $recipeID = null) {
     // Validate inputs
     if (empty($comment) || empty($communityID)) {
@@ -485,18 +396,6 @@ function getUserProfileMySQLi($userID, $conn) {
             'error' => 'Database error: ' . $e->getMessage()
         ];
     }
-}
-
-// Helper function to get table columns
-function getTableColumns($conn, $tableName) {
-    $columns = [];
-    $result = $conn->query("SHOW COLUMNS FROM $tableName");
-    if ($result) {
-        while ($row = $result->fetch_assoc()) {
-            $columns[] = $row['Field'];
-        }
-    }
-    return $columns;
 }
 
 // Function to update user profile
