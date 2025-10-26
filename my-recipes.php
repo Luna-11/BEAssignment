@@ -53,7 +53,6 @@ if (isset($_SESSION['userID'])) {
             r.difficultID,
             r.userID,
             r.image,
-            r.text,
             r.recipeDescription,
             r.date,
             r.cuisineTypeID,
@@ -299,11 +298,6 @@ if (isset($_SESSION['userID'])) {
                                                 <p class="mt-2 text-text-color">
                                                     <?php echo htmlspecialchars(substr($recipe['recipeDescription'], 0, 150)); ?>
                                                     <?php if (strlen($recipe['recipeDescription']) > 150): ?>...<?php endif; ?>
-                                                </p>
-                                            <?php elseif (!empty($recipe['text'])): ?>
-                                                <p class="mt-2 text-text-color">
-                                                    <?php echo htmlspecialchars(substr($recipe['text'], 0, 150)); ?>
-                                                    <?php if (strlen($recipe['text']) > 150): ?>...<?php endif; ?>
                                                 </p>
                                             <?php endif; ?>
                                             

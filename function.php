@@ -342,6 +342,32 @@ function detectUserIdColumn($conn) {
     return 'id';
 }
 
+// Function to get table columns
+function getTableColumns($conn, $tableName) {
+    $columns = [];
+    
+    try {
+        $stmt = $conn->prepare("SHOW COLUMNS FROM $tableName");
+        if (!$stmt) {
+            error_log("Failed to prepare SHOW COLUMNS for table: $tableName");
+            return [];
+        }
+        
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        while ($row = $result->fetch_assoc()) {
+            $columns[] = $row['Field'];
+        }
+        
+        $stmt->close();
+        return $columns;
+        
+    } catch (Exception $e) {
+        error_log("Error in getTableColumns: " . $e->getMessage());
+        return [];
+    }
+}
 // Update the getUserProfileMySQLi function to be more robust
 function getUserProfileMySQLi($userID, $conn) {
     try {
